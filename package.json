@@ -1,0 +1,13 @@
+{
+  "name": "modelatlas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI model recommendation MVP",
+  "scripts": {
+    "start": "npx http-server . -p 8000"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
