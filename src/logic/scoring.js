@@ -1,5 +1,7 @@
 import { models } from '../data/models.js';
 
+export const PRIVACY_REQUIRED_THRESHOLD = 72;
+
 export function getLeaderboard(task = 'coding') {
   return models
     .map((model) => {
@@ -284,15 +286,30 @@ function getTaskModifierProfile(task, formValues) {
     }
   }
 
+  if (formValues.input_type === 'multimodal') {
+    profile.quality = 1.08;
+    profile.context = 1.08;
+  }
+
+  if (formValues.output_format === 'structured') {
+    profile.reliability = 1.14;
+    profile.quality = 1.06;
+  }
+
+  if (formValues.deployment === 'controlled' || formValues.deployment === 'local') {
+    profile.privacy = 1.18;
+    profile.reliability = 1.06;
+  }
+
   return profile;
 }
 
 export function getRecommendation(formValues) {
-  const task = formValues.task;
-  const priority = formValues.priority;
-  const speed = formValues.speed;
-  const context = formValues.context;
-  const privacy = formValues.privacy;
+  const task = formValues.task || 'coding';
+  const priority = formValues.priority || 'balanced';
+  const speed = formValues.speed || 'medium';
+  const context = formValues.context || 'medium';
+  const privacy = formValues.privacy || 'preferred';
   const taskModifiers = getTaskModifierProfile(task, formValues);
 
   const priorityBias = {
@@ -319,7 +336,12 @@ export function getRecommendation(formValues) {
     'not-important': 0.9
   };
 
-  const scored = models.map((model) => {
+  const eligibleModels = privacy === 'required'
+    ? models.filter((model) => model.privacy >= PRIVACY_REQUIRED_THRESHOLD)
+    : models;
+  const scoringModels = eligibleModels.length > 0 ? eligibleModels : models;
+
+  const scored = scoringModels.map((model) => {
     const benchmarkEntry = model.benchmarks?.[task] ?? { score: 70, label: 'benchmark mix' };
     const taskFit = benchmarkEntry.score / 20;
     const qualityScore = model.quality / 20;
@@ -328,12 +350,6 @@ export function getRecommendation(formValues) {
     const contextScore = model.context / 20;
     const reliability = model.reliability / 20;
     const privacyScore = model.privacy / 20;
-
-    const isDeepEngineeringCodingTask =
-      task === 'coding' &&
-      (formValues.codebase_size === 'large') &&
-      (formValues.tool_use === 'deep' || formValues.tool_use === 'agentic') &&
-      formValues.validation === 'strict';
 
     const deepTaskProfiles = {
       coding: ['large', 'deep', 'strict'],
@@ -418,7 +434,16 @@ export function getRecommendation(formValues) {
       benchmarkDate: model.benchmarkDate,
       benchmarkVersion: model.benchmarkVersion,
       sourceConfidence: model.sourceConfidence,
-      score: Number(score.toFixed(2))
+      score: Number(score.toFixed(2)),
+      scoreBreakdown: {
+        taskFit: Number((taskFit * 35).toFixed(2)),
+        quality: Number((qualityScore * 25 * (priorityBias[priority]?.quality ?? 1) * (taskModifiers.quality ?? 1)).toFixed(2)),
+        cost: Number((costScore * 15 * (priorityBias[priority]?.costEfficiency ?? 1) * (taskModifiers.cost ?? 1)).toFixed(2)),
+        speed: Number((speedScore * 10 * (speedBias[speed] ?? 1) * (taskModifiers.speed ?? 1)).toFixed(2)),
+        context: Number((contextScore * 10 * (contextBias[context] ?? 1) * (taskModifiers.context ?? 1)).toFixed(2)),
+        reliability: Number((reliability * 5 * (taskModifiers.reliability ?? 1)).toFixed(2)),
+        privacy: Number((privacyScore * 5 * (privacyBias[privacy] ?? 1) * (taskModifiers.privacy ?? 1)).toFixed(2))
+      }
     };
   });
 
@@ -427,7 +452,7 @@ export function getRecommendation(formValues) {
   const costComparison = getCostComparison();
   const bestByUseCase = getBestByUseCase();
   const newestVsCheapestVsFastest = getNewestVsCheapestVsFastest();
-  const budget = [...ranked].sort((a, b) => b.score - a.score).find((item) => item.id.includes('mini') || item.id.includes('haiku') || item.id.includes('mistral')) ?? ranked[1];
+  const budget = [...ranked].sort((a, b) => b.score - a.score).find((item) => item.id.includes('mini') || item.id.includes('haiku') || item.id.includes('mistral')) ?? ranked[1] ?? ranked[0];
   const premium = [...models].sort((a, b) => b.quality - a.quality)[0];
   const decisionGuide = getDecisionGuide(ranked[0], budget, premium, task);
 
@@ -442,6 +467,8 @@ export function getRecommendation(formValues) {
     bestByUseCase,
     newestVsCheapestVsFastest,
     decisionGuide,
+    eligibleModelCount: eligibleModels.length,
+    privacyConstraintApplied: privacy === 'required',
     explanation: buildExplanation(task, priority, speed, context, privacy, ranked, scenarioComparison)
   };
 }

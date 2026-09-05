@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { models } from '../src/data/models.js';
-import { getRecommendation } from '../src/logic/scoring.js';
+import { getRecommendation, PRIVACY_REQUIRED_THRESHOLD } from '../src/logic/scoring.js';
 
 test('models include benchmark metadata and source references', () => {
   assert.ok(Array.isArray(models), 'models should be an array');
@@ -84,4 +84,34 @@ test('leaderboard data is CSV-backed and includes date/version metadata', () => 
   assert.ok(csvModel.benchmarkVersion, 'benchmark version is missing');
   assert.ok(['high', 'medium', 'low'].includes(csvModel.sourceConfidence), 'confidence must be one of high/medium/low');
   assert.ok(csvModel.benchmarks.coding.score > 0, 'coding benchmark score should be positive');
+});
+
+test('privacy required applies an eligibility constraint', () => {
+  const recommendation = getRecommendation({
+    task: 'coding',
+    priority: 'balanced',
+    speed: 'medium',
+    context: 'medium',
+    privacy: 'required'
+  });
+
+  assert.equal(recommendation.privacyConstraintApplied, true);
+  assert.equal(recommendation.eligibleModelCount, models.filter((model) => model.privacy >= PRIVACY_REQUIRED_THRESHOLD).length);
+  assert.ok(recommendation.ranked.every((model) => models.find((entry) => entry.id === model.id).privacy >= PRIVACY_REQUIRED_THRESHOLD));
+});
+
+test('workflow constraints contribute to the recommendation score', () => {
+  const baseline = getRecommendation({ task: 'general', priority: 'balanced', speed: 'medium', context: 'medium', privacy: 'preferred' });
+  const structured = getRecommendation({
+    task: 'general',
+    priority: 'balanced',
+    speed: 'medium',
+    context: 'medium',
+    privacy: 'preferred',
+    input_type: 'multimodal',
+    output_format: 'structured',
+    deployment: 'controlled'
+  });
+
+  assert.notDeepEqual(structured.ranked[0].scoreBreakdown, baseline.ranked[0].scoreBreakdown);
 });

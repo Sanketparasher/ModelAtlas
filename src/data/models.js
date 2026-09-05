@@ -98,6 +98,19 @@ function parseBenchmarkCsv(csvText) {
 }
 
 export const models = parseBenchmarkCsv(benchmarkCsv);
+
+for (const model of models) {
+  const requiredFields = ['id', 'name', 'provider', 'benchmarkDate', 'benchmarkVersion', 'sourceConfidence'];
+  const missingField = requiredFields.find((field) => !model[field]);
+  if (missingField || Object.keys(model.benchmarks).length !== taskKeys.length || model.sources.length === 0) {
+    throw new Error(`Invalid model record: ${model.id || 'unknown'} (${missingField || 'benchmark/source metadata missing'})`);
+  }
+}
+
+export const benchmarkSnapshotDate = models
+  .map((model) => model.benchmarkDate)
+  .sort()
+  .at(-1);
 export const benchmarkTaskLabels = {
   writing: 'Writing',
   coding: 'Coding',

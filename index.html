@@ -16,7 +16,7 @@
               <p class="eyebrow">ModelAtlas</p>
             </div>
           </div>
-          <div class="status-pill">Live benchmark view</div>
+          <div class="status-pill">Benchmark snapshot</div>
         </div>
 
         <div class="hero-copy">
@@ -32,19 +32,19 @@
         <div class="metrics-strip">
           <div class="metric-box">
             <span class="metric-label">Models tracked</span>
-            <strong>8</strong>
+            <strong id="models-tracked">8</strong>
           </div>
           <div class="metric-box">
             <span class="metric-label">Use cases</span>
-            <strong>6</strong>
+            <strong id="use-cases-tracked">6</strong>
           </div>
           <div class="metric-box">
             <span class="metric-label">Best value</span>
-            <strong>O4 Mini</strong>
+            <strong id="best-value-model">O4 Mini</strong>
           </div>
           <div class="metric-box">
             <span class="metric-label">Frontier pick</span>
-            <strong>Claude Opus 4</strong>
+            <strong id="frontier-model">Claude Opus 4</strong>
           </div>
         </div>
       </header>
@@ -256,13 +256,41 @@
             </select>
           </div>
 
+          <div class="field">
+            <label for="input_type">What kind of input do you need to handle?</label>
+            <p class="field-hint">Use this to account for text-only versus multimodal workflows.</p>
+            <select id="input_type" name="input_type">
+              <option value="text" selected>Text only</option>
+              <option value="multimodal">Images, PDFs, or mixed media</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="output_format">Do you need a structured output format?</label>
+            <p class="field-hint">Structured output matters when results feed another tool or system.</p>
+            <select id="output_format" name="output_format">
+              <option value="freeform" selected>Freeform text is fine</option>
+              <option value="structured">Reliable JSON or schema-shaped output</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="deployment">How will you deploy the model?</label>
+            <p class="field-hint">This keeps hosted APIs and local or controlled environments distinct.</p>
+            <select id="deployment" name="deployment">
+              <option value="hosted" selected>Hosted provider API</option>
+              <option value="controlled">Controlled or private environment</option>
+              <option value="local">Local or self-hosted deployment</option>
+            </select>
+          </div>
+
           <button type="submit">Get my model recommendation</button>
         </form>
       </section>
 
       <section class="card view-switcher" aria-label="View switcher">
-        <button type="button" class="view-button active" data-view="leaderboard">Leaderboard</button>
-        <button type="button" class="view-button" data-view="recommendation">Recommendation</button>
+        <button type="button" class="view-button active" data-view="leaderboard" role="tab" aria-controls="leaderboard-view" aria-selected="true">Leaderboard</button>
+        <button type="button" class="view-button" data-view="recommendation" role="tab" aria-controls="recommendation-view" aria-selected="false">Recommendation</button>
       </section>
 
       <section id="leaderboard-view" class="card comparison-card">
@@ -294,8 +322,13 @@
         </div>
       </section>
 
-      <section id="recommendation-view" class="card result-card hidden">
+      <section id="recommendation-view" class="card result-card hidden" aria-live="polite">
         <h2>Your recommendation</h2>
+        <div class="result-actions">
+          <button type="button" id="change-answers" class="secondary-button">Change answers</button>
+          <button type="button" id="copy-recommendation" class="secondary-button">Copy recommendation</button>
+          <button type="button" id="export-recommendation" class="secondary-button">Export JSON</button>
+        </div>
         <div class="result-grid">
           <div>
             <p class="label">Primary</p>
@@ -318,6 +351,29 @@
         <div class="explanation">
           <h3>Why this fits</h3>
           <p id="explanation-text"></p>
+        </div>
+
+        <div class="panel-section">
+          <h3>Top matches</h3>
+          <p class="panel-note" id="constraint-summary"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Total</th>
+                  <th>Task fit</th>
+                  <th>Quality</th>
+                  <th>Cost</th>
+                  <th>Speed</th>
+                  <th>Context</th>
+                  <th>Reliability</th>
+                  <th>Privacy</th>
+                </tr>
+              </thead>
+              <tbody id="top-matches-table"></tbody>
+            </table>
+          </div>
         </div>
 
         <div class="scenario-grid" id="scenario-comparison"></div>

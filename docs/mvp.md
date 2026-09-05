@@ -32,10 +32,19 @@ Each model should contain:
 3. System selects a primary recommendation and alternatives
 4. System shows a short explanation
 
+## Current capabilities
+
+- benchmark snapshot freshness metadata
+- hard privacy eligibility filtering
+- score contribution breakdown for the top matches
+- multimodal, structured-output, and deployment preferences
+- saved answers, copy-to-clipboard, and JSON export
+- keyboard focus states and reduced-motion support
+
 ## Future iterations
 
 - add more model entries
-- add live benchmark data
+- add a maintained benchmark ingestion pipeline
 - support user accounts
 - add compare-mode view
 - expand explanation depth
