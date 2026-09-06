@@ -10,14 +10,14 @@ Which AI model is the best fit for my task, under my constraints?
 
 ## Current capabilities
 
-- task-specific questionnaire for writing, coding, research, summarization, general assistance, and extraction
-- curated model shortlist backed by benchmark metadata and source links
-- weighted recommendations using task fit, quality, cost, speed, context, reliability, and privacy
-- hard privacy eligibility filtering when privacy is required
+- task-specific questionnaire for coding and general assistance
+- live benchmark catalog fetched from LMSYS Chatbot Arena and the official SWE-bench leaderboard
+- benchmark-led recommendations using published benchmark scores and pricing where available
+- explicit provenance, retrieval dates, benchmark dates, and confidence metadata
 - multimodal, structured-output, and deployment preferences
 - ranked recommendations with budget, speed, fallback, and premium alternatives
 - top-match score breakdown and comparison tables
-- benchmark snapshot date, source confidence, version, and pricing metadata
+- benchmark snapshot date, source confidence, version, source URLs, and pricing metadata
 - saved questionnaire answers using local storage
 - copy recommendation and JSON export actions
 - keyboard focus states, tab semantics, live result updates, and reduced-motion support
@@ -26,11 +26,15 @@ Which AI model is the best fit for my task, under my constraints?
 
 - index.html — app shell and form layout
 - styles.css — responsive UI styling and accessibility states
-- src/data/models.js — model metadata and scoring inputs
+- src/data/models.js — generated benchmark catalog entry point
+- src/data/generated-models.js — generated live-source snapshot; do not edit manually
 - src/logic/scoring.js — recommendation logic
 - app.js — form handling and rendering
 - docs/mvp.md — product and engineering notes
 - tests/scoring.test.js — scoring and data contract tests
+- src/data/benchmark-schema.js — normalized benchmark schema and provenance validation
+- scripts/validate-benchmarks.js — benchmark catalog validation command
+- scripts/update-benchmarks.js — fetches and normalizes trusted online leaderboards
 
 ## Run locally
 
@@ -47,9 +51,17 @@ Run the test suite with:
 
 npm test
 
+Validate the benchmark catalog with:
+
+npm run validate:benchmarks
+
+Refresh the catalog from the online sources with:
+
+npm run update:benchmarks
+
 ## Data notes
 
-Model data is a curated benchmark snapshot, not a live provider feed. Scores and pricing should be reviewed when providers release new model versions or change pricing. The app displays benchmark dates, versions, confidence levels, and source links to make that limitation visible.
+The catalog is generated from public leaderboard data. Coding scores come from SWE-bench Verified and general scores come from LMSYS Chatbot Arena. The app does not invent scores for unsupported tasks; refresh the catalog with `npm run update:benchmarks` before using newer source data.
 
 ## Project status
 

@@ -1,21 +1,40 @@
 import { models } from '../data/models.js';
 
 export const PRIVACY_REQUIRED_THRESHOLD = 72;
+export const BENCHMARK_WEIGHT = 45;
+
+export function getBenchmarkRecord(model, task) {
+  return model.benchmarkRecords?.find((record) => record.task === task) ?? {
+    value: 0,
+    label: `${task} benchmark`,
+    source: { name: 'benchmark source unavailable', url: '#' },
+    confidence: 'low'
+  };
+}
+
+export function getBenchmarkScore(model, task) {
+  return Number(getBenchmarkRecord(model, task).value ?? 0);
+}
 
 export function getLeaderboard(task = 'coding') {
   return models
     .map((model) => {
-      const benchmark = model.benchmarks?.[task] ?? { score: 70, label: `${task} benchmark` };
+      const record = getBenchmarkRecord(model, task);
 
       return {
         id: model.id,
         name: model.name,
         provider: model.provider,
-        benchmark,
+        benchmark: {
+          score: record.value,
+          label: record.label,
+          source: record.source.name,
+          url: record.source.url
+        },
         benchmarkDate: model.benchmarkDate,
         benchmarkVersion: model.benchmarkVersion,
         sourceConfidence: model.sourceConfidence,
-        score: Number(benchmark.score.toFixed(2))
+        score: Number(record.value.toFixed(2))
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -23,14 +42,15 @@ export function getLeaderboard(task = 'coding') {
 
 export function getScenarioComparison(task = 'coding') {
   const ranked = models.map((model) => {
-    const benchmark = model.benchmarks?.[task] ?? { score: 70, label: `${task} benchmark` };
+    const record = getBenchmarkRecord(model, task);
+    const benchmark = { score: record.value, label: record.label };
 
-    const valueScore = model.quality * 0.55 + model.costEfficiency * 0.45 + benchmark.score * 0.35;
-    const budgetScore = model.costEfficiency * 0.8 + model.quality * 0.25 + benchmark.score * 0.2;
-    const speedScore = model.speed * 0.7 + benchmark.score * 0.3 + model.reliability * 0.15;
-    const longContextScore = model.context * 0.75 + benchmark.score * 0.25 + model.quality * 0.1;
-    const privacyScore = model.privacy * 0.7 + model.reliability * 0.25 + benchmark.score * 0.1;
-    const tokenEfficiencyScore = model.tokenEfficiency * 0.9 + benchmark.score * 0.25 + model.costEfficiency * 0.15;
+    const valueScore = benchmark.score * 0.55 + model.quality * 0.2 + model.costEfficiency * 0.25;
+    const budgetScore = benchmark.score * 0.2 + model.costEfficiency * 0.65 + model.quality * 0.15;
+    const speedScore = benchmark.score * 0.3 + model.speed * 0.55 + model.reliability * 0.15;
+    const longContextScore = benchmark.score * 0.35 + model.context * 0.55 + model.quality * 0.1;
+    const privacyScore = benchmark.score * 0.1 + model.privacy * 0.65 + model.reliability * 0.25;
+    const tokenEfficiencyScore = benchmark.score * 0.25 + model.tokenEfficiency * 0.6 + model.costEfficiency * 0.15;
 
     return {
       id: model.id,
@@ -88,22 +108,26 @@ export function getBestByUseCase() {
     { key: 'summarization', label: 'Summarization' },
     { key: 'general', label: 'General assistance' },
     { key: 'extraction', label: 'Extraction' }
-  ];
+  ].filter(({ key }) => models.some((model) => getBenchmarkScore(model, key) > 0));
 
   return taskOrder.map(({ key, label }) => {
     const bestModel = [...models]
       .map((model) => ({
         ...model,
-        benchmark: model.benchmarks?.[key] ?? { score: 70 }
+        benchmark: getBenchmarkRecord(model, key)
       }))
-      .sort((a, b) => (b.benchmark.score + b.quality + b.tokenEfficiency) - (a.benchmark.score + a.quality + a.tokenEfficiency))[0];
+      .sort((a, b) => (
+        getBenchmarkScore(b, key) * 0.6 + b.quality * 0.15 + b.tokenEfficiency * 0.25
+      ) - (
+        getBenchmarkScore(a, key) * 0.6 + a.quality * 0.15 + a.tokenEfficiency * 0.25
+      ))[0];
 
     return {
       task: key,
       label,
       model: bestModel.name,
       provider: bestModel.provider,
-      benchmarkScore: bestModel.benchmark.score
+      benchmarkScore: getBenchmarkScore(bestModel, key)
     };
   });
 }
@@ -156,6 +180,7 @@ export function getDecisionGuide(primary, budget, premium, task) {
 
 function getTaskModifierProfile(task, formValues) {
   const profile = {
+    benchmark: 1,
     quality: 1,
     cost: 1,
     speed: 1,
@@ -170,6 +195,7 @@ function getTaskModifierProfile(task, formValues) {
     const validation = formValues.validation || 'balanced';
 
     if (codebaseSize === 'large') {
+      profile.benchmark = 1.08;
       profile.context = 1.18;
       profile.quality = 1.12;
       profile.reliability = 1.1;
@@ -179,12 +205,14 @@ function getTaskModifierProfile(task, formValues) {
     }
 
     if (toolUse === 'deep' || toolUse === 'agentic') {
+      profile.benchmark *= 1.1;
       profile.quality = 1.2;
       profile.context = 1.14;
       profile.reliability = 1.12;
     }
 
     if (validation === 'strict') {
+      profile.benchmark *= 1.08;
       profile.reliability = 1.22;
       profile.quality = 1.1;
     } else if (validation === 'light') {
@@ -287,11 +315,13 @@ function getTaskModifierProfile(task, formValues) {
   }
 
   if (formValues.input_type === 'multimodal') {
+    profile.benchmark *= 1.01;
     profile.quality = 1.08;
     profile.context = 1.08;
   }
 
   if (formValues.output_format === 'structured') {
+    profile.benchmark *= 1.02;
     profile.reliability = 1.14;
     profile.quality = 1.06;
   }
@@ -336,20 +366,22 @@ export function getRecommendation(formValues) {
     'not-important': 0.9
   };
 
-  const eligibleModels = privacy === 'required'
+  const privacyDataAvailable = models.some((model) => model.privacyAvailable !== false);
+  const eligibleModels = privacy === 'required' && privacyDataAvailable
     ? models.filter((model) => model.privacy >= PRIVACY_REQUIRED_THRESHOLD)
     : models;
   const scoringModels = eligibleModels.length > 0 ? eligibleModels : models;
 
   const scored = scoringModels.map((model) => {
-    const benchmarkEntry = model.benchmarks?.[task] ?? { score: 70, label: 'benchmark mix' };
-    const taskFit = benchmarkEntry.score / 20;
-    const qualityScore = model.quality / 20;
-    const costScore = model.costEfficiency / 20;
-    const speedScore = model.speed / 20;
-    const contextScore = model.context / 20;
-    const reliability = model.reliability / 20;
-    const privacyScore = model.privacy / 20;
+    const benchmarkRecord = getBenchmarkRecord(model, task);
+    const benchmarkEntry = { score: benchmarkRecord.value, label: benchmarkRecord.label };
+    const taskFit = (benchmarkEntry.score / 100) * (taskModifiers.benchmark ?? 1);
+    const qualityScore = model.quality / 100;
+    const costScore = model.costEfficiency / 100;
+    const speedScore = model.speed / 100;
+    const contextScore = model.context / 100;
+    const reliability = model.reliability / 100;
+    const privacyScore = model.privacy / 100;
 
     const deepTaskProfiles = {
       coding: ['large', 'deep', 'strict'],
@@ -368,9 +400,9 @@ export function getRecommendation(formValues) {
       (formValues.tool_use === 'deep' || formValues.tool_use === 'agentic') &&
       formValues.validation === 'strict'
     ) {
-      deepWorkPenalty *= model.context < 90 ? 0.82 : 1;
-      deepWorkPenalty *= model.reliability < 90 ? 0.8 : 1;
-      deepWorkPenalty *= model.quality < 90 ? 0.78 : 1;
+      deepWorkPenalty *= model.context && model.context < 90 ? 0.82 : 1;
+      deepWorkPenalty *= model.reliability && model.reliability < 90 ? 0.8 : 1;
+      deepWorkPenalty *= model.quality && model.quality < 90 ? 0.78 : 1;
       deepWorkPenalty *= model.id.includes('mini') || model.id.includes('haiku') ? 0.7 : 1;
     }
 
@@ -378,9 +410,9 @@ export function getRecommendation(formValues) {
       task === 'research' &&
       (formValues.source_volume === 'many' || formValues.fact_checking === 'essential')
     ) {
-      deepWorkPenalty *= model.context < 90 ? 0.8 : 1;
-      deepWorkPenalty *= model.reliability < 90 ? 0.82 : 1;
-      deepWorkPenalty *= model.quality < 90 ? 0.78 : 1;
+      deepWorkPenalty *= model.context && model.context < 90 ? 0.8 : 1;
+      deepWorkPenalty *= model.reliability && model.reliability < 90 ? 0.82 : 1;
+      deepWorkPenalty *= model.quality && model.quality < 90 ? 0.78 : 1;
       deepWorkPenalty *= model.id.includes('mini') || model.id.includes('haiku') ? 0.7 : 1;
     }
 
@@ -389,9 +421,9 @@ export function getRecommendation(formValues) {
       formValues.output_length === 'long' &&
       (formValues.writing_style === 'technical' || formValues.writing_style === 'marketing')
     ) {
-      deepWorkPenalty *= model.context < 90 ? 0.84 : 1;
-      deepWorkPenalty *= model.reliability < 90 ? 0.82 : 1;
-      deepWorkPenalty *= model.quality < 90 ? 0.8 : 1;
+      deepWorkPenalty *= model.context && model.context < 90 ? 0.84 : 1;
+      deepWorkPenalty *= model.reliability && model.reliability < 90 ? 0.82 : 1;
+      deepWorkPenalty *= model.quality && model.quality < 90 ? 0.8 : 1;
       deepWorkPenalty *= model.id.includes('mini') || model.id.includes('haiku') ? 0.72 : 1;
     }
 
@@ -400,9 +432,9 @@ export function getRecommendation(formValues) {
       formValues.document_volume === 'large' &&
       formValues.summary_depth === 'detailed'
     ) {
-      deepWorkPenalty *= model.context < 90 ? 0.8 : 1;
-      deepWorkPenalty *= model.reliability < 90 ? 0.82 : 1;
-      deepWorkPenalty *= model.quality < 90 ? 0.8 : 1;
+      deepWorkPenalty *= model.context && model.context < 90 ? 0.8 : 1;
+      deepWorkPenalty *= model.reliability && model.reliability < 90 ? 0.82 : 1;
+      deepWorkPenalty *= model.quality && model.quality < 90 ? 0.8 : 1;
       deepWorkPenalty *= model.id.includes('mini') || model.id.includes('haiku') ? 0.72 : 1;
     }
 
@@ -411,20 +443,20 @@ export function getRecommendation(formValues) {
       formValues.extraction_precision === 'critical' &&
       formValues.document_type === 'structured'
     ) {
-      deepWorkPenalty *= model.reliability < 90 ? 0.8 : 1;
-      deepWorkPenalty *= model.quality < 90 ? 0.78 : 1;
-      deepWorkPenalty *= model.context < 90 ? 0.82 : 1;
+      deepWorkPenalty *= model.reliability && model.reliability < 90 ? 0.8 : 1;
+      deepWorkPenalty *= model.quality && model.quality < 90 ? 0.78 : 1;
+      deepWorkPenalty *= model.context && model.context < 90 ? 0.82 : 1;
       deepWorkPenalty *= model.id.includes('mini') || model.id.includes('haiku') ? 0.7 : 1;
     }
 
     const score =
-      (taskFit * 35 +
-      qualityScore * 25 * (priorityBias[priority]?.quality ?? 1) * (taskModifiers.quality ?? 1) +
+      (taskFit * BENCHMARK_WEIGHT +
+      qualityScore * 15 * (priorityBias[priority]?.quality ?? 1) * (taskModifiers.quality ?? 1) +
       costScore * 15 * (priorityBias[priority]?.costEfficiency ?? 1) * (taskModifiers.cost ?? 1) +
       speedScore * 10 * (speedBias[speed] ?? 1) * (taskModifiers.speed ?? 1) +
-      contextScore * 10 * (contextBias[context] ?? 1) * (taskModifiers.context ?? 1) +
-      reliability * 5 * (taskModifiers.reliability ?? 1) +
-      privacyScore * 5 * (privacyBias[privacy] ?? 1) * (taskModifiers.privacy ?? 1)) * deepWorkPenalty;
+      contextScore * 8 * (contextBias[context] ?? 1) * (taskModifiers.context ?? 1) +
+      reliability * 4 * (taskModifiers.reliability ?? 1) +
+      privacyScore * 3 * (privacyBias[privacy] ?? 1) * (taskModifiers.privacy ?? 1)) * deepWorkPenalty;
 
     return {
       id: model.id,
@@ -436,8 +468,9 @@ export function getRecommendation(formValues) {
       sourceConfidence: model.sourceConfidence,
       score: Number(score.toFixed(2)),
       scoreBreakdown: {
-        taskFit: Number((taskFit * 35).toFixed(2)),
-        quality: Number((qualityScore * 25 * (priorityBias[priority]?.quality ?? 1) * (taskModifiers.quality ?? 1)).toFixed(2)),
+        benchmark: Number((taskFit * BENCHMARK_WEIGHT).toFixed(2)),
+        taskFit: Number((taskFit * BENCHMARK_WEIGHT).toFixed(2)),
+        quality: Number((qualityScore * 15 * (priorityBias[priority]?.quality ?? 1) * (taskModifiers.quality ?? 1)).toFixed(2)),
         cost: Number((costScore * 15 * (priorityBias[priority]?.costEfficiency ?? 1) * (taskModifiers.cost ?? 1)).toFixed(2)),
         speed: Number((speedScore * 10 * (speedBias[speed] ?? 1) * (taskModifiers.speed ?? 1)).toFixed(2)),
         context: Number((contextScore * 10 * (contextBias[context] ?? 1) * (taskModifiers.context ?? 1)).toFixed(2)),
@@ -453,7 +486,7 @@ export function getRecommendation(formValues) {
   const bestByUseCase = getBestByUseCase();
   const newestVsCheapestVsFastest = getNewestVsCheapestVsFastest();
   const budget = [...ranked].sort((a, b) => b.score - a.score).find((item) => item.id.includes('mini') || item.id.includes('haiku') || item.id.includes('mistral')) ?? ranked[1] ?? ranked[0];
-  const premium = [...models].sort((a, b) => b.quality - a.quality)[0];
+  const premium = [...models].sort((a, b) => getBenchmarkScore(b, task) - getBenchmarkScore(a, task))[0];
   const decisionGuide = getDecisionGuide(ranked[0], budget, premium, task);
 
   return {
@@ -468,7 +501,7 @@ export function getRecommendation(formValues) {
     newestVsCheapestVsFastest,
     decisionGuide,
     eligibleModelCount: eligibleModels.length,
-    privacyConstraintApplied: privacy === 'required',
+    privacyConstraintApplied: privacy === 'required' && privacyDataAvailable,
     explanation: buildExplanation(task, priority, speed, context, privacy, ranked, scenarioComparison)
   };
 }

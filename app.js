@@ -42,7 +42,7 @@ function formatSnapshotDate(date) {
 
 function initializeMetrics() {
   modelsTrackedEl.textContent = models.length;
-  useCasesTrackedEl.textContent = Object.keys(models[0]?.benchmarks ?? {}).length;
+  useCasesTrackedEl.textContent = new Set(models.flatMap((model) => Object.keys(model.benchmarks ?? {}))).size;
   const valueModel = [...models].sort((a, b) => b.costEfficiency - a.costEfficiency)[0];
   const frontierModel = [...models].sort((a, b) => b.quality - a.quality)[0];
   bestValueModelEl.textContent = valueModel?.name ?? 'Unavailable';
@@ -79,7 +79,7 @@ function renderTopMatches(ranked, privacyConstraintApplied, eligibleModelCount) 
     <tr>
       <td><strong>${model.name}</strong><br><span class="muted">${model.provider}</span></td>
       <td><strong>${model.score}</strong></td>
-      <td>${model.scoreBreakdown.taskFit}</td>
+      <td>${model.scoreBreakdown.benchmark}</td>
       <td>${model.scoreBreakdown.quality}</td>
       <td>${model.scoreBreakdown.cost}</td>
       <td>${model.scoreBreakdown.speed}</td>
@@ -91,7 +91,7 @@ function renderTopMatches(ranked, privacyConstraintApplied, eligibleModelCount) 
 
   constraintSummaryEl.textContent = privacyConstraintApplied
     ? `Privacy requirement applied: ${eligibleModelCount} of ${models.length} models met the current privacy threshold.`
-    : 'Scores reflect task fit, quality, cost, speed, context, reliability, and privacy preferences.';
+    : 'Scores are led by the task benchmark, then adjusted for quality, cost, speed, context, reliability, and privacy preferences.';
 }
 
 function getRecommendationText() {

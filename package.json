@@ -6,7 +6,9 @@
   "description": "AI model recommendation MVP",
   "scripts": {
     "start": "npx http-server . -p 8000",
-    "test": "node --test"
+    "test": "node --test",
+    "validate:benchmarks": "node scripts/validate-benchmarks.js",
+    "update:benchmarks": "node scripts/update-benchmarks.js"
   },
   "devDependencies": {
     "http-server": "^14.1.1"
