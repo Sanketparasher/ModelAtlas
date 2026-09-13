@@ -189,6 +189,55 @@ function getTaskModifierProfile(task, formValues) {
     privacy: 1
   };
 
+  const userType = formValues.user_type || 'individual';
+  const teamSize = formValues.team_size || 'solo';
+  const budgetScope = formValues.budget_scope || 'personal';
+  const dataSensitivity = formValues.data_sensitivity || 'low';
+
+  if (userType === 'individual' || userType === 'freelancer') {
+    profile.cost = 1.45;
+    profile.speed = 1.35;
+    profile.quality = 0.92;
+    profile.reliability = 0.9;
+    profile.privacy = 0.82;
+    profile.context = 0.9;
+  } else if (userType === 'small_business') {
+    profile.quality = 1.18;
+    profile.cost = 1.12;
+    profile.reliability = 1.12;
+    profile.privacy = 1.1;
+  } else {
+    profile.quality = 1.3;
+    profile.reliability = 1.38;
+    profile.privacy = 1.55;
+    profile.context = 1.22;
+    profile.cost = 0.9;
+    profile.speed = 0.94;
+  }
+
+  if (teamSize === 'department' || teamSize === 'organization') {
+    profile.reliability = 1.52;
+    profile.privacy = 1.68;
+    profile.quality = 1.3;
+    profile.context = 1.28;
+  }
+
+  if (budgetScope === 'priority') {
+    profile.quality = 1.5;
+    profile.reliability = 1.28;
+    profile.context = 1.14;
+  } else if (budgetScope === 'personal') {
+    profile.cost = 1.62;
+    profile.speed = 1.42;
+    profile.quality = 0.9;
+  }
+
+  if (dataSensitivity === 'high' || dataSensitivity === 'regulated') {
+    profile.privacy = 1.8;
+    profile.reliability = 1.48;
+    profile.quality = 1.18;
+  }
+
   if (task === 'coding') {
     const codebaseSize = formValues.codebase_size || 'medium';
     const toolUse = formValues.tool_use || 'basic';
@@ -449,6 +498,32 @@ export function getRecommendation(formValues) {
       deepWorkPenalty *= model.id.includes('mini') || model.id.includes('haiku') ? 0.7 : 1;
     }
 
+    const personaBoost = (() => {
+      const contextLength = Number(model.contextLength ?? 0);
+      const costPer1M = Number(model.costPer1M ?? 0);
+      const userType = formValues.user_type || 'individual';
+      const teamSize = formValues.team_size || 'solo';
+      const dataSensitivity = formValues.data_sensitivity || 'low';
+      const budgetScope = formValues.budget_scope || 'personal';
+
+      if (userType === 'individual' || userType === 'freelancer') {
+        return (model.costEfficiency ?? 0) * 0.14 + (model.speed ?? 0) * 0.18 - Math.max(0, costPer1M * 10);
+      }
+
+      if (userType === 'small_business') {
+        return (model.quality ?? 0) * 0.1 + (model.costEfficiency ?? 0) * 0.12 + (model.reliability ?? 0) * 0.12 - Math.max(0, costPer1M * 6);
+      }
+
+      if (userType === 'business' || userType === 'enterprise' || teamSize === 'department' || teamSize === 'organization') {
+        const sensitivityBonus = dataSensitivity === 'regulated' ? 18 : dataSensitivity === 'high' ? 12 : dataSensitivity === 'moderate' ? 8 : 4;
+        const budgetBonus = budgetScope === 'priority' ? 12 : budgetScope === 'business' ? 8 : 4;
+        const contextBonus = (contextLength / 1000000) * 30;
+        return contextBonus + sensitivityBonus + budgetBonus + (model.context ?? 0) * 0.1 + (model.reliability ?? 0) * 0.14 + (model.privacy ?? 0) * 0.18 - Math.max(0, costPer1M * 2.5);
+      }
+
+      return 0;
+    })();
+
     const score =
       (taskFit * BENCHMARK_WEIGHT +
       qualityScore * 15 * (priorityBias[priority]?.quality ?? 1) * (taskModifiers.quality ?? 1) +
@@ -456,7 +531,8 @@ export function getRecommendation(formValues) {
       speedScore * 10 * (speedBias[speed] ?? 1) * (taskModifiers.speed ?? 1) +
       contextScore * 8 * (contextBias[context] ?? 1) * (taskModifiers.context ?? 1) +
       reliability * 4 * (taskModifiers.reliability ?? 1) +
-      privacyScore * 3 * (privacyBias[privacy] ?? 1) * (taskModifiers.privacy ?? 1)) * deepWorkPenalty;
+      privacyScore * 3 * (privacyBias[privacy] ?? 1) * (taskModifiers.privacy ?? 1) +
+      personaBoost) * deepWorkPenalty;
 
     return {
       id: model.id,

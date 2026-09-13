@@ -73,6 +73,51 @@
 
         <form id="recommendation-form">
           <div class="field">
+            <label for="user_type">Who is using the model most often?</label>
+            <p class="field-hint">This helps us tailor the recommendation for a single person or a team or business workflow.</p>
+            <select id="user_type" name="user_type">
+              <option value="individual" selected>Individual user / solo professional</option>
+              <option value="freelancer">Freelancer or consultant</option>
+              <option value="small_business">Small business or startup</option>
+              <option value="business">Business or department</option>
+              <option value="enterprise">Enterprise or large organization</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="team_size">Who needs the output most often?</label>
+            <p class="field-hint">This affects collaboration, reliability, and governance expectations.</p>
+            <select id="team_size" name="team_size">
+              <option value="solo" selected>Just me</option>
+              <option value="small_team">A small team (2–10 people)</option>
+              <option value="department">A department or multiple teams</option>
+              <option value="organization">A whole organization</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="budget_scope">What is your typical budget scope?</label>
+            <p class="field-hint">We use this to balance quality, pricing, and cost efficiency for individual or business workloads.</p>
+            <select id="budget_scope" name="budget_scope">
+              <option value="personal" selected>Personal / low-cost setup</option>
+              <option value="team">Team or project budget</option>
+              <option value="business">Business / operational budget</option>
+              <option value="priority">Priority budget for premium quality</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="data_sensitivity">How sensitive is the information you work with?</label>
+            <p class="field-hint">Sensitive data adds weighting to privacy, compliance, and trust assumptions.</p>
+            <select id="data_sensitivity" name="data_sensitivity">
+              <option value="low" selected>Mostly public or low-risk information</option>
+              <option value="moderate">Moderate sensitivity, internal documents, or client work</option>
+              <option value="high">High sensitivity or confidential business data</option>
+              <option value="regulated">Regulated or compliance-heavy environment</option>
+            </select>
+          </div>
+
+          <div class="field">
             <label for="task">What kind of work are you doing most right now?</label>
             <p class="field-hint">Choose the core activity that drives your workflow.</p>
             <select id="task" name="task">

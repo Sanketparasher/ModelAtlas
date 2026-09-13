@@ -73,6 +73,35 @@ test('task-specific follow-up answers influence ranking', () => {
   assert.ok(codingDeepWork.primary.benchmark.score > 0, 'coding recommendation should have a sourced benchmark');
 });
 
+test('personal and business profiles produce different recommendations', () => {
+  const individual = getRecommendation({
+    task: 'coding',
+    user_type: 'individual',
+    team_size: 'solo',
+    budget_scope: 'personal',
+    data_sensitivity: 'low',
+    priority: 'balanced',
+    speed: 'medium',
+    context: 'medium',
+    privacy: 'preferred'
+  });
+
+  const enterprise = getRecommendation({
+    task: 'coding',
+    user_type: 'enterprise',
+    team_size: 'organization',
+    budget_scope: 'priority',
+    data_sensitivity: 'regulated',
+    priority: 'quality',
+    speed: 'medium',
+    context: 'long',
+    privacy: 'required'
+  });
+
+  assert.notEqual(individual.primary.name, enterprise.primary.name, 'user profile context should change the recommended model');
+  assert.ok(enterprise.primary.score >= individual.primary.score, 'enterprise profiles should favor more robust and privacy-safe models');
+});
+
 test('leaderboard data is live-source-backed and includes date/version metadata', () => {
   const liveModel = models.find((model) => model.benchmarkRecords.some((record) => record.task === 'coding'));
   assert.ok(liveModel, 'a live coding benchmark model should exist');
