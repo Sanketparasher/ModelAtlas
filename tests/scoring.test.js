@@ -73,6 +73,14 @@ test('task-specific follow-up answers influence ranking', () => {
   assert.ok(codingDeepWork.primary.benchmark.score > 0, 'coding recommendation should have a sourced benchmark');
 });
 
+test('broader task choices are available for students and business workflows', () => {
+  const formHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.ok(formHtml.includes('value="study"'), 'study workflow should be offered');
+  assert.ok(formHtml.includes('value="research"'), 'research workflow should be offered');
+  assert.ok(formHtml.includes('value="business"'), 'business workflow should be offered');
+  assert.ok(formHtml.includes('value="productivity"'), 'productivity workflow should be offered');
+});
+
 test('personal and business profiles produce different recommendations', () => {
   const individual = getRecommendation({
     task: 'coding',

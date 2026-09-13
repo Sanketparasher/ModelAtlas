@@ -52,7 +52,8 @@ function syncTaskSpecificQuestions() {
   const activeTask = taskSelect.value;
 
   taskSpecificFields.forEach((field) => {
-    const isActive = field.dataset.task === activeTask;
+    const allowedTasks = (field.dataset.task || '').split(/\s+/).filter(Boolean);
+    const isActive = allowedTasks.includes(activeTask);
     field.classList.toggle('hidden', !isActive);
     field.querySelectorAll('select').forEach((select) => {
       select.disabled = !isActive;

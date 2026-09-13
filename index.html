@@ -119,10 +119,17 @@
 
           <div class="field">
             <label for="task">What kind of work are you doing most right now?</label>
-            <p class="field-hint">Choose the core activity that drives your workflow.</p>
+            <p class="field-hint">Choose the workflow that best matches what you do most often.</p>
             <select id="task" name="task">
               <option value="coding" selected>Coding, debugging, and software development</option>
-              <option value="general">General assistance and everyday tasks</option>
+              <option value="research">Research, analysis, and evidence review</option>
+              <option value="writing">Writing, editing, and content creation</option>
+              <option value="summarization">Summarizing reports, notes, and long documents</option>
+              <option value="general">General productivity and everyday AI help</option>
+              <option value="study">Study, homework, and learning support</option>
+              <option value="extraction">Extracting insights from forms, PDFs, or records</option>
+              <option value="business">Business operations, support, and project work</option>
+              <option value="productivity">Personal productivity and planning</option>
             </select>
           </div>
 
@@ -229,7 +236,7 @@
               </select>
             </div>
 
-            <div class="field task-field hidden" data-task="general">
+            <div class="field task-field hidden" data-task="general study productivity business">
               <label for="assistant_usage">What kind of general assistant work do you do most often?</label>
               <p class="field-hint">This helps choose between broad-purpose quality and speed-first utility.</p>
               <select id="assistant_usage" name="assistant_usage">
@@ -239,7 +246,7 @@
               </select>
             </div>
 
-            <div class="field task-field hidden" data-task="general">
+            <div class="field task-field hidden" data-task="general study productivity business">
               <label for="automation_level">How much automation do you need from the model?</label>
               <p class="field-hint">Higher automation needs often favor faster and more reliable general models.</p>
               <select id="automation_level" name="automation_level">

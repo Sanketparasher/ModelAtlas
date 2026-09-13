@@ -156,7 +156,10 @@ export function getDecisionGuide(primary, budget, premium, task) {
     research: 'research synthesis and analysis',
     summarization: 'summarization and document distillation',
     general: 'general assistant workflows',
-    extraction: 'structured extraction and document parsing'
+    extraction: 'structured extraction and document parsing',
+    study: 'study and learning workflows',
+    business: 'business operations and team workflows',
+    productivity: 'personal productivity and planning tasks'
   };
 
   return {
@@ -591,7 +594,10 @@ function buildExplanation(task, priority, speed, context, privacy, ranked, scena
     research: 'research synthesis and analysis',
     summarization: 'summarization and extraction quality',
     general: 'general-purpose assistant performance',
-    extraction: 'structured extraction and document processing'
+    extraction: 'structured extraction and document processing',
+    study: 'study support and learning clarity',
+    business: 'business workflow and operations fit',
+    productivity: 'personal productivity and planning performance'
   };
 
   const priorityText = {
