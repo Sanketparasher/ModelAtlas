@@ -1,5 +1,5 @@
 import { benchmarkSnapshotDate, models } from './src/data/models.js';
-import { getLeaderboard, getRecommendation } from './src/logic/scoring.js';
+import { getRecommendation } from './src/logic/scoring.js';
 
 const form = document.getElementById('recommendation-form');
 const taskSelect = document.getElementById('task');
@@ -18,11 +18,6 @@ const bestPremiumOptionTextEl = document.getElementById('best-premium-option-tex
 const costComparisonTableEl = document.getElementById('cost-comparison-table');
 const useCaseMatrixEl = document.getElementById('best-by-usecase-matrix');
 const summaryPanelEl = document.getElementById('summary-panel');
-const comparisonSummaryEl = document.getElementById('comparison-summary');
-const comparisonTableEl = document.getElementById('model-comparison-table');
-const recommendationView = document.getElementById('recommendation-view');
-const leaderboardView = document.getElementById('leaderboard-view');
-const viewButtons = document.querySelectorAll('[data-view]');
 const topMatchesTableEl = document.getElementById('top-matches-table');
 const constraintSummaryEl = document.getElementById('constraint-summary');
 const changeAnswersButton = document.getElementById('change-answers');
@@ -41,16 +36,19 @@ function formatSnapshotDate(date) {
 }
 
 function initializeMetrics() {
+  if (!modelsTrackedEl || !useCasesTrackedEl || !bestValueModelEl || !frontierModelEl) return;
   modelsTrackedEl.textContent = models.length;
   useCasesTrackedEl.textContent = new Set(models.flatMap((model) => Object.keys(model.benchmarks ?? {}))).size;
   const valueModel = [...models].sort((a, b) => b.costEfficiency - a.costEfficiency)[0];
   const frontierModel = [...models].sort((a, b) => b.quality - a.quality)[0];
   bestValueModelEl.textContent = valueModel?.name ?? 'Unavailable';
   frontierModelEl.textContent = frontierModel?.name ?? 'Unavailable';
-  document.querySelector('.status-pill').textContent = `Snapshot · ${formatSnapshotDate(benchmarkSnapshotDate)}`;
+  const statusPill = document.querySelector('.status-pill');
+  if (statusPill) statusPill.textContent = `Snapshot · ${formatSnapshotDate(benchmarkSnapshotDate)}`;
 }
 
 function syncTaskSpecificQuestions() {
+  if (!taskSelect) return;
   const activeTask = taskSelect.value;
 
   taskSpecificFields.forEach((field) => {
@@ -62,19 +60,9 @@ function syncTaskSpecificQuestions() {
   });
 }
 
-function showView(viewName) {
-  const isRecommendation = viewName === 'recommendation';
-  recommendationView.classList.toggle('hidden', !isRecommendation);
-  leaderboardView.classList.toggle('hidden', isRecommendation);
-
-  viewButtons.forEach((button) => {
-    const active = button.dataset.view === viewName;
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-selected', String(active));
-  });
-}
-
 function renderTopMatches(ranked, privacyConstraintApplied, eligibleModelCount) {
+  if (!topMatchesTableEl || !constraintSummaryEl) return;
+
   topMatchesTableEl.innerHTML = ranked.slice(0, 3).map((model) => `
     <tr>
       <td><strong>${model.name}</strong><br><span class="muted">${model.provider}</span></td>
@@ -109,6 +97,7 @@ function saveFormValues(values) {
 }
 
 function restoreFormValues() {
+  if (!form) return;
   const stored = localStorage.getItem('modelatlas-form');
   if (!stored) return;
 
@@ -123,212 +112,122 @@ function restoreFormValues() {
   }
 }
 
-function renderComparisonSummary(task) {
-  const taskLabel = {
-    writing: 'writing',
-    coding: 'coding',
-    research: 'research',
-    summarization: 'summarization',
-    general: 'general assistant work',
-    extraction: 'document extraction'
-  };
-
-  comparisonSummaryEl.innerHTML = `
-    <p>
-      Benchmark view for <strong>${taskLabel[task] || 'this task'}</strong>.
-      Scores below are sourced from public model launch materials and documentation, with confidence and version metadata included.
-    </p>
-  `;
-}
-
 function renderScenarioComparison(scenarioComparison) {
+  if (!scenarioComparisonEl) return;
+
   const cards = [
-    {
-      label: 'Best overall value',
-      model: scenarioComparison.bestValue,
-      detail: 'Strongest quality-to-cost balance'
-    },
-    {
-      label: 'Best budget choice',
-      model: scenarioComparison.bestBudget,
-      detail: 'Most efficient option for lower spend'
-    },
-    {
-      label: 'Best speed',
-      model: scenarioComparison.bestSpeed,
-      detail: 'Fastest low-latency option'
-    },
-    {
-      label: 'Best long context',
-      model: scenarioComparison.bestLongContext,
-      detail: 'Best for large documents and codebases'
-    },
-    {
-      label: 'Best token efficiency',
-      model: scenarioComparison.bestTokenEfficiency,
-      detail: 'Fewer tokens for the same output goal'
-    }
+    { label: 'Best overall value', model: scenarioComparison.bestValue, detail: 'Strongest quality-to-cost balance' },
+    { label: 'Best budget choice', model: scenarioComparison.bestBudget, detail: 'Most efficient option for lower spend' },
+    { label: 'Best speed', model: scenarioComparison.bestSpeed, detail: 'Fastest low-latency option' },
+    { label: 'Best long context', model: scenarioComparison.bestLongContext, detail: 'Best for large documents and codebases' },
+    { label: 'Best token efficiency', model: scenarioComparison.bestTokenEfficiency, detail: 'Fewer tokens for the same output goal' }
   ];
 
-  scenarioComparisonEl.innerHTML = cards
-    .map((entry) => `
-      <div class="scenario-card">
-        <p class="label">${entry.label}</p>
-        <p class="scenario-model">${entry.model.name}</p>
-        <p class="scenario-detail">${entry.detail}</p>
-      </div>
-    `)
-    .join('');
+  scenarioComparisonEl.innerHTML = cards.map((entry) => `
+    <div class="scenario-card">
+      <p class="label">${entry.label}</p>
+      <p class="scenario-model">${entry.model.name}</p>
+      <p class="scenario-detail">${entry.detail}</p>
+    </div>
+  `).join('');
 }
 
 function renderCostComparison(costComparison) {
-  costComparisonTableEl.innerHTML = costComparison
-    .map((entry) => `
-      <tr>
-        <td><strong>${entry.name}</strong><br><span class="muted">${entry.provider}</span></td>
-        <td>$${Number(entry.costPer1M).toFixed(2)}</td>
-        <td>${entry.tokenEfficiency}</td>
-      </tr>
-    `)
-    .join('');
+  if (!costComparisonTableEl) return;
+  costComparisonTableEl.innerHTML = costComparison.map((entry) => `
+    <tr>
+      <td><strong>${entry.name}</strong><br><span class="muted">${entry.provider}</span></td>
+      <td>$${Number(entry.costPer1M).toFixed(2)}</td>
+      <td>${entry.tokenEfficiency}</td>
+    </tr>
+  `).join('');
 }
 
 function renderUseCaseMatrix(bestByUseCase) {
-  useCaseMatrixEl.innerHTML = bestByUseCase
-    .map((entry) => `
-      <div class="matrix-card">
-        <p class="label">${entry.label}</p>
-        <p class="matrix-model">${entry.model}</p>
-        <p class="matrix-meta">${entry.provider} · benchmark ${entry.benchmarkScore}/100</p>
-      </div>
-    `)
-    .join('');
+  if (!useCaseMatrixEl) return;
+  useCaseMatrixEl.innerHTML = bestByUseCase.map((entry) => `
+    <div class="matrix-card">
+      <p class="label">${entry.label}</p>
+      <p class="matrix-model">${entry.model}</p>
+      <p class="matrix-meta">${entry.provider} · benchmark ${entry.benchmarkScore}/100</p>
+    </div>
+  `).join('');
 }
 
 function renderSummaryPanel(summary) {
+  if (!summaryPanelEl) return;
   const cards = [
     { label: 'Newest', value: summary.newestLabel },
     { label: 'Cheapest', value: summary.cheapestLabel },
     { label: 'Fastest', value: summary.fastestLabel }
   ];
 
-  summaryPanelEl.innerHTML = cards
-    .map((entry) => `
-      <div class="summary-card">
-        <p class="label">${entry.label}</p>
-        <p class="summary-value">${entry.value}</p>
-      </div>
-    `)
-    .join('');
+  summaryPanelEl.innerHTML = cards.map((entry) => `
+    <div class="summary-card">
+      <p class="label">${entry.label}</p>
+      <p class="summary-value">${entry.value}</p>
+    </div>
+  `).join('');
 }
 
 function renderDecisionGuide(decisionGuide) {
+  if (!useThisModelTextEl || !avoidThisModelTextEl || !bestBudgetChoiceTextEl || !bestPremiumOptionTextEl) return;
   useThisModelTextEl.textContent = decisionGuide.primary.useWhen;
   avoidThisModelTextEl.textContent = decisionGuide.primary.avoidWhen;
   bestBudgetChoiceTextEl.textContent = decisionGuide.budgetChoice.useWhen;
   bestPremiumOptionTextEl.textContent = decisionGuide.premiumOption.useWhen;
 }
 
-function renderComparisonTable(task) {
-  const leaderboard = getLeaderboard(task);
+if (!form) {
+  initializeMetrics();
+} else {
+  taskSelect.addEventListener('change', syncTaskSpecificQuestions);
+  syncTaskSpecificQuestions();
 
-  comparisonTableEl.innerHTML = leaderboard
-    .map((model) => {
-      const sourceLinks = models
-        .find((entry) => entry.id === model.id)
-        ?.sources.map((source) => `<a href="${source.url}" target="_blank" rel="noreferrer">${source.name}</a>`)
-        .join(' · ') ?? 'Source list unavailable';
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-      const match = models.find((entry) => entry.id === model.id);
+    const formData = new FormData(form);
+    const values = Object.fromEntries(formData.entries());
+    const recommendation = getRecommendation(values);
+    latestRecommendation = recommendation;
+    saveFormValues(values);
 
-      return `
-        <tr>
-          <td>
-            <div class="model-name-group">
-              <strong>${model.name}</strong>
-              <span>${model.provider}</span>
-            </div>
-            <small>${model.benchmark.label}</small>
-          </td>
-          <td>${match?.quality ?? 0}</td>
-          <td>${match?.costEfficiency ?? 0}</td>
-          <td>${match?.speed ?? 0}</td>
-          <td>${match?.context ?? 0}</td>
-          <td>${match?.reliability ?? 0}</td>
-          <td>${match?.privacy ?? 0}</td>
-          <td class="source-cell">
-            <div><strong>Confidence:</strong> ${match?.sourceConfidence ?? 'unknown'}</div>
-            <div><strong>Version:</strong> ${match?.benchmarkVersion ?? 'unknown'}</div>
-            <div><strong>Benchmark date:</strong> ${match?.benchmarkDate ?? 'unknown'}</div>
-            <div>${sourceLinks}</div>
-          </td>
-        </tr>
-      `;
-    })
-    .join('');
-}
-
-taskSelect.addEventListener('change', syncTaskSpecificQuestions);
-syncTaskSpecificQuestions();
-
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-
-  const formData = new FormData(form);
-  const values = Object.fromEntries(formData.entries());
-
-  const recommendation = getRecommendation(values);
-  latestRecommendation = recommendation;
-  saveFormValues(values);
-
-  primaryModelEl.textContent = recommendation.primary.name;
-  budgetModelEl.textContent = recommendation.budget.name;
-  fastModelEl.textContent = recommendation.fast.name;
-  fallbackModelEl.textContent = recommendation.fallback.name;
-  explanationTextEl.textContent = recommendation.explanation;
-  renderScenarioComparison(recommendation.scenarioComparison);
-  renderDecisionGuide(recommendation.decisionGuide);
-  renderCostComparison(recommendation.costComparison);
-  renderUseCaseMatrix(recommendation.bestByUseCase);
-  renderSummaryPanel(recommendation.newestVsCheapestVsFastest.summary);
-  renderTopMatches(recommendation.ranked, recommendation.privacyConstraintApplied, recommendation.eligibleModelCount);
-
-  renderComparisonSummary(values.task);
-  renderComparisonTable(values.task);
-  showView('recommendation');
-  resultSection.classList.remove('hidden');
-});
-
-viewButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    showView(button.dataset.view);
+    primaryModelEl.textContent = recommendation.primary.name;
+    budgetModelEl.textContent = recommendation.budget.name;
+    fastModelEl.textContent = recommendation.fast.name;
+    fallbackModelEl.textContent = recommendation.fallback.name;
+    explanationTextEl.textContent = recommendation.explanation;
+    renderScenarioComparison(recommendation.scenarioComparison);
+    renderDecisionGuide(recommendation.decisionGuide);
+    renderCostComparison(recommendation.costComparison);
+    renderUseCaseMatrix(recommendation.bestByUseCase);
+    renderSummaryPanel(recommendation.newestVsCheapestVsFastest.summary);
+    renderTopMatches(recommendation.ranked, recommendation.privacyConstraintApplied, recommendation.eligibleModelCount);
+    resultSection.classList.remove('hidden');
   });
-});
 
-changeAnswersButton.addEventListener('click', () => {
-  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  showView('leaderboard');
-});
+  changeAnswersButton.addEventListener('click', () => {
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    resultSection.classList.add('hidden');
+  });
 
-copyRecommendationButton.addEventListener('click', async () => {
-  await navigator.clipboard.writeText(getRecommendationText());
-  copyRecommendationButton.textContent = 'Copied';
-  window.setTimeout(() => { copyRecommendationButton.textContent = 'Copy recommendation'; }, 1600);
-});
+  copyRecommendationButton.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(getRecommendationText());
+    copyRecommendationButton.textContent = 'Copied';
+    window.setTimeout(() => { copyRecommendationButton.textContent = 'Copy recommendation'; }, 1600);
+  });
 
-exportRecommendationButton.addEventListener('click', () => {
-  if (!latestRecommendation) return;
-  const blob = new Blob([JSON.stringify(latestRecommendation, null, 2)], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'modelatlas-recommendation.json';
-  link.click();
-  URL.revokeObjectURL(link.href);
-});
+  exportRecommendationButton.addEventListener('click', () => {
+    if (!latestRecommendation) return;
+    const blob = new Blob([JSON.stringify(latestRecommendation, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'modelatlas-recommendation.json';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
 
-initializeMetrics();
-restoreFormValues();
-syncTaskSpecificQuestions();
-renderComparisonSummary('coding');
-renderComparisonTable('coding');
-showView('leaderboard');
+  initializeMetrics();
+  restoreFormValues();
+}

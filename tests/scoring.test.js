@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
 
 import { models } from '../src/data/models.js';
 import { validateBenchmarkRecord, validateModelCatalog } from '../src/data/benchmark-schema.js';
@@ -78,6 +79,14 @@ test('leaderboard data is live-source-backed and includes date/version metadata'
   assert.ok(liveModel.benchmarkDate, 'benchmark date is missing');
   assert.match(liveModel.benchmarkVersion, /^live-\d{4}-\d{2}-\d{2}$/);
   assert.ok(liveModel.benchmarks.coding.value > 0, 'coding benchmark score should be positive');
+});
+
+test('leaderboard is split onto its own page', () => {
+  const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.equal(indexHtml.includes('leaderboard-view'), false, 'homepage should not contain an embedded leaderboard section');
+  assert.equal(existsSync(new URL('../leaderboard.html', import.meta.url)), true, 'leaderboard page should exist');
+  const leaderboardHtml = readFileSync(new URL('../leaderboard.html', import.meta.url), 'utf8');
+  assert.ok(leaderboardHtml.includes('leaderboard-table'), 'leaderboard page should contain a dedicated table');
 });
 
 test('privacy required applies an eligibility constraint', () => {
