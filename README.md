@@ -1,68 +1,113 @@
 # ModelAtlas
 
-A lightweight web app for recommending the best AI model for a user's specific task and constraints.
+ModelAtlas is a lightweight AI model recommender for students, researchers, professionals, freelancers, startups, and business teams.
 
 ## Purpose
 
-This project is intentionally small and practical. It is designed to help a user answer one question:
+The app helps users answer one question quickly:
 
-Which AI model is the best fit for my task, under my constraints?
+Which AI model is the best fit for my task, my constraints, and my budget?
+
+Instead of treating every user the same, ModelAtlas asks about:
+
+- who is using the model
+- what kind of work they do
+- what matters most: speed, quality, cost, privacy, or context
+- whether the workload is personal, academic, research, or business-focused
+
+## What the app covers
+
+- students and learning workflows
+- research and evidence review
+- writing and content creation
+- summarization and document review
+- coding and debugging
+- business operations and workflow support
+- personal productivity and planning
+- document extraction and structured analysis
 
 ## Current capabilities
 
-- task-specific questionnaire for coding and general assistance
-- live benchmark catalog fetched from LMSYS Chatbot Arena and the official SWE-bench leaderboard
-- benchmark-led recommendations using published benchmark scores and pricing where available
-- explicit provenance, retrieval dates, benchmark dates, and confidence metadata
-- multimodal, structured-output, and deployment preferences
-- ranked recommendations with budget, speed, fallback, and premium alternatives
-- top-match score breakdown and comparison tables
-- benchmark snapshot date, source confidence, version, source URLs, and pricing metadata
-- saved questionnaire answers using local storage
-- copy recommendation and JSON export actions
-- keyboard focus states, tab semantics, live result updates, and reduced-motion support
+- broader task selection for different user groups
+- user profile weighting for solo vs team vs business usage
+- benchmark-led scoring with source provenance and pricing context
+- ranked recommendations with budget, fast, fallback, and premium alternatives
+- explanation panel showing why a model was chosen
+- task-specific follow-up questions
+- saved answers with local storage
+- recommendation export and copy actions
+- static GitHub Pages deployment support
 
 ## Project structure
 
-- index.html — app shell and form layout
-- styles.css — responsive UI styling and accessibility states
-- src/data/models.js — generated benchmark catalog entry point
-- src/data/generated-models.js — generated live-source snapshot; do not edit manually
-- src/logic/scoring.js — recommendation logic
-- app.js — form handling and rendering
-- docs/mvp.md — product and engineering notes
-- tests/scoring.test.js — scoring and data contract tests
-- src/data/benchmark-schema.js — normalized benchmark schema and provenance validation
-- scripts/validate-benchmarks.js — benchmark catalog validation command
-- scripts/update-benchmarks.js — fetches and normalizes trusted online leaderboards
+- index.html — main recommendation page
+- leaderboard.html — dedicated leaderboard page
+- app.js — homepage form flow and rendering
+- leaderboard.js — leaderboard page rendering
+- styles.css — styling and responsive UI
+- src/data/models.js — model catalog entry point
+- src/data/generated-models.js — generated benchmark snapshot
+- src/data/benchmark-schema.js — data validation and provenance rules
+- src/logic/scoring.js — recommendation logic and scoring
+- tests/scoring.test.js — regression and scoring checks
+- docs/mvp.md — product notes and roadmap
+- scripts/update-benchmarks.js — refresh benchmark data
+- scripts/validate-benchmarks.js — validate model catalog integrity
 
 ## Run locally
 
-From the project root, install dependencies and start the local server:
+From the project root:
 
+```bash
 npm install
 npm start
+```
 
 Then open:
 
+```text
 http://localhost:8000
+```
 
-Run the test suite with:
+Run the tests:
 
+```bash
 npm test
+```
 
-Validate the benchmark catalog with:
+Validate the benchmark catalog:
 
+```bash
 npm run validate:benchmarks
+```
 
-Refresh the catalog from the online sources with:
+Refresh the catalog from the public sources:
 
+```bash
 npm run update:benchmarks
+```
+
+## GitHub Pages
+
+This project is a static site and is ready for GitHub Pages.
+
+1. Push the repo to GitHub
+2. Go to Settings → Pages
+3. Set Source to Deploy from a branch
+4. Choose Branch: main
+5. Folder: /root
+6. Save
+
+The site will be available at:
+
+```text
+https://<your-username>.github.io/<repo-name>/
+```
 
 ## Data notes
 
-The catalog is generated from public leaderboard data. Coding scores come from SWE-bench Verified and general scores come from LMSYS Chatbot Arena. The app does not invent scores for unsupported tasks; refresh the catalog with `npm run update:benchmarks` before using newer source data.
+The catalog is generated from public benchmark sources and includes source metadata, benchmark versioning, and confidence indicators. It is meant to be explainable and practical rather than a replacement for provider documentation, security review, or internal evaluation.
 
-## Project status
+## Status
 
-ModelAtlas is an explainable recommendation MVP. It is designed to help compare model fit for a workflow, not to replace provider documentation, security review, or production benchmarking.
+ModelAtlas is an MVP designed for real-world model comparison, broader public use, and simple static deployment.
