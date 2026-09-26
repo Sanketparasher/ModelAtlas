@@ -8,7 +8,9 @@
     "start": "npx http-server . -p 8000",
     "test": "node --test",
     "validate:benchmarks": "node scripts/validate-benchmarks.js",
-    "update:benchmarks": "node scripts/update-benchmarks.js"
+    "update:benchmarks": "node scripts/update-benchmarks.js",
+    "refresh:benchmarks": "node scripts/benchmark-refresh-job.js --once",
+    "watch:benchmarks": "node scripts/benchmark-refresh-job.js"
   },
   "devDependencies": {
     "http-server": "^14.1.1"

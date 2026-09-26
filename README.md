@@ -100,6 +100,14 @@ Refresh the catalog from the public sources:
 npm run update:benchmarks
 ```
 
+Run the periodic refresh loop locally (polling for new benchmark snapshots):
+
+```bash
+npm run watch:benchmarks
+```
+
+The project also includes a GitHub Actions workflow that runs on a schedule and commits updated benchmark data when fresh source data is detected.
+
 ## GitHub Pages
 
 This project is a static site and is ready for GitHub Pages.
