@@ -1,6 +1,6 @@
 # ModelAtlas
 
-ModelAtlas is a lightweight AI model recommender for students, researchers, professionals, freelancers, startups, and business teams.
+ModelAtlas is a lightweight AI model recommender for students, researchers, freelancers, founders, teams, and enterprise users.
 
 ## Purpose
 
@@ -8,12 +8,17 @@ The app helps users answer one question quickly:
 
 Which AI model is the best fit for my task, my constraints, and my budget?
 
-Instead of treating every user the same, ModelAtlas asks about:
+Instead of treating every user the same, ModelAtlas personalizes the experience by role, workflow, and tradeoff preference. The latest version makes the experience feel lighter and more relevant by guiding users through a role-based onboarding flow before the detailed assessment begins.
 
-- who is using the model
-- what kind of work they do
-- what matters most: speed, quality, cost, privacy, or context
-- whether the workload is personal, academic, research, or business-focused
+## Core user experience
+
+The current app includes:
+
+- profession-based landing cards for different user types
+- role-aware quick-start suggestions for solo professionals, freelancers, startups, teams, and enterprises
+- a more polished premium landing experience with trust signals and stronger messaging
+- a streamlined recommendation flow that reduces decision fatigue
+- a results page with clear top alternatives, cost tradeoffs, use-case guidance, and explanation panels
 
 ## What the app covers
 
@@ -28,6 +33,7 @@ Instead of treating every user the same, ModelAtlas asks about:
 
 ## Current capabilities
 
+- role-based onboarding and workflow suggestions
 - broader task selection for different user groups
 - user profile weighting for solo vs team vs business usage
 - benchmark-led scoring with source provenance and pricing context
@@ -38,11 +44,18 @@ Instead of treating every user the same, ModelAtlas asks about:
 - recommendation export and copy actions
 - static GitHub Pages deployment support
 
+## Recent improvements
+
+- Added role selection cards to make the onboarding feel more relevant and less overwhelming
+- Added dynamic role suggestions to help users start in the right workflow quickly
+- Refined the hero section to emphasize trust, speed, and usefulness
+- Expanded result cards to better communicate the strongest model, budget option, and fallback recommendation
+
 ## Project structure
 
-- index.html — main recommendation page
+- index.html — landing page, role selection, recommendation flow, and result view
 - leaderboard.html — dedicated leaderboard page
-- app.js — homepage form flow and rendering
+- app.js — homepage form flow, onboarding interactions, and rendering
 - leaderboard.js — leaderboard page rendering
 - styles.css — styling and responsive UI
 - src/data/models.js — model catalog entry point
@@ -110,4 +123,4 @@ The catalog is generated from public benchmark sources and includes source metad
 
 ## Status
 
-ModelAtlas is an MVP designed for real-world model comparison, broader public use, and simple static deployment.
+ModelAtlas is a practical, benchmark-driven recommendation engine designed for real-world usage, broader public adoption, and simple static deployment. The latest iteration focuses on reducing friction through role-based onboarding and a more premium, user-friendly presentation.

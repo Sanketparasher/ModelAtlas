@@ -1,9 +1,9 @@
 {
   "name": "modelatlas",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "AI model recommendation app for students, researchers, professionals, and business teams",
+  "description": "AI model recommendation app for students, researchers, professionals, and business teams with role-based onboarding",
   "scripts": {
     "start": "npx http-server . -p 8000",
     "test": "node --test",
