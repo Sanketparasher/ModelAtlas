@@ -68,6 +68,42 @@
         </div>
       </header>
 
+      <section class="showcase-grid" aria-label="Popular use cases">
+        <article class="showcase-card accent">
+          <span class="showcase-tag">For builders</span>
+          <h3>Ship faster with code-aware models</h3>
+          <p>Debug faster, iterate cleaner, and keep large codebases productive.</p>
+        </article>
+        <article class="showcase-card purple">
+          <span class="showcase-tag">For researchers</span>
+          <h3>Turn long docs into clear insight</h3>
+          <p>Smarter synthesis and evidence review for dense research workflows.</p>
+        </article>
+        <article class="showcase-card green">
+          <span class="showcase-tag">For teams</span>
+          <h3>Balance quality, cost, and trust</h3>
+          <p>Pick the best fit for productivity, operations, and collaboration.</p>
+        </article>
+      </section>
+
+      <section class="value-grid" aria-label="How ModelAtlas works">
+        <div class="value-card">
+          <span class="step-pill">01</span>
+          <h3>Pick your role</h3>
+          <p>Choose the profile that matches your work and goals.</p>
+        </div>
+        <div class="value-card">
+          <span class="step-pill">02</span>
+          <h3>Answer a few prompts</h3>
+          <p>Share the task, budget, speed, and privacy priorities.</p>
+        </div>
+        <div class="value-card">
+          <span class="step-pill">03</span>
+          <h3>See the best fit</h3>
+          <p>Get a top recommendation with stronger alternatives below.</p>
+        </div>
+      </section>
+
       <section class="card form-card">
         <div class="section-header">
           <div>
@@ -412,15 +448,23 @@
       </section>
 
       <section id="recommendation-view" class="card result-card hidden" aria-live="polite">
-        <h2>Your recommendation</h2>
+        <div class="result-headline">
+          <div>
+            <p class="eyebrow small">Your best match</p>
+            <h2>Recommendation</h2>
+          </div>
+          <a class="leaderboard-cta" href="leaderboard.html">View full leaderboard</a>
+        </div>
+
         <div class="result-actions">
           <button type="button" id="change-answers" class="secondary-button">Change answers</button>
           <button type="button" id="copy-recommendation" class="secondary-button">Copy recommendation</button>
           <button type="button" id="export-recommendation" class="secondary-button">Export JSON</button>
         </div>
+
         <div class="result-grid">
-          <div>
-            <p class="label">Primary</p>
+          <div class="result-winner-card">
+            <p class="label">Best overall</p>
             <p id="primary-model" class="result-value"></p>
           </div>
           <div>
