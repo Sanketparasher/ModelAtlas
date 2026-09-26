@@ -3,8 +3,14 @@ import { getRecommendation } from './src/logic/scoring.js';
 
 const form = document.getElementById('recommendation-form');
 const taskSelect = document.getElementById('task');
+const userTypeSelect = document.getElementById('user_type');
 const taskSpecificFields = document.querySelectorAll('.task-field');
+const professionCards = document.querySelectorAll('.profession-card');
+const roleGuideTitleEl = document.getElementById('role-guide-title');
+const roleGuideCopyEl = document.getElementById('role-guide-copy');
+const rolePicksEl = document.getElementById('role-picks');
 const resultSection = document.getElementById('recommendation-view');
+const resultSummaryEl = document.getElementById('result-summary');
 const primaryModelEl = document.getElementById('primary-model');
 const budgetModelEl = document.getElementById('budget-model');
 const fastModelEl = document.getElementById('fast-model');
@@ -59,6 +65,128 @@ function syncTaskSpecificQuestions() {
       select.disabled = !isActive;
     });
   });
+}
+
+function syncSelectedProfessionCard() {
+  if (!userTypeSelect || !professionCards.length) return;
+  professionCards.forEach((card) => {
+    card.classList.toggle('active', card.dataset.role === userTypeSelect.value);
+  });
+}
+
+const roleSuggestions = {
+  individual: {
+    title: 'Solo professional workflow',
+    copy: 'Start with a personal workflow: quick writing, short research, or daily productivity support.',
+    picks: [
+      { label: 'Daily productivity', value: 'general', description: 'Planning, drafting, and everyday AI help' },
+      { label: 'Writing', value: 'writing', description: 'Emails, content, and polished communication' },
+      { label: 'Research', value: 'research', description: 'Short reports and evidence review' }
+    ]
+  },
+  freelancer: {
+    title: 'Freelancer workflow',
+    copy: 'Prioritize fast, affordable output for client work, briefs, and repeatable quality.',
+    picks: [
+      { label: 'Writing', value: 'writing', description: 'Client deliverables and content production' },
+      { label: 'Summaries', value: 'summarization', description: 'Condense meetings, reports, and project notes' },
+      { label: 'General help', value: 'general', description: 'Low-friction support for admin and delivery work' }
+    ]
+  },
+  small_business: {
+    title: 'Startup workflow',
+    copy: 'Balance speed, output quality, and value as your team grows and automates more work.',
+    picks: [
+      { label: 'Business ops', value: 'business', description: 'Support, status updates, and process work' },
+      { label: 'Productivity', value: 'productivity', description: 'Planning, meeting prep, and task support' },
+      { label: 'General AI', value: 'general', description: 'Light automation and broader team help' }
+    ]
+  },
+  business: {
+    title: 'Team workflow',
+    copy: 'Choose a model that is reliable, structured, and strong with team operations and collaboration.',
+    picks: [
+      { label: 'Business operations', value: 'business', description: 'Support tasks and workflow execution' },
+      { label: 'Summaries', value: 'summarization', description: 'Team notes, documents, and reports' },
+      { label: 'Research', value: 'research', description: 'Analysis, synthesis, and evidence review' }
+    ]
+  },
+  enterprise: {
+    title: 'Enterprise workflow',
+    copy: 'Favor reliable quality, compliance-friendly behavior, and more secure, structured deployment.',
+    picks: [
+      { label: 'Research', value: 'research', description: 'Trusted analysis for complex decisions' },
+      { label: 'Extraction', value: 'extraction', description: 'Structured document parsing and analysis' },
+      { label: 'Coding', value: 'coding', description: 'High-context developer workflows and tooling' }
+    ]
+  }
+};
+
+function renderRoleSuggestions() {
+  if (!userTypeSelect || !roleGuideTitleEl || !roleGuideCopyEl || !rolePicksEl) return;
+
+  const role = userTypeSelect.value;
+  const profile = roleSuggestions[role] || roleSuggestions.individual;
+  roleGuideTitleEl.textContent = profile.title;
+  roleGuideCopyEl.textContent = profile.copy;
+
+  rolePicksEl.innerHTML = profile.picks.map((pick) => `
+    <button type="button" class="role-pick" data-task="${pick.value}">
+      <span class="role-pick-title">${pick.label}</span>
+      <span class="role-pick-meta">${pick.description}</span>
+    </button>
+  `).join('');
+
+  rolePicksEl.querySelectorAll('.role-pick').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!taskSelect) return;
+      taskSelect.value = button.dataset.task;
+      syncTaskSpecificQuestions();
+      taskSelect.dispatchEvent(new Event('change'));
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+}
+
+function bindProfessionCards() {
+  if (!professionCards.length) return;
+
+  professionCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      if (!userTypeSelect) return;
+      userTypeSelect.value = card.dataset.role;
+      syncSelectedProfessionCard();
+      renderRoleSuggestions();
+      userTypeSelect.dispatchEvent(new Event('change'));
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  if (userTypeSelect) {
+    userTypeSelect.addEventListener('change', () => {
+      syncSelectedProfessionCard();
+      renderRoleSuggestions();
+    });
+  }
+}
+
+function renderResultSummary(recommendation) {
+  if (!resultSummaryEl || !recommendation) return;
+
+  const summaryCards = [
+    { label: 'Best overall', value: recommendation.primary.name, meta: 'Highest fit for the current brief' },
+    { label: 'Best value', value: recommendation.budget.name, meta: 'Most efficient option for lower spend' },
+    { label: 'Fastest option', value: recommendation.fast.name, meta: 'Lowest latency and quick turnaround' },
+    { label: 'Fallback', value: recommendation.fallback.name, meta: 'Safe backup for tougher or edge cases' }
+  ];
+
+  resultSummaryEl.innerHTML = summaryCards.map((card) => `
+    <div class="result-summary-card">
+      <p class="label">${card.label}</p>
+      <p class="result-value">${card.value}</p>
+      <p class="result-meta">${card.meta}</p>
+    </div>
+  `).join('');
 }
 
 function renderTopMatches(ranked, privacyConstraintApplied, eligibleModelCount) {
@@ -183,7 +311,10 @@ if (!form) {
   initializeMetrics();
 } else {
   taskSelect.addEventListener('change', syncTaskSpecificQuestions);
+  bindProfessionCards();
   syncTaskSpecificQuestions();
+  syncSelectedProfessionCard();
+  renderRoleSuggestions();
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -199,6 +330,7 @@ if (!form) {
     fastModelEl.textContent = recommendation.fast.name;
     fallbackModelEl.textContent = recommendation.fallback.name;
     explanationTextEl.textContent = recommendation.explanation;
+    renderResultSummary(recommendation);
     renderScenarioComparison(recommendation.scenarioComparison);
     renderDecisionGuide(recommendation.decisionGuide);
     renderCostComparison(recommendation.costComparison);

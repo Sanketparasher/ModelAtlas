@@ -35,11 +35,17 @@
         <div class="hero-copy">
           <div>
             <p class="eyebrow">AI model selection</p>
-            <h1>Choose the right AI model for your work</h1>
+            <h1>Find the right AI model for your work in under 30 seconds.</h1>
           </div>
           <p class="subtitle">
-            Compare models by task fit, cost, speed, context, and efficiency — without guessing which model is best for the job.
+            Built for students, researchers, developers, freelancers, and growing teams who want faster, smarter, and more cost-aware choices.
           </p>
+          <div class="trust-strip" aria-label="Key product benefits">
+            <span>Benchmark-backed</span>
+            <span>Cost-aware</span>
+            <span>Privacy-aware</span>
+            <span>Task-specific</span>
+          </div>
         </div>
 
         <div class="metrics-strip">
@@ -61,6 +67,52 @@
           </div>
         </div>
       </header>
+
+      <section class="card form-card">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow small">Choose your fit</p>
+            <h2>Pick the role that matches your work</h2>
+          </div>
+        </div>
+
+        <div class="profession-selector" aria-label="Professional profiles">
+          <button type="button" class="profession-card active" data-role="individual">
+            <span class="profession-icon">S</span>
+            <span class="profession-title">Solo professional</span>
+            <span class="profession-meta">Individual productivity and focused work</span>
+          </button>
+          <button type="button" class="profession-card" data-role="freelancer">
+            <span class="profession-icon">F</span>
+            <span class="profession-title">Freelancer</span>
+            <span class="profession-meta">Client work, writing, and fast delivery</span>
+          </button>
+          <button type="button" class="profession-card" data-role="small_business">
+            <span class="profession-icon">B</span>
+            <span class="profession-title">Startup</span>
+            <span class="profession-meta">Lean teams and budget-conscious growth</span>
+          </button>
+          <button type="button" class="profession-card" data-role="business">
+            <span class="profession-icon">T</span>
+            <span class="profession-title">Team</span>
+            <span class="profession-meta">Operations, support, and structured work</span>
+          </button>
+          <button type="button" class="profession-card" data-role="enterprise">
+            <span class="profession-icon">E</span>
+            <span class="profession-title">Enterprise</span>
+            <span class="profession-meta">Governance, safety, and scale</span>
+          </button>
+        </div>
+
+        <div class="role-guidance">
+          <div class="role-guide-header">
+            <p class="eyebrow small">Suggested starting points</p>
+            <h3 id="role-guide-title">Solo professional workflow</h3>
+          </div>
+          <p id="role-guide-copy" class="role-guide-copy">Start with a personal workflow: quick writing, short research, or daily productivity support.</p>
+          <div id="role-picks" class="role-picks" aria-live="polite"></div>
+        </div>
+      </section>
 
       <section class="card form-card">
         <div class="form-header">
@@ -384,6 +436,8 @@
             <p id="fallback-model" class="result-value"></p>
           </div>
         </div>
+
+        <div id="result-summary" class="result-summary-grid" aria-live="polite"></div>
 
         <div class="explanation">
           <h3>Why this fits</h3>
