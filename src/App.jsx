@@ -103,7 +103,7 @@ function getMetricSummary() {
 }
 
 function App() {
-  const [activePage, setActivePage] = useState('home');
+  const [activeSection, setActiveSection] = useState('overview');
   const [form, setForm] = useState(defaultForm);
 
   const metrics = useMemo(() => getMetricSummary(), []);
@@ -111,75 +111,88 @@ function App() {
   const leaderboard = useMemo(() => getLeaderboard(form.task), [form.task]);
   const currentRoleGuide = roleGuide[form.user_type] ?? roleGuide.individual;
 
+  const navItems = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'recommendation', label: 'Recommendation' },
+    { id: 'leaderboard', label: 'Leaderboard' }
+  ];
+
   const handleRoleSelect = (value) => setForm((previous) => ({ ...previous, user_type: value }));
   const handleTaskSelect = (value) => setForm((previous) => ({ ...previous, task: value }));
+
+  const scrollToSection = (sectionId) => {
+    setActiveSection(sectionId);
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <>
       <style>{`
         :root {
-          --bg: #09090b;
-          --bg-alt: #101114;
-          --panel: rgba(18, 18, 20, 0.82);
-          --panel-strong: rgba(21, 21, 23, 0.96);
-          --panel-soft: rgba(26, 26, 30, 0.92);
-          --border: rgba(255,255,255,0.08);
+          --bg: #08090d;
+          --bg-soft: #101319;
+          --panel: rgba(17, 20, 26, 0.82);
+          --panel-strong: rgba(19, 22, 28, 0.96);
+          --panel-elevated: rgba(26, 30, 38, 0.9);
+          --border: rgba(148, 163, 184, 0.16);
           --border-strong: rgba(251, 191, 36, 0.28);
           --text: #f8fafc;
-          --muted: #a1a1aa;
-          --subtle: #d4d4d8;
-          --amber: #f59e0b;
-          --amber-soft: rgba(245, 158, 11, 0.12);
+          --muted: #a5b4c7;
+          --subtle: #dfe7f3;
+          --amber: #fbbf24;
+          --amber-strong: #f59e0b;
           --orange: #f97316;
-          --shadow: rgba(0, 0, 0, 0.28);
+          --cyan: #67e8f9;
+          --shadow: rgba(2, 6, 23, 0.42);
         }
 
         * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         html, body, #root { margin: 0; min-height: 100%; background: var(--bg); }
         body {
-          background:
-            radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 20%),
-            radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.12), transparent 24%),
-            linear-gradient(180deg, var(--bg) 0%, #0d0d11 100%);
           color: var(--text);
           font-family: Inter, 'Segoe UI', sans-serif;
+          background:
+            radial-gradient(circle at top left, rgba(251, 191, 36, 0.18), transparent 18%),
+            radial-gradient(circle at bottom right, rgba(103, 232, 249, 0.12), transparent 24%),
+            linear-gradient(180deg, #090b12 0%, #0a0d13 100%);
         }
+
+        a { color: inherit; text-decoration: none; }
         button, select { font: inherit; }
 
-        .obsidian-app {
+        .site-shell {
           min-height: 100vh;
-          background: linear-gradient(180deg, rgba(9,9,11,0.94), rgba(9,9,11,1));
+          background: linear-gradient(180deg, rgba(9, 11, 18, 0.86), rgba(9, 11, 18, 1));
           color: var(--text);
         }
 
-        .obsidian-container {
-          width: min(1180px, calc(100vw - 32px));
-          margin: 0 auto;
-          padding: 26px 0 60px;
-        }
-
-        .obsidian-nav {
+        .topbar {
           position: sticky;
           top: 0;
           z-index: 30;
+          width: min(1220px, calc(100vw - 24px));
+          margin: 18px auto 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 14px;
+          gap: 16px;
           padding: 14px 18px;
-          margin-bottom: 24px;
           border: 1px solid var(--border);
           border-radius: 18px;
-          background: rgba(9, 9, 11, 0.72);
-          backdrop-filter: blur(12px);
-          box-shadow: 0 18px 36px rgba(0,0,0,0.2);
+          background: rgba(8, 11, 17, 0.76);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 18px 36px rgba(2, 6, 23, 0.3);
         }
 
         .brand {
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          cursor: pointer;
+          min-width: 0;
         }
 
         .brand-mark {
@@ -188,219 +201,421 @@ function App() {
           display: grid;
           place-items: center;
           border-radius: 12px;
-          background: linear-gradient(135deg, #fbbf24, #f97316);
-          color: #111827;
-          font-weight: 800;
-          box-shadow: 0 12px 24px rgba(245, 158, 11, 0.18);
+          background: linear-gradient(135deg, var(--amber), var(--orange));
+          color: #161b2b;
+          font-size: 0.95rem;
+          font-weight: 900;
+          box-shadow: 0 10px 20px rgba(251, 191, 36, 0.22);
         }
 
         .brand-name {
-          font-size: 1.3rem;
+          font-size: 1.25rem;
           font-weight: 800;
           letter-spacing: -0.04em;
         }
 
-        .nav-controls {
+        .nav-list {
           display: flex;
           align-items: center;
           gap: 8px;
           flex-wrap: wrap;
         }
 
-        .nav-button {
+        .nav-item {
           border: 1px solid transparent;
           background: transparent;
           color: var(--muted);
-          padding: 9px 12px;
           border-radius: 10px;
+          padding: 9px 12px;
           font-weight: 700;
           cursor: pointer;
-          text-transform: capitalize;
           transition: all 0.2s ease;
         }
 
-        .nav-button.active,
-        .nav-button:hover {
-          background: rgba(245, 158, 11, 0.08);
-          border-color: rgba(245, 158, 11, 0.25);
+        .nav-item:hover,
+        .nav-item.active {
           color: var(--text);
-          box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.12);
+          border-color: rgba(251, 191, 36, 0.22);
+          background: rgba(251, 191, 36, 0.08);
+          box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.08);
         }
 
-        .page-shell {
-          animation: fadeUp 0.45s ease;
-        }
-
-        .hero-panel {
-          position: relative;
-          text-align: center;
-          padding: 28px 0 10px;
-        }
-
-        .hero-glow {
-          position: absolute;
-          left: 50%;
-          top: 34%;
-          width: 520px;
-          height: 520px;
-          transform: translate(-50%, -50%);
-          background: rgba(245, 158, 11, 0.09);
-          filter: blur(100px);
-          pointer-events: none;
-        }
-
-        .eyebrow {
-          display: inline-block;
-          margin: 0 0 14px;
-          color: var(--muted);
-          font-size: 0.73rem;
+        .nav-cta {
+          background: linear-gradient(135deg, var(--amber), var(--amber-strong));
+          color: #1b1b22;
+          border: 0;
+          border-radius: 12px;
+          padding: 10px 16px;
           font-weight: 800;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
+          cursor: pointer;
+          box-shadow: 0 16px 28px rgba(251, 191, 36, 0.18);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-cta:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 18px 28px rgba(251, 191, 36, 0.24);
+        }
+
+        .page-content {
+          width: min(1220px, calc(100vw - 24px));
+          margin: 0 auto;
+          padding: 36px 0 72px;
+        }
+
+        .hero-section {
+          position: relative;
+          padding: 20px 0 8px;
+        }
+
+        .hero-grid {
+          display: grid;
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 24px;
+          align-items: center;
         }
 
         .hero-copy {
           position: relative;
-          max-width: 920px;
-          margin: 0 auto;
+          z-index: 1;
         }
 
-        .hero-copy h1 {
-          margin: 0 auto;
-          max-width: 980px;
-          font-size: clamp(2.8rem, 5vw, 5.4rem);
-          line-height: 1.04;
+        .eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin: 0 0 16px;
+          color: var(--muted);
+          font-size: 0.72rem;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--amber), var(--orange));
+          box-shadow: 0 0 18px rgba(251, 191, 36, 0.7);
+        }
+
+        .hero-title {
+          margin: 0;
+          max-width: 640px;
+          font-size: clamp(2.8rem, 5vw, 5.1rem);
+          line-height: 0.96;
           letter-spacing: -0.06em;
           font-weight: 900;
         }
 
         .gradient-text {
-          background: linear-gradient(90deg, #fbbf24, #f97316);
+          background: linear-gradient(135deg, #fde68a 0%, #fbbf24 18%, #f59e0b 45%, #f97316 100%);
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
         }
 
-        .hero-subtitle {
-          margin: 20px auto 0;
-          max-width: 760px;
+        .hero-text {
+          margin: 18px 0 0;
+          max-width: 600px;
           color: var(--muted);
-          font-size: 1.08rem;
-          line-height: 1.7;
+          font-size: 1.06rem;
+          line-height: 1.8;
         }
 
         .cta-row {
-          margin-top: 28px;
           display: flex;
-          justify-content: center;
           flex-wrap: wrap;
           gap: 14px;
+          margin-top: 28px;
         }
 
         .primary-btn,
-        .secondary-btn {
+        .ghost-btn {
           border: none;
           border-radius: 14px;
-          padding: 0.95rem 1.45rem;
+          padding: 0.92rem 1.35rem;
           font-weight: 800;
           cursor: pointer;
-          transition: transform 0.2s ease, filter 0.2s ease;
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .primary-btn {
-          background: linear-gradient(135deg, #fbbf24, #f59e0b);
-          color: #111827;
-          box-shadow: 0 16px 28px rgba(245, 158, 11, 0.2);
+          background: linear-gradient(135deg, var(--amber), var(--amber-strong));
+          color: #1f2430;
+          box-shadow: 0 18px 30px rgba(251, 191, 36, 0.2);
         }
 
-        .secondary-btn {
-          background: rgba(255,255,255,0.03);
+        .ghost-btn {
+          background: rgba(255,255,255,0.02);
           border: 1px solid var(--border);
           color: var(--text);
         }
 
         .primary-btn:hover,
-        .secondary-btn:hover {
+        .ghost-btn:hover {
           transform: translateY(-1px);
-          filter: brightness(1.06);
+        }
+
+        .inline-badges {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          margin-top: 24px;
+        }
+
+        .inline-badges span {
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 10px;
+          border-radius: 999px;
+          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.02);
+          color: var(--subtle);
+          font-size: 0.76rem;
+          font-weight: 700;
+        }
+
+        .hero-visual {
+          position: relative;
+          min-height: 440px;
+        }
+
+        .visual-card {
+          position: relative;
+          height: 100%;
+          min-height: 440px;
+          padding: 22px;
+          border-radius: 28px;
+          border: 1px solid var(--border);
+          background: linear-gradient(180deg, rgba(17, 20, 26, 0.96), rgba(12, 14, 20, 0.98));
+          box-shadow: 0 30px 60px rgba(2, 6, 23, 0.4);
+          overflow: hidden;
+        }
+
+        .visual-card::before {
+          content: '';
+          position: absolute;
+          inset: -35% auto auto -10%;
+          width: 210px;
+          height: 210px;
+          border-radius: 50%;
+          background: rgba(251, 191, 36, 0.12);
+          filter: blur(30px);
+        }
+
+        .visual-card::after {
+          content: '';
+          position: absolute;
+          inset: auto -10% -30% auto;
+          width: 220px;
+          height: 220px;
+          border-radius: 50%;
+          background: rgba(103, 232, 249, 0.08);
+          filter: blur(30px);
+        }
+
+        .chart-panel {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          gap: 16px;
+        }
+
+        .mini-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding-bottom: 8px;
+        }
+
+        .mini-header strong {
+          letter-spacing: -0.02em;
+          font-size: 1.02rem;
+        }
+
+        .status-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(103, 232, 249, 0.22);
+          background: rgba(103, 232, 249, 0.08);
+          color: #a5f3fc;
+          border-radius: 999px;
+          padding: 6px 10px;
+          font-size: 0.7rem;
+          font-weight: 700;
+        }
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #67e8f9;
+          box-shadow: 0 0 12px rgba(103, 232, 249, 0.8);
+        }
+
+        .chart-block {
+          display: grid;
+          gap: 10px;
+          padding: 16px;
+          border: 1px solid var(--border);
+          border-radius: 18px;
+          background: rgba(255,255,255,0.02);
+        }
+
+        .bars {
+          display: flex;
+          align-items: end;
+          gap: 10px;
+          height: 150px;
+          padding-top: 12px;
+        }
+
+        .bar {
+          flex: 1 1 0;
+          border-radius: 12px 12px 0 0;
+          background: linear-gradient(180deg, rgba(251, 191, 36, 0.9), rgba(249, 115, 22, 0.8));
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+        }
+
+        .bar:nth-child(2) { background: linear-gradient(180deg, rgba(103,232,249,0.9), rgba(56,189,248,0.8)); }
+        .bar:nth-child(3) { background: linear-gradient(180deg, rgba(251,191,36,0.9), rgba(251,146,60,0.8)); }
+        .bar:nth-child(4) { background: linear-gradient(180deg, rgba(168,85,247,0.85), rgba(96,165,250,0.8)); }
+
+        .metric-stack {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(120px, 1fr));
+          gap: 12px;
+        }
+
+        .metric-box {
+          padding: 12px 14px;
+          border: 1px solid var(--border);
+          border-radius: 14px;
+          background: rgba(255,255,255,0.02);
+        }
+
+        .metric-box span {
+          display: block;
+          color: var(--muted);
+          font-size: 0.7rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          font-weight: 800;
+        }
+
+        .metric-box strong {
+          font-size: 1.08rem;
+          letter-spacing: -0.03em;
         }
 
         .stat-grid {
           display: grid;
-          grid-template-columns: repeat(3, minmax(180px, 1fr));
+          grid-template-columns: repeat(3, minmax(170px, 1fr));
           gap: 18px;
-          margin-top: 42px;
-        }
-
-        .stat-card,
-        .feature-card,
-        .panel,
-        .role-card,
-        .task-card,
-        .leaderboard-table,
-        .result-box {
-          border: 1px solid var(--border);
-          background: linear-gradient(180deg, rgba(26,26,30,0.9), rgba(18,18,20,0.88));
-          box-shadow: 0 18px 30px rgba(0,0,0,0.14);
+          margin-top: 34px;
         }
 
         .stat-card {
-          padding: 20px 18px;
-          border-radius: 18px;
           position: relative;
           overflow: hidden;
+          padding: 20px 18px;
+          border-radius: 18px;
+          border: 1px solid var(--border);
+          background: linear-gradient(180deg, rgba(18, 20, 26, 0.9), rgba(13,15,19,0.9));
+          box-shadow: 0 14px 24px rgba(2, 6, 23, 0.28);
         }
 
-        .stat-card::before,
-        .feature-card::before,
-        .role-card::before,
-        .task-card::before,
-        .panel::before {
+        .stat-card::before {
           content: '';
           position: absolute;
           inset: 0 auto auto 0;
           width: 100%;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.46), transparent);
-          opacity: 0.8;
+          background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.5), transparent);
         }
 
         .stat-label {
           display: block;
-          margin-bottom: 8px;
           color: var(--muted);
           font-size: 0.7rem;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           font-weight: 800;
+          margin-bottom: 10px;
         }
 
         .stat-value {
-          font-size: clamp(1.5rem, 2vw, 2.3rem);
+          font-size: clamp(1.35rem, 2vw, 2rem);
           font-weight: 800;
           letter-spacing: -0.05em;
         }
 
         .value-accent { color: #fbbf24; }
-        .value-alt { color: #f97316; }
+        .value-alt { color: #67e8f9; }
 
-        .section-grid {
+        .feature-band {
+          margin-top: 28px;
+          padding: 16px 0 0;
+        }
+
+        .section-heading {
+          display: grid;
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+
+        .section-heading.center {
+          text-align: center;
+        }
+
+        .section-heading h2 {
+          margin: 0;
+          font-size: clamp(2rem, 3vw, 3rem);
+          letter-spacing: -0.05em;
+        }
+
+        .section-heading p {
+          margin: 0;
+          color: var(--muted);
+          line-height: 1.7;
+        }
+
+        .feature-row {
           display: grid;
           grid-template-columns: repeat(3, minmax(220px, 1fr));
           gap: 18px;
-          margin-top: 30px;
         }
 
         .feature-card {
-          padding: 22px 18px;
+          position: relative;
+          overflow: hidden;
+          padding: 22px 18px 18px;
           border-radius: 20px;
+          border: 1px solid var(--border);
+          background: linear-gradient(180deg, rgba(19, 22, 28, 0.92), rgba(12,15,20,0.96));
+          box-shadow: 0 20px 32px rgba(2, 6, 23, 0.2);
+          transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(251, 191, 36, 0.24);
         }
 
         .feature-pill {
           display: inline-flex;
-          padding: 6px 10px;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 10px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.04);
+          background: rgba(255,255,255,0.03);
           border: 1px solid var(--border);
           color: var(--subtle);
           font-size: 0.68rem;
@@ -410,134 +625,124 @@ function App() {
         }
 
         .feature-card h3 {
-          margin: 12px 0 10px;
-          font-size: 1.2rem;
+          margin: 16px 0 10px;
+          font-size: 1.22rem;
           letter-spacing: -0.03em;
         }
 
         .feature-card p {
           margin: 0;
           color: var(--muted);
-          line-height: 1.6;
+          line-height: 1.7;
         }
 
-        .panel {
-          padding: 30px 28px;
+        .tool-section,
+        .leaderboard-section {
+          margin-top: 42px;
+          padding-top: 12px;
+        }
+
+        .tool-layout {
+          display: grid;
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 20px;
+          margin-top: 16px;
+        }
+
+        .inspector-panel,
+        .result-card,
+        .leaderboard-shell {
+          border: 1px solid var(--border);
           border-radius: 24px;
+          background: linear-gradient(180deg, rgba(18,20,26,0.9), rgba(11,14,18,0.95));
+          box-shadow: 0 24px 40px rgba(2, 6, 23, 0.22);
+        }
+
+        .inspector-panel {
+          padding: 24px 20px 20px;
         }
 
         .panel-header {
           display: flex;
           justify-content: space-between;
-          align-items: end;
-          gap: 14px;
-          margin-bottom: 16px;
-        }
-
-        .panel-header h2 {
-          margin: 0;
-          font-size: clamp(1.8rem, 2.4vw, 2.5rem);
-          letter-spacing: -0.04em;
-        }
-
-        .panel-copy {
-          margin: 0;
-          max-width: 760px;
-          color: var(--muted);
-          line-height: 1.8;
-        }
-
-        .progress {
-          display: flex;
-          justify-content: center;
-          gap: 14px;
-          flex-wrap: wrap;
-          margin: 26px 0;
-        }
-
-        .step {
-          display: flex;
           align-items: center;
-          gap: 10px;
+          margin-bottom: 18px;
+        }
+
+        .mini-label {
+          display: block;
+          margin-bottom: 8px;
           color: var(--muted);
-          font-weight: 700;
+          font-size: 0.72rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          font-weight: 800;
         }
 
-        .step-number {
-          width: 34px;
-          height: 34px;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.02);
-          border: 1px solid var(--border);
-        }
-
-        .step.active .step-number {
-          background: rgba(245, 158, 11, 0.12);
-          border-color: rgba(245,158,11,0.28);
-          color: #fbbf24;
-        }
-
-        .step.active {
-          color: var(--text);
+        .panel-header h3 {
+          margin: 0;
+          font-size: 1.5rem;
+          letter-spacing: -0.04em;
         }
 
         .role-grid {
           display: grid;
-          grid-template-columns: repeat(3, minmax(200px, 1fr));
-          gap: 18px;
-          margin-top: 8px;
+          grid-template-columns: repeat(3, minmax(170px, 1fr));
+          gap: 14px;
+          margin-top: 10px;
         }
 
         .role-card {
+          position: relative;
           display: flex;
           flex-direction: column;
+          gap: 12px;
           align-items: flex-start;
-          gap: 14px;
-          text-align: left;
-          padding: 22px 20px;
+          padding: 18px 16px;
           border-radius: 18px;
+          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.02);
+          color: var(--text);
           cursor: pointer;
-          transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-          position: relative;
+          text-align: left;
+          transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
 
         .role-card:hover,
         .role-card.selected {
           transform: translateY(-1px);
-          border-color: var(--border-strong);
-          background: linear-gradient(180deg, rgba(245,158,11,0.08), rgba(18,18,20,0.9));
-          box-shadow: 0 14px 28px rgba(245, 158, 11, 0.08);
+          border-color: rgba(251, 191, 36, 0.26);
+          background: linear-gradient(180deg, rgba(251, 191, 36, 0.08), rgba(18,18,20,0.8));
         }
 
         .role-icon {
-          width: 44px;
-          height: 44px;
           display: grid;
           place-items: center;
-          border-radius: 12px;
-          background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.08);
+          width: 38px;
+          height: 38px;
+          border-radius: 11px;
+          background: rgba(251, 191, 36, 0.12);
+          border: 1px solid rgba(251, 191, 36, 0.22);
           color: #fbbf24;
           font-weight: 800;
         }
 
         .role-card h3 {
           margin: 0;
-          font-size: 1.12rem;
+          font-size: 1.05rem;
         }
 
         .role-card p {
           margin: 0;
           color: var(--muted);
           line-height: 1.6;
+          font-size: 0.85rem;
         }
 
         .task-grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(220px, 1fr));
-          gap: 14px;
+          grid-template-columns: repeat(2, minmax(160px, 1fr));
+          gap: 12px;
           margin-top: 18px;
         }
 
@@ -546,40 +751,28 @@ function App() {
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          padding: 18px 18px;
-          border-radius: 16px;
+          width: 100%;
+          padding: 16px 14px;
+          border-radius: 14px;
+          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.02);
           color: var(--text);
           cursor: pointer;
-          transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-          position: relative;
+          transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
 
         .task-card:hover,
         .task-card.selected {
-          border-color: var(--border-strong);
-          background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), rgba(18,18,20,0.9));
           transform: translateY(-1px);
+          border-color: rgba(251, 191, 36, 0.26);
+          background: linear-gradient(180deg, rgba(251, 191, 36, 0.08), rgba(18, 18, 20, 0.8));
         }
 
-        .speed-pill {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 6px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,0.08);
-          background: rgba(255,255,255,0.02);
-          color: var(--subtle);
-          font-size: 0.73rem;
-          font-weight: 700;
-          text-transform: capitalize;
-        }
-
-        .input-grid {
+        .field-grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(220px, 1fr));
+          grid-template-columns: repeat(2, minmax(200px, 1fr));
           gap: 14px;
-          margin-top: 20px;
+          margin-top: 22px;
         }
 
         .field {
@@ -590,7 +783,7 @@ function App() {
 
         .field label {
           color: var(--muted);
-          font-size: 0.8rem;
+          font-size: 0.78rem;
           font-weight: 700;
         }
 
@@ -598,89 +791,96 @@ function App() {
           appearance: none;
           border: 1px solid var(--border);
           border-radius: 12px;
-          padding: 0.82rem 0.9rem;
           background: rgba(255,255,255,0.02);
           color: var(--text);
+          padding: 0.8rem 0.9rem;
         }
 
-        .result-box {
-          margin-top: 24px;
-          padding: 22px 20px;
-          border-radius: 22px;
-          border-color: rgba(245, 158, 11, 0.28);
-          background: linear-gradient(180deg, rgba(245,158,11,0.08), rgba(17,17,19,0.95));
-        }
-
-        .result-top {
+        .result-card {
+          padding: 24px 20px;
           display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 18px;
+          flex-direction: column;
+          gap: 18px;
         }
 
         .result-badge {
-          width: 38px;
-          height: 38px;
+          width: 42px;
+          height: 42px;
           display: grid;
           place-items: center;
-          border-radius: 12px;
-          background: rgba(245, 158, 11, 0.18);
-          border: 1px solid rgba(245, 158, 11, 0.26);
+          border-radius: 14px;
+          background: rgba(251, 191, 36, 0.12);
+          border: 1px solid rgba(251, 191, 36, 0.22);
           color: #fbbf24;
           font-weight: 900;
         }
 
-        .result-box h3 {
-          margin: 0;
-          font-size: clamp(2.2rem, 4vw, 3rem);
-          line-height: 1.08;
-          letter-spacing: -0.05em;
+        .result-head h3 {
+          margin: 8px 0 0;
+          font-size: clamp(2rem, 3vw, 3rem);
+          line-height: 1.05;
+          letter-spacing: -0.06em;
         }
 
-        .result-box p {
+        .result-card p {
           margin: 0;
           color: var(--muted);
-          line-height: 1.7;
+          line-height: 1.75;
         }
 
-        .kpi-grid {
+        .metrics-grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(140px, 1fr));
+          grid-template-columns: repeat(2, minmax(120px, 1fr));
           gap: 12px;
-          margin-top: 20px;
         }
 
-        .kpi-card {
-          padding: 14px 12px;
-          border-radius: 14px;
+        .metric-box {
+          padding: 12px 14px;
           border: 1px solid var(--border);
+          border-radius: 14px;
           background: rgba(255,255,255,0.02);
         }
 
-        .kpi-label {
+        .metric-box span {
           display: block;
-          margin-bottom: 8px;
           color: var(--muted);
-          font-size: 0.72rem;
+          font-size: 0.7rem;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           font-weight: 800;
+          margin-bottom: 8px;
+        }
+
+        .metric-box strong {
+          font-size: 1.08rem;
+          letter-spacing: -0.02em;
         }
 
         .cta-row.result {
           justify-content: flex-start;
-          margin-top: 22px;
+          margin-top: 0;
+        }
+
+        .leaderboard-shell {
+          padding: 20px;
+          margin-top: 16px;
+        }
+
+        .leaderboard-shell .field {
+          max-width: 260px;
+          margin-bottom: 18px;
         }
 
         .leaderboard-table {
-          margin-top: 20px;
           overflow: auto;
           border-radius: 18px;
+          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.02);
         }
 
         table {
           width: 100%;
-          min-width: 820px;
+          min-width: 850px;
           border-collapse: collapse;
         }
 
@@ -689,15 +889,15 @@ function App() {
           padding: 16px 18px;
           color: var(--muted);
           font-size: 0.72rem;
-          font-weight: 800;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
+          font-weight: 800;
           border-bottom: 1px solid var(--border);
         }
 
         tbody td {
           padding: 18px;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          border-bottom: 1px solid rgba(255,255,255,0.05);
           vertical-align: middle;
         }
 
@@ -722,13 +922,13 @@ function App() {
 
         .score-pill {
           display: inline-flex;
-          min-width: 52px;
           justify-content: center;
-          padding: 9px 12px;
+          min-width: 56px;
+          padding: 8px 12px;
           border-radius: 999px;
-          background: rgba(245, 158, 11, 0.08);
+          background: rgba(251, 191, 36, 0.08);
+          border: 1px solid rgba(251, 191, 36, 0.22);
           color: #fbbf24;
-          border: 1px solid rgba(245, 158, 11, 0.22);
           font-weight: 800;
         }
 
@@ -738,122 +938,215 @@ function App() {
           line-height: 1.7;
         }
 
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+        .site-footer {
+          width: min(1220px, calc(100vw - 24px));
+          margin: 0 auto;
+          padding: 10px 0 48px;
+          color: var(--muted);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          border-top: 1px solid rgba(148, 163, 184, 0.12);
         }
 
-        @media (max-width: 900px) {
-          .stat-grid, .section-grid, .role-grid, .kpi-grid { grid-template-columns: 1fr 1fr; }
+        .site-footer p {
+          margin: 0;
         }
 
-        @media (max-width: 680px) {
-          .obsidian-container { width: min(100vw - 20px, 1180px); }
-          .obsidian-nav { flex-direction: column; align-items: flex-start; }
-          .nav-controls { width: 100%; }
-          .nav-button { flex: 1 1 auto; }
-          .stat-grid, .section-grid, .role-grid, .task-grid, .input-grid, .kpi-grid { grid-template-columns: 1fr; }
-          .panel { padding: 20px 16px; }
-          .result-box { padding: 18px 16px; }
+        @media (max-width: 980px) {
+          .hero-grid,
+          .tool-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .feature-row,
+          .stat-grid,
+          .role-grid,
+          .field-grid,
+          .metrics-grid {
+            grid-template-columns: repeat(2, minmax(160px, 1fr));
+          }
+        }
+
+        @media (max-width: 720px) {
+          .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .nav-list {
+            width: 100%;
+          }
+
+          .nav-item {
+            flex: 1 1 auto;
+          }
+
+          .feature-row,
+          .stat-grid,
+          .role-grid,
+          .field-grid,
+          .task-grid,
+          .metrics-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .page-content,
+          .site-footer {
+            width: min(100vw - 16px, 1220px);
+          }
+
+          .hero-title {
+            max-width: 100%;
+          }
+
+          .ghost-btn,
+          .primary-btn,
+          .nav-cta {
+            width: 100%;
+          }
+
+          .cta-row {
+            flex-direction: column;
+          }
         }
       `}</style>
 
-      <div className="obsidian-app">
-        <div className="obsidian-container">
-          <nav className="obsidian-nav" aria-label="Main navigation">
-            <div className="brand" onClick={() => setActivePage('home')}>
-              <div className="brand-mark">M</div>
-              <div className="brand-name">ModelAtlas</div>
-            </div>
+      <div className="site-shell">
+        <header className="topbar">
+          <div className="brand">
+            <div className="brand-mark">M</div>
+            <div className="brand-name">ModelAtlas</div>
+          </div>
 
-            <div className="nav-controls">
-              {['home', 'recommendation', 'leaderboard'].map((page) => (
-                <button
-                  key={page}
-                  type="button"
-                  className={`nav-button ${activePage === page ? 'active' : ''}`}
-                  onClick={() => setActivePage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
+          <nav className="nav-list" aria-label="Main navigation">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+                onClick={() => scrollToSection(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+            <button type="button" className="nav-cta" onClick={() => scrollToSection('recommendation')}>Try it now</button>
           </nav>
+        </header>
 
-          <div className="page-shell">
-            {activePage === 'home' && (
-              <>
-                <header className="hero-panel">
-                  <div className="hero-glow" />
-                  <div className="hero-copy">
-                    <p className="eyebrow">AI model selection</p>
-                    <h1>
-                      Find the right AI model for your work in <span className="gradient-text">under 30 seconds</span>
-                    </h1>
-                    <p className="hero-subtitle">
-                      Benchmark-backed, cost-aware guidance for developers, researchers, teams, and operators who need fast, high-confidence model choices.
-                    </p>
-                    <div className="cta-row">
-                      <button type="button" className="primary-btn" onClick={() => setActivePage('recommendation')}>Start Assessment</button>
-                      <button type="button" className="secondary-btn" onClick={() => setActivePage('leaderboard')}>View Leaderboard</button>
-                    </div>
-                  </div>
-
-                  <div className="stat-grid">
-                    <div className="stat-card">
-                      <span className="stat-label">Models tracked</span>
-                      <div className="stat-value">{metrics.modelsTracked}</div>
-                    </div>
-                    <div className="stat-card">
-                      <span className="stat-label">Best value</span>
-                      <div className="stat-value value-accent">{metrics.bestValueModel}</div>
-                    </div>
-                    <div className="stat-card">
-                      <span className="stat-label">Frontier pick</span>
-                      <div className="stat-value value-alt">{metrics.frontierModel}</div>
-                    </div>
-                  </div>
-                </header>
-
-                <section className="section-grid">
-                  <article className="feature-card">
-                    <span className="feature-pill">For builders</span>
-                    <h3>Ship faster with code-aware models</h3>
-                    <p>Debug faster, reduce iteration time, and keep large codebases productive.</p>
-                  </article>
-                  <article className="feature-card">
-                    <span className="feature-pill">For research</span>
-                    <h3>Turn long docs into clear insight</h3>
-                    <p>Surface trends and evidence faster with high-context synthesis models.</p>
-                  </article>
-                  <article className="feature-card">
-                    <span className="feature-pill">For teams</span>
-                    <h3>Balance quality, privacy, and spend</h3>
-                    <p>Use benchmark-aware recommendations without overspending on premium tiers.</p>
-                  </article>
-                </section>
-              </>
-            )}
-
-            {activePage === 'recommendation' && (
-              <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <p className="eyebrow">Assessment</p>
-                    <h2>Choose the model profile that fits your work</h2>
-                  </div>
-                </div>
-                <p className="panel-copy">
-                  The recommendation engine combines benchmark strength, quality, cost, speed, privacy, and context requirements to match your workflow.
+        <main className="page-content">
+          <section id="overview" className="hero-section">
+            <div className="hero-grid">
+              <div className="hero-copy">
+                <p className="eyebrow">AI model selection</p>
+                <h1 className="hero-title">
+                  Find the <span className="gradient-text">best model</span> for your workflow.
+                </h1>
+                <p className="hero-text">
+                  Benchmark-backed guidance for builders, teams, and operators who need fast, confident model decisions without wasting budget or time.
                 </p>
 
-                <div className="progress">
-                  {['Role', 'Workload', 'Result'].map((stepName, index) => (
-                    <div key={stepName} className={`step ${form.user_type ? 'active' : ''}`}>
-                      <span className="step-number">{index + 1}</span>
-                      <span>{stepName}</span>
+                <div className="cta-row">
+                  <button type="button" className="primary-btn" onClick={() => scrollToSection('recommendation')}>Start recommendation</button>
+                  <button type="button" className="ghost-btn" onClick={() => scrollToSection('leaderboard')}>View leaderboard</button>
+                </div>
+
+                <div className="inline-badges">
+                  <span>Faster route planning</span>
+                  <span>Budget-aware</span>
+                  <span>Benchmark-backed</span>
+                </div>
+              </div>
+
+              <div className="hero-visual" aria-label="Model performance overview">
+                <div className="visual-card">
+                  <div className="chart-panel">
+                    <div className="mini-header">
+                      <strong>Opportunity index</strong>
+                      <span className="status-pill"><span className="status-dot" />Live</span>
                     </div>
-                  ))}
+
+                    <div className="chart-block">
+                      <div className="bars" aria-hidden="true">
+                        <span className="bar" style={{ height: '58%' }} />
+                        <span className="bar" style={{ height: '74%' }} />
+                        <span className="bar" style={{ height: '66%' }} />
+                        <span className="bar" style={{ height: '88%' }} />
+                      </div>
+                    </div>
+
+                    <div className="metric-stack">
+                      <div className="metric-box">
+                        <span>Frontier</span>
+                        <strong>{metrics.frontierModel}</strong>
+                      </div>
+                      <div className="metric-box">
+                        <span>Best value</span>
+                        <strong>{metrics.bestValueModel}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-grid">
+              <div className="stat-card">
+                <span className="stat-label">Models tracked</span>
+                <div className="stat-value">{metrics.modelsTracked}</div>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Use cases</span>
+                <div className="stat-value value-alt">{metrics.useCasesTracked}</div>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Quality focus</span>
+                <div className="stat-value value-accent">High</div>
+              </div>
+            </div>
+          </section>
+
+          <section className="feature-band">
+            <div className="section-heading center">
+              <p className="eyebrow">Why teams use it</p>
+              <h2>Built for practical, high-impact decisions.</h2>
+            </div>
+
+            <div className="feature-row">
+              <article className="feature-card">
+                <span className="feature-pill">For builders</span>
+                <h3>Ship faster with better code support</h3>
+                <p>Reduce debugging loops, keep more context, and choose a model that fits your actual delivery workflow.</p>
+              </article>
+
+              <article className="feature-card">
+                <span className="feature-pill">For research</span>
+                <h3>Turn long documents into clear insight</h3>
+                <p>Surface trends, synthesize evidence, and move faster from raw docs to useful, trustworthy answers.</p>
+              </article>
+
+              <article className="feature-card">
+                <span className="feature-pill">For teams</span>
+                <h3>Balance quality, privacy, and spend</h3>
+                <p>Pick the right tradeoff between cost, context window, speed, and trust instead of overpaying for the wrong model.</p>
+              </article>
+            </div>
+          </section>
+
+          <section id="recommendation" className="tool-section">
+            <div className="section-heading">
+              <p className="eyebrow">Smart recommendation</p>
+              <h2>Choose the model profile that matches your work.</h2>
+            </div>
+
+            <div className="tool-layout">
+              <div className="inspector-panel">
+                <div className="panel-header">
+                  <div>
+                    <span className="mini-label">Workflow</span>
+                    <h3>Define your needs</h3>
+                  </div>
                 </div>
 
                 <div className="role-grid">
@@ -885,7 +1178,7 @@ function App() {
                   ))}
                 </div>
 
-                <div className="input-grid">
+                <div className="field-grid">
                   <div className="field">
                     <label htmlFor="task">Primary task</label>
                     <select id="task" value={form.task} onChange={(event) => setForm((previous) => ({ ...previous, task: event.target.value }))}>
@@ -945,114 +1238,117 @@ function App() {
                     </select>
                   </div>
                 </div>
+              </div>
 
-                <div className="result-box">
-                  <div className="result-top">
-                    <div className="result-badge">★</div>
-                    <p className="eyebrow">Top recommendation</p>
-                  </div>
+              <aside className="result-card">
+                <div className="result-badge">★</div>
+                <div className="result-head">
+                  <span className="mini-label">Top recommendation</span>
                   <h3>{recommendation.primary?.name}</h3>
-                  <p>{recommendation.explanation}</p>
+                </div>
 
-                  <div className="kpi-grid">
-                    <div className="kpi-card">
-                      <span className="kpi-label">Quality</span>
-                      <strong>{recommendation.primary?.qualityLabel ?? 'High'}</strong>
-                    </div>
-                    <div className="kpi-card">
-                      <span className="kpi-label">Cost</span>
-                      <strong>{recommendation.budget?.name ?? 'Balanced'}</strong>
-                    </div>
-                    <div className="kpi-card">
-                      <span className="kpi-label">Speed</span>
-                      <strong>{recommendation.fast?.name ?? 'Fast'}</strong>
-                    </div>
-                    <div className="kpi-card">
-                      <span className="kpi-label">Context</span>
-                      <strong>{recommendation.primary?.contextLabel ?? 'Large'}</strong>
-                    </div>
+                <p>{recommendation.explanation}</p>
+
+                <div className="metrics-grid">
+                  <div className="metric-box">
+                    <span>Quality</span>
+                    <strong>{recommendation.primary?.qualityLabel ?? 'High'}</strong>
                   </div>
-
-                  <div className="cta-row result">
-                    <button type="button" className="primary-btn" onClick={() => setActivePage('leaderboard')}>View full leaderboard</button>
-                    <button type="button" className="secondary-btn" onClick={() => setForm(defaultForm)}>Start over</button>
+                  <div className="metric-box">
+                    <span>Cost</span>
+                    <strong>{recommendation.budget?.name ?? 'Balanced'}</strong>
+                  </div>
+                  <div className="metric-box">
+                    <span>Speed</span>
+                    <strong>{recommendation.fast?.name ?? 'Fast'}</strong>
+                  </div>
+                  <div className="metric-box">
+                    <span>Context</span>
+                    <strong>{recommendation.primary?.contextLabel ?? 'Large'}</strong>
                   </div>
                 </div>
+
+                <div className="cta-row result">
+                  <button type="button" className="primary-btn" onClick={() => scrollToSection('leaderboard')}>Compare models</button>
+                  <button type="button" className="ghost-btn" onClick={() => setForm(defaultForm)}>Reset</button>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section id="leaderboard" className="leaderboard-section">
+            <div className="section-heading">
+              <p className="eyebrow">Benchmark board</p>
+              <h2>Track how the leading models stack up.</h2>
+            </div>
+
+            <div className="leaderboard-shell">
+              <div className="field">
+                <label htmlFor="leaderboard-task">Task</label>
+                <select id="leaderboard-task" value={form.task} onChange={(event) => setForm((previous) => ({ ...previous, task: event.target.value }))}>
+                  <option value="coding">Coding</option>
+                  <option value="research">Research</option>
+                  <option value="writing">Writing</option>
+                  <option value="summarization">Summarization</option>
+                  <option value="general">General assistance</option>
+                  <option value="extraction">Extraction</option>
+                  <option value="business">Business operations</option>
+                  <option value="productivity">Productivity</option>
+                </select>
               </div>
-            )}
 
-            {activePage === 'leaderboard' && (
-              <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <p className="eyebrow">Leaderboard</p>
-                    <h2>Benchmark ranking</h2>
-                  </div>
-                  <span className="speed-pill">Updated: {formatDate(benchmarkSnapshotDate)}</span>
-                </div>
-                <p className="panel-copy">
-                  Current ranking for the selected task, weighed against model quality, efficiency, reliability, and privacy.
-                </p>
-
-                <div className="field" style={{ marginTop: 18, maxWidth: 280 }}>
-                  <label htmlFor="leaderboard-task">Task</label>
-                  <select id="leaderboard-task" value={form.task} onChange={(event) => setForm((previous) => ({ ...previous, task: event.target.value }))}>
-                    <option value="coding">Coding</option>
-                    <option value="research">Research</option>
-                    <option value="writing">Writing</option>
-                    <option value="summarization">Summarization</option>
-                    <option value="general">General assistance</option>
-                    <option value="extraction">Extraction</option>
-                    <option value="business">Business operations</option>
-                    <option value="productivity">Productivity</option>
-                  </select>
-                </div>
-
-                <div className="leaderboard-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Model</th>
-                        <th>Score</th>
-                        <th>Benchmark</th>
-                        <th>Quality</th>
-                        <th>Cost</th>
-                        <th>Speed</th>
-                        <th>Context</th>
-                        <th>Reliability</th>
-                        <th>Privacy</th>
+              <div className="leaderboard-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Model</th>
+                      <th>Score</th>
+                      <th>Benchmark</th>
+                      <th>Quality</th>
+                      <th>Cost</th>
+                      <th>Speed</th>
+                      <th>Context</th>
+                      <th>Reliability</th>
+                      <th>Privacy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaderboard.map((model) => (
+                      <tr key={model.id}>
+                        <td>
+                          <div className="model-meta">
+                            <strong>{model.name}</strong>
+                            <span>{model.provider}</span>
+                          </div>
+                        </td>
+                        <td><span className="score-pill">{model.score}</span></td>
+                        <td>{model.benchmark.score}</td>
+                        <td>{model.scoreBreakdown?.quality ?? 0}</td>
+                        <td>{model.scoreBreakdown?.cost ?? 0}</td>
+                        <td>{model.scoreBreakdown?.speed ?? 0}</td>
+                        <td>{model.scoreBreakdown?.context ?? 0}</td>
+                        <td>{model.scoreBreakdown?.reliability ?? 0}</td>
+                        <td>{model.scoreBreakdown?.privacy ?? 0}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {leaderboard.map((model) => (
-                        <tr key={model.id}>
-                          <td>
-                            <div className="model-meta">
-                              <strong>{model.name}</strong>
-                              <span>{model.provider}</span>
-                            </div>
-                          </td>
-                          <td><span className="score-pill">{model.score}</span></td>
-                          <td>{model.benchmark.score}</td>
-                          <td>{model.scoreBreakdown?.quality ?? 0}</td>
-                          <td>{model.scoreBreakdown?.cost ?? 0}</td>
-                          <td>{model.scoreBreakdown?.speed ?? 0}</td>
-                          <td>{model.scoreBreakdown?.context ?? 0}</td>
-                          <td>{model.scoreBreakdown?.reliability ?? 0}</td>
-                          <td>{model.scoreBreakdown?.privacy ?? 0}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <p className="footnote">
-                  This leaderboard is benchmark-oriented and intentionally optimized for a practical workflow mix rather than a single raw benchmark winner.
-                </p>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
+
+              <p className="footnote">
+                This leaderboard blends benchmark results with practical tradeoffs to help teams choose what works in real operations.
+              </p>
+            </div>
+          </section>
+        </main>
+
+        <footer className="site-footer">
+          <div className="brand">
+            <div className="brand-mark">M</div>
+            <div className="brand-name">ModelAtlas</div>
           </div>
-        </div>
+          <p>Benchmark-informed AI selection for modern teams.</p>
+        </footer>
       </div>
     </>
   );
