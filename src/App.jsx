@@ -119,10 +119,12 @@ function App() {
       <style>{`
         :root {
           --bg: #09090b;
-          --panel: rgba(18, 18, 20, 0.8);
+          --bg-alt: #101114;
+          --panel: rgba(18, 18, 20, 0.82);
           --panel-strong: rgba(21, 21, 23, 0.96);
-          --panel-soft: rgba(26, 26, 30, 0.9);
+          --panel-soft: rgba(26, 26, 30, 0.92);
           --border: rgba(255,255,255,0.08);
+          --border-strong: rgba(251, 191, 36, 0.28);
           --text: #f8fafc;
           --muted: #a1a1aa;
           --subtle: #d4d4d8;
@@ -136,9 +138,9 @@ function App() {
         html, body, #root { margin: 0; min-height: 100%; background: var(--bg); }
         body {
           background:
-            radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 18%),
-            radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.12), transparent 22%),
-            var(--bg);
+            radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 20%),
+            radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.12), transparent 24%),
+            linear-gradient(180deg, var(--bg) 0%, #0d0d11 100%);
           color: var(--text);
           font-family: Inter, 'Segoe UI', sans-serif;
         }
@@ -146,7 +148,7 @@ function App() {
 
         .obsidian-app {
           min-height: 100vh;
-          background: linear-gradient(180deg, rgba(9,9,11,0.98), rgba(9,9,11,1));
+          background: linear-gradient(180deg, rgba(9,9,11,0.94), rgba(9,9,11,1));
           color: var(--text);
         }
 
@@ -222,6 +224,7 @@ function App() {
           background: rgba(245, 158, 11, 0.08);
           border-color: rgba(245, 158, 11, 0.25);
           color: var(--text);
+          box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.12);
         }
 
         .page-shell {
@@ -337,13 +340,29 @@ function App() {
         .leaderboard-table,
         .result-box {
           border: 1px solid var(--border);
-          background: rgba(18,18,20,0.82);
+          background: linear-gradient(180deg, rgba(26,26,30,0.9), rgba(18,18,20,0.88));
           box-shadow: 0 18px 30px rgba(0,0,0,0.14);
         }
 
         .stat-card {
           padding: 20px 18px;
           border-radius: 18px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .stat-card::before,
+        .feature-card::before,
+        .role-card::before,
+        .task-card::before,
+        .panel::before {
+          content: '';
+          position: absolute;
+          inset: 0 auto auto 0;
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.46), transparent);
+          opacity: 0.8;
         }
 
         .stat-label {
@@ -480,14 +499,16 @@ function App() {
           padding: 22px 20px;
           border-radius: 18px;
           cursor: pointer;
-          transition: transform 0.2s ease, border-color 0.2s ease;
+          transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+          position: relative;
         }
 
         .role-card:hover,
         .role-card.selected {
           transform: translateY(-1px);
-          border-color: rgba(245, 158, 11, 0.24);
-          background: rgba(245, 158, 11, 0.04);
+          border-color: var(--border-strong);
+          background: linear-gradient(180deg, rgba(245,158,11,0.08), rgba(18,18,20,0.9));
+          box-shadow: 0 14px 28px rgba(245, 158, 11, 0.08);
         }
 
         .role-icon {
@@ -529,11 +550,15 @@ function App() {
           border-radius: 16px;
           color: var(--text);
           cursor: pointer;
-          transition: border-color 0.2s ease;
+          transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+          position: relative;
         }
 
-        .task-card:hover {
-          border-color: rgba(245, 158, 11, 0.24);
+        .task-card:hover,
+        .task-card.selected {
+          border-color: var(--border-strong);
+          background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), rgba(18,18,20,0.9));
+          transform: translateY(-1px);
         }
 
         .speed-pill {
@@ -851,7 +876,7 @@ function App() {
                     <button
                       key={pick.value}
                       type="button"
-                      className="task-card"
+                      className={`task-card ${form.task === pick.value ? 'selected' : ''}`}
                       onClick={() => handleTaskSelect(pick.value)}
                     >
                       <span>{pick.label}</span>
