@@ -101,6 +101,7 @@ body::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: auto;
   padding: 10px 14px;
   border-radius: 12px;
   color: var(--muted);
