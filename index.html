@@ -361,6 +361,92 @@
         margin-top: 6px;
       }
 
+      .browse-link-card {
+        margin-top: 18px;
+        background: rgba(13, 18, 28, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .browse-link-card h3 {
+        margin: 0;
+        font-size: clamp(1.3rem, 2vw, 1.8rem);
+      }
+
+      .browse-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: var(--text);
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-weight: 700;
+      }
+
+      .detail-section {
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      .detail-section h4 {
+        margin: 0 0 12px;
+        font-size: 1.15rem;
+      }
+
+      .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.75);
+      }
+
+      .detail-table th,
+      .detail-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      .detail-table th {
+        color: var(--muted-soft);
+        font-size: 0.73rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .insight-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .insight-card {
+        background: rgba(15, 23, 42, 0.76);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+
+      .insight-card strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted-soft);
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
       @media (max-width: 760px) {
         .page-shell {
           width: min(100% - 20px, 1280px);
@@ -510,6 +596,7 @@
         <section class="recommendation-panel" id="recommendation-panel" aria-live="polite">
           <div class="panel-header">
             <h3>Recommendation</h3>
+            <a class="browse-link" href="leaderboard.html">View full leaderboard</a>
           </div>
 
           <div class="recommendation-actions">
@@ -539,7 +626,67 @@
           <p class="reason" id="recommendation-reason"></p>
 
           <div class="score-grid" id="score-grid"></div>
+
+          <div class="detail-section">
+            <h4>Top matches</h4>
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Benchmark</th>
+                  <th>Quality</th>
+                  <th>Cost</th>
+                  <th>Speed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GPT-4.1</td>
+                  <td>94</td>
+                  <td>95</td>
+                  <td>82</td>
+                  <td>88</td>
+                </tr>
+                <tr>
+                  <td>Claude 3.5 Sonnet</td>
+                  <td>92</td>
+                  <td>93</td>
+                  <td>86</td>
+                  <td>87</td>
+                </tr>
+                <tr>
+                  <td>Gemini 2.5 Flash</td>
+                  <td>90</td>
+                  <td>89</td>
+                  <td>92</td>
+                  <td>96</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="detail-section">
+            <h4>Decision guide</h4>
+            <div class="insight-grid">
+              <div class="insight-card">
+                <strong>Use this model when…</strong>
+                <span>When your team wants strong reasoning and quality for drafting, analysis, and structured work.</span>
+              </div>
+              <div class="insight-card">
+                <strong>Best budget option</strong>
+                <span>Gemini 2.5 Flash is the best fit for lower-cost, faster throughput.</span>
+              </div>
+            </div>
+          </div>
         </section>
+
+        <div class="browse-link-card">
+          <div>
+            <span class="eyebrow">Browse</span>
+            <h3>Explore the full leaderboard</h3>
+          </div>
+          <a class="browse-link" href="leaderboard.html">Open leaderboard page</a>
+        </div>
       </main>
     </div>
 

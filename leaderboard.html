@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ModelAtlas | Leaderboard</title>
+    <style>
+      :root {
+        --bg: #050b15;
+        --bg-2: #0d1725;
+        --panel: rgba(18, 26, 38, 0.88);
+        --panel-soft: rgba(15, 23, 42, 0.75);
+        --text: #edf6ff;
+        --muted: #9fb2cb;
+        --border: rgba(148, 163, 184, 0.18);
+        --amber: #f59e0b;
+        --purple: #a855f7;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        background:
+          radial-gradient(circle at 12% 20%, rgba(168, 85, 247, 0.18), transparent 20%),
+          radial-gradient(circle at 85% 15%, rgba(34, 211, 238, 0.12), transparent 18%),
+          linear-gradient(180deg, #040b13 0%, #0b1220 28%, #07131d 100%);
+        color: var(--text);
+      }
+
+      body {
+        min-height: 100vh;
+      }
+
+      .page-shell {
+        width: min(1200px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 64px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 0 18px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b 60%, #f97316);
+        color: #101827;
+        font-weight: 800;
+      }
+
+      .brand-name {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: rgba(148, 163, 184, 0.06);
+      }
+
+      .panel {
+        margin-top: 28px;
+        background: rgba(10, 15, 23, 0.82);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 24px 20px;
+      }
+
+      .eyebrow {
+        display: block;
+        margin: 0 0 8px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.72rem;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(2rem, 4vw, 3rem);
+        letter-spacing: -0.05em;
+      }
+
+      .subtitle {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.74rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: var(--text);
+      }
+
+      .rank {
+        font-weight: 700;
+        color: #fbbf24;
+      }
+
+      .model {
+        font-weight: 700;
+      }
+
+      @media (max-width: 760px) {
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .brand-name {
+          font-size: 1.5rem;
+        }
+
+        table {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="header">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div class="brand-name">ModelAtlas</div>
+        </div>
+        <a class="nav-link" href="index.html">Back to home</a>
+      </header>
+
+      <main class="panel">
+        <span class="eyebrow">Leaderboard</span>
+        <h1>Model rankings</h1>
+        <p class="subtitle">Benchmark-informed tracking for quality, cost, speed, context, reliability, and privacy.</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Model</th>
+              <th>Benchmark</th>
+              <th>Quality</th>
+              <th>Cost</th>
+              <th>Speed</th>
+              <th>Context</th>
+              <th>Reliability</th>
+              <th>Privacy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rank">#1</td>
+              <td class="model">GPT-4.1</td>
+              <td>94</td>
+              <td>95</td>
+              <td>82</td>
+              <td>88</td>
+              <td>90</td>
+              <td>91</td>
+              <td>80</td>
+            </tr>
+            <tr>
+              <td class="rank">#2</td>
+              <td class="model">Claude 3.5 Sonnet</td>
+              <td>92</td>
+              <td>93</td>
+              <td>86</td>
+              <td>87</td>
+              <td>88</td>
+              <td>90</td>
+              <td>84</td>
+            </tr>
+            <tr>
+              <td class="rank">#3</td>
+              <td class="model">Gemini 2.5 Flash</td>
+              <td>90</td>
+              <td>89</td>
+              <td>92</td>
+              <td>96</td>
+              <td>86</td>
+              <td>89</td>
+              <td>88</td>
+            </tr>
+            <tr>
+              <td class="rank">#4</td>
+              <td class="model">Llama 3.3 70B</td>
+              <td>87</td>
+              <td>88</td>
+              <td>90</td>
+              <td>84</td>
+              <td>82</td>
+              <td>85</td>
+              <td>92</td>
+            </tr>
+            <tr>
+              <td class="rank">#5</td>
+              <td class="model">GPT-4o mini</td>
+              <td>85</td>
+              <td>84</td>
+              <td>94</td>
+              <td>97</td>
+              <td>80</td>
+              <td>83</td>
+              <td>76</td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </div>
+  </body>
+</html>
