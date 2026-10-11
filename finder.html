@@ -97,6 +97,7 @@
       display: flex; align-items: flex-start; gap: 1rem;
     }
     .option:hover { border-color: rgba(245,158,11,0.35); background: rgba(255,255,255,0.03); transform: translateY(-1px); }
+    .option:active { transform: scale(0.985); }
     .option.selected {
       border-color: var(--amber); background: rgba(245,158,11,0.07);
       box-shadow: 0 0 20px rgba(245,158,11,0.12);
@@ -1010,7 +1011,8 @@
     // Attach click listeners to dynamically created options
     container.querySelectorAll('.option').forEach(opt => {
       opt.addEventListener('click', () => {
-        const stepNum = opt.dataset.dynstep;
+        if (isAutoAdvancing) return;
+        const stepNum = parseInt(opt.dataset.dynstep, 10);
         const qid = opt.dataset.qid;
         const val = opt.dataset.val;
 
@@ -1020,12 +1022,27 @@
         answers[qid] = val;
         const nextBtn = document.getElementById('dynNextBtn_' + stepNum);
         if (nextBtn) nextBtn.disabled = false;
+
+        // Auto-advance to next question or results with brief visual confirmation
+        const isFinalStep = stepNum === branch.questions.length + 1;
+        isAutoAdvancing = true;
+        setTimeout(() => {
+          isAutoAdvancing = false;
+          if (isFinalStep) {
+            computeDynamicResults();
+          } else {
+            goDynamicStep(stepNum + 1);
+          }
+        }, 220);
       });
     });
   }
 
   // ─── STEP NAVIGATION ─────────────────────────────────────────────────────
+  let isAutoAdvancing = false;
+
   function goDynamicStep(targetIndex) {
+    isAutoAdvancing = false; // Reset lock when user clicks Back or navigates
     // Hide all step cards
     document.getElementById('step1').classList.remove('active');
     document.querySelectorAll('#dynamicStepsContainer .step-card').forEach(c => c.classList.remove('active'));
@@ -1051,6 +1068,7 @@
   // Handle Step 1 (Persona) Option Selection
   document.querySelectorAll('#step1 .option').forEach(opt => {
     opt.addEventListener('click', () => {
+      if (isAutoAdvancing) return;
       document.querySelectorAll('#step1 .option').forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
 
@@ -1058,6 +1076,13 @@
       answers = { persona: currentPersona };
       document.getElementById('next1').disabled = false;
       updateProgressBar();
+
+      // Auto-advance directly into the chosen track's questions
+      isAutoAdvancing = true;
+      setTimeout(() => {
+        isAutoAdvancing = false;
+        confirmPersonaAndProceed();
+      }, 220);
     });
   });
 
@@ -1557,6 +1582,7 @@
   }
 
   function resetFinder() {
+    isAutoAdvancing = false;
     answers = { persona: 'coder' };
     currentPersona = 'coder';
     currentStepIndex = 1;
