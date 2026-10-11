@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model Finder — ModelAtlas</title>
+  <title>Dynamic Model Finder — ModelAtlas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -34,8 +34,8 @@
     .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
 
     /* FINDER SHELL */
-    .finder-wrap { max-width: 820px; margin: 0 auto; padding: 3.5rem 1.5rem 6rem; }
-    .finder-header { text-align: center; margin-bottom: 2.5rem; }
+    .finder-wrap { max-width: 840px; margin: 0 auto; padding: 3.5rem 1.5rem 6rem; }
+    .finder-header { text-align: center; margin-bottom: 2.25rem; }
     .finder-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.6rem; }
     .finder-header p { color: var(--text-muted); font-size: 1.05rem; }
 
@@ -57,11 +57,20 @@
 
     /* PROGRESS */
     .progress-wrap { margin-bottom: 2.25rem; }
-    .progress-labels { display: flex; justify-content: space-between; margin-bottom: 0.6rem; }
+    .progress-labels { display: flex; justify-content: space-between; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 4px; }
     .progress-label { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); transition: color 0.2s; }
     .progress-label.active-step { color: var(--amber-light); }
     .progress-bar-bg { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--cyan)); border-radius: 99px; transition: width 0.35s ease; }
+
+    /* TRACK INDICATOR */
+    .track-indicator {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.74rem; font-weight: 700; color: var(--amber-light);
+      background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 99px; padding: 0.2rem 0.75rem; margin-bottom: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
 
     /* STEPS */
     .step-card {
@@ -94,7 +103,15 @@
     }
     .option-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1.2; margin-top: 2px; }
     .option-text { flex: 1; }
-    .option-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--text); }
+    .option-label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.25rem; flex-wrap: wrap; }
+    .option-label { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+    .option-pill {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 0.18rem 0.55rem; border-radius: 99px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--amber-light); text-transform: uppercase; letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
     .option-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.45; }
     .option-check {
       width: 20px; height: 20px; border-radius: 50%;
@@ -178,25 +195,28 @@
     .alt-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
     @media (max-width: 600px) { .alt-cards { grid-template-columns: 1fr; } }
     .alt-card {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1.25rem;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem; position: relative;
     }
     .alt-card-badge {
-      display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-      padding: 0.2rem 0.6rem; border-radius: 99px; margin-bottom: 0.85rem;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 0.5rem;
     }
-    .badge-runner { background: rgba(6,182,212,0.15); color: var(--cyan); }
-    .badge-budget { background: rgba(34,197,94,0.12); color: var(--green); }
-    .alt-card-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.35rem; }
-    .alt-card-reason { font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; }
+    .badge-runner { color: var(--cyan); }
+    .badge-budget { color: var(--green); }
+    .alt-card-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .alt-card-reason { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
 
-    .results-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem; }
-    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+    .results-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-secondary { background: var(--bg3); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--amber); color: var(--amber-light); }
 
-    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; }
-    .footer-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .footer-links a { text-decoration: none; color: var(--text-muted); font-size: 0.88rem; transition: color 0.2s; }
+    footer {
+      border-top: 1px solid var(--border); padding: 2.5rem 2rem;
+      text-align: center; margin-top: auto;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.75rem; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
     .footer-links a:hover { color: var(--amber); }
     .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
 
@@ -225,8 +245,8 @@
 
 <div class="finder-wrap">
   <div class="finder-header" id="finderHeader">
-    <h1>🧭 Universal Model Finder</h1>
-    <p>6 practical questions · Tailored for students, coders, freelancers & enterprises</p>
+    <h1>🧭 Dynamic Model Finder</h1>
+    <p>Adaptive questionnaire with domain-specific deep questions for your exact technical profile</p>
   </div>
 
   <!-- PROGRESS -->
@@ -237,272 +257,104 @@
     </div>
   </div>
 
-  <!-- STEP 1: INTERFACE & WORKFLOW SURFACE -->
+  <!-- STEP 1: ROOT PERSONA SELECTOR -->
   <div class="step-card active" id="step1">
     <div class="preset-banner">
-      <span class="preset-title">⚡ 1-Click Presets:</span>
-      <button type="button" class="preset-btn" onclick="applyPreset('student')">🎒 Student</button>
-      <button type="button" class="preset-btn" onclick="applyPreset('coder')">💻 Developer</button>
-      <button type="button" class="preset-btn" onclick="applyPreset('freelancer')">💼 Freelancer</button>
-      <button type="button" class="preset-btn" onclick="applyPreset('enterprise')">🏢 Enterprise</button>
+      <span class="preset-title">⚡ 1-Click Fast Presets:</span>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('coder')">💻 Developer</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('api')">🔌 API Builder</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('enterprise')">🏢 Enterprise</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('student')">🎒 Student</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('creator')">✍️ Creator</button>
     </div>
 
-    <div class="step-num-pill">Step 1 of 6 · Workflow Surface</div>
-    <div class="step-question">How do you plan to interact with the AI?</div>
-    <div class="step-hint">Choose your primary working environment — this shapes whether we prioritize premier web apps, IDE copilot completion, backend APIs, or enterprise cloud VPCs.</div>
+    <div class="step-num-pill">Step 1 of 5 · Core Track Selection</div>
+    <div class="step-question">Which profile best represents your primary role?</div>
+    <div class="step-hint">Selecting your track dynamically unlocks deep, targeted technical questions designed specifically for your workflow.</div>
+    
     <div class="options">
-      <div class="option" data-step="1" data-val="web_app">
-        <div class="option-icon">🎒</div>
-        <div class="option-text">
-          <div class="option-label">In a clean web browser or mobile app (No coding required)</div>
-          <div class="option-desc">Students, writers, general researchers — I just want a clean UI to chat, draft essays, or analyze documents online</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="1" data-val="ide">
+      <div class="option" data-step="1" data-val="coder">
         <div class="option-icon">💻</div>
         <div class="option-text">
-          <div class="option-label">Inside my IDE / Code Editor (Cursor, VS Code, Windsurf, Copilot)</div>
-          <div class="option-desc">Individual developers & engineers — I need high SWE-bench scores, fast autocomplete, and multi-file code editing</div>
+          <div class="option-label-row">
+            <span class="option-label">Software Engineer & Developer</span>
+            <span class="option-pill">Coding Track</span>
+          </div>
+          <div class="option-desc">Writing code, multi-file repo refactoring, SWE-bench debugging, local GPU hosting, or agentic terminal loops</div>
         </div>
         <div class="option-check"></div>
       </div>
+
       <div class="option" data-step="1" data-val="api">
         <div class="option-icon">🔌</div>
         <div class="option-text">
-          <div class="option-label">Via API / Backend Code into my own app, product, or agent</div>
-          <div class="option-desc">Indie hackers & software builders — I care about $/1M token pricing, low latency, rate limits, and structured JSON outputs</div>
+          <div class="option-label-row">
+            <span class="option-label">Product Builder & API Integrator</span>
+            <span class="option-pill">Backend Track</span>
+          </div>
+          <div class="option-desc">Backend microservices, strict JSON Schema outputs, agent tool-calling, sub-400ms TTFT latency, token economics</div>
         </div>
         <div class="option-check"></div>
       </div>
+
       <div class="option" data-step="1" data-val="enterprise">
         <div class="option-icon">🏢</div>
         <div class="option-text">
-          <div class="option-label">Enterprise Infrastructure (Private VPC, SSO, SLA, Compliance)</div>
-          <div class="option-desc">CTOs, architects & teams — deploying via AWS Bedrock, Azure, Vertex AI, or on-premises servers with rigorous SLAs</div>
+          <div class="option-label-row">
+            <span class="option-label">Enterprise & IT Decision Maker</span>
+            <span class="option-pill">Enterprise Track</span>
+          </div>
+          <div class="option-desc">SOC-2 / HIPAA compliance, Zero Data Retention (ZDR), private cloud VPC endpoints, sovereign air-gapped on-premise</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+
+      <div class="option" data-step="1" data-val="student">
+        <div class="option-icon">🎒</div>
+        <div class="option-text">
+          <div class="option-label-row">
+            <span class="option-label">Student & Academic Researcher</span>
+            <span class="option-pill">Academic Track</span>
+          </div>
+          <div class="option-desc">Research paper synthesis, dense PDF review, STEM math & formal proofs, CS tutoring, generous free tiers</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+
+      <div class="option" data-step="1" data-val="creator">
+        <div class="option-icon">✍️</div>
+        <div class="option-text">
+          <div class="option-label-row">
+            <span class="option-label">Content Creator & Knowledge Worker</span>
+            <span class="option-pill">Creator Track</span>
+          </div>
+          <div class="option-desc">Long-form editorial prose, marketing copy, executive briefs, natural human voice avoiding AI clichés</div>
         </div>
         <div class="option-check"></div>
       </div>
     </div>
+
     <div class="step-nav">
       <span></span>
-      <button class="btn btn-next" id="next1" disabled onclick="goNext(1)">Next →</button>
+      <button class="btn btn-next" id="next1" disabled onclick="confirmPersonaAndProceed()">Continue with Track →</button>
     </div>
   </div>
 
-  <!-- STEP 2: COGNITIVE INTENSITY & TASK -->
-  <div class="step-card" id="step2">
-    <div class="step-num-pill">Step 2 of 6 · Cognitive Intensity</div>
-    <div class="step-question">What is the hardest part of the work you need the AI to do?</div>
-    <div class="step-hint">Differentiates between creative drafting, deliberate math/logic reasoning, fast repetitive triage, and visual multimodal analysis.</div>
-    <div class="options">
-      <div class="option" data-step="2" data-val="drafting">
-        <div class="option-icon">📝</div>
-        <div class="option-text">
-          <div class="option-label">Clear drafting, prose, and everyday communication</div>
-          <div class="option-desc">Polishing emails, essays, blogs, translating languages, rewriting, and summarizing meetings</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="2" data-val="reasoning">
-        <div class="option-icon">🧠</div>
-        <div class="option-text">
-          <div class="option-label">Heavy logic, advanced STEM, math, or complex software architecture</div>
-          <div class="option-desc">Multi-step reasoning, tricky algorithms, graduate-level math, deep debugging, and formal verification</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="2" data-val="triage">
-        <div class="option-icon">⚡</div>
-        <div class="option-text">
-          <div class="option-label">High-volume repetitive triage & data processing</div>
-          <div class="option-desc">Classifying thousands of tickets, data tagging, fast routing, automated customer support at scale</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="2" data-val="multimodal">
-        <div class="option-icon">👁️</div>
-        <div class="option-text">
-          <div class="option-label">Visual & Multimodal inspection (PDF charts, UI mockups, diagrams)</div>
-          <div class="option-desc">Extracting data from messy scans, interpreting UI screenshots, analyzing video, mixed media</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-    </div>
-    <div class="step-nav">
-      <button class="btn btn-ghost" onclick="goBack(2)">← Back</button>
-      <button class="btn btn-next" id="next2" disabled onclick="goNext(2)">Next →</button>
-    </div>
-  </div>
+  <!-- DYNAMIC ADAPTIVE STEPS CONTAINER (Populated dynamically based on track) -->
+  <div id="dynamicStepsContainer"></div>
 
-  <!-- STEP 3: CONTEXT BREADTH -->
-  <div class="step-card" id="step3">
-    <div class="step-num-pill">Step 3 of 6 · Context Breadth</div>
-    <div class="step-question">How much information does the AI need to read in a single prompt?</div>
-    <div class="step-hint">Context window capacity determines whether the model can digest long documents without forgetting early details.</div>
-    <div class="options">
-      <div class="option" data-step="3" data-val="short">
-        <div class="option-icon">📄</div>
-        <div class="option-text">
-          <div class="option-label">Quick exchanges or short text (&lt;8,000 tokens)</div>
-          <div class="option-desc">1–5 pages, single code functions, quick Q&A, or casual back-and-forth chat</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="3" data-val="medium">
-        <div class="option-icon">📑</div>
-        <div class="option-text">
-          <div class="option-label">Medium documents & multi-file context (8K–128K tokens)</div>
-          <div class="option-desc">Research papers, 20–50 page reports, multi-file code snippets, moderate project context</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="3" data-val="massive">
-        <div class="option-icon">📚</div>
-        <div class="option-text">
-          <div class="option-label">Massive archives, full codebases, or books (200K–2M tokens)</div>
-          <div class="option-desc">Entire Git repositories, 300+ page legal contracts, hours of video, or entire textbooks</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-    </div>
-    <div class="step-nav">
-      <button class="btn btn-ghost" onclick="goBack(3)">← Back</button>
-      <button class="btn btn-next" id="next3" disabled onclick="goNext(3)">Next →</button>
-    </div>
-  </div>
-
-  <!-- STEP 4: ECONOMIC ENVELOPE -->
-  <div class="step-card" id="step4">
-    <div class="step-num-pill">Step 4 of 6 · Budget & Economics</div>
-    <div class="step-question">What is your budget structure for this workflow?</div>
-    <div class="step-hint">Sets practical boundaries between zero-cost open models, pay-as-you-go developer APIs, and enterprise budgets.</div>
-    <div class="options">
-      <div class="option" data-step="4" data-val="free">
-        <div class="option-icon">🆓</div>
-        <div class="option-text">
-          <div class="option-label">Strictly $0 / Free tier or local execution</div>
-          <div class="option-desc">I am a student or hobbyist and cannot pay per prompt; I need free web tools or local models</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="4" data-val="value">
-        <div class="option-icon">🪙</div>
-        <div class="option-text">
-          <div class="option-label">Budget-conscious pay-as-you-go ($5–$25 / month)</div>
-          <div class="option-desc">I want maximum price-to-performance; keeping cost under $0.50 per 1M tokens matters</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="4" data-val="pro">
-        <div class="option-icon">💼</div>
-        <div class="option-text">
-          <div class="option-label">Professional project budget ($50–$250 / month)</div>
-          <div class="option-desc">I will happily pay standard market rates for top-tier quality that saves hours of professional time</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="4" data-val="unlimited">
-        <div class="option-icon">🚀</div>
-        <div class="option-text">
-          <div class="option-label">Mission-critical / Best possible output regardless of cost</div>
-          <div class="option-desc">A single mistake costs more than the API bill; I want maximum benchmark accuracy</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-    </div>
-    <div class="step-nav">
-      <button class="btn btn-ghost" onclick="goBack(4)">← Back</button>
-      <button class="btn btn-next" id="next4" disabled onclick="goNext(4)">Next →</button>
-    </div>
-  </div>
-
-  <!-- STEP 5: DATA GOVERNANCE & PRIVACY -->
-  <div class="step-card" id="step5">
-    <div class="step-num-pill">Step 5 of 6 · Data Governance</div>
-    <div class="step-question">What are the privacy requirements for the data you enter?</div>
-    <div class="step-hint">Crucial filter separating commercial cloud APIs from isolated zero-retention or on-premises deployments.</div>
-    <div class="options">
-      <div class="option" data-step="5" data-val="public">
-        <div class="option-icon">🌐</div>
-        <div class="option-text">
-          <div class="option-label">Public or low-sensitivity data</div>
-          <div class="option-desc">General knowledge, public documents, school coursework, or open-source code</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="5" data-val="confidential">
-        <div class="option-icon">🔒</div>
-        <div class="option-text">
-          <div class="option-label">Business confidential / Client NDA protected</div>
-          <div class="option-desc">Client deliverables, internal company memos — requires Zero-Data-Retention &amp; no model training</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="5" data-val="on_prem">
-        <div class="option-icon">🛡️</div>
-        <div class="option-text">
-          <div class="option-label">Strictly isolated / On-premises or air-gapped only</div>
-          <div class="option-desc">Healthcare (HIPAA), banking, national security — data CANNOT touch third-party cloud APIs</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-    </div>
-    <div class="step-nav">
-      <button class="btn btn-ghost" onclick="goBack(5)">← Back</button>
-      <button class="btn btn-next" id="next5" disabled onclick="goNext(5)">Next →</button>
-    </div>
-  </div>
-
-  <!-- STEP 6: SPEED VS DELIBERATE THINKING -->
-  <div class="step-card" id="step6">
-    <div class="step-num-pill">Step 6 of 6 · Speed vs. Thinking Depth</div>
-    <div class="step-question">What is your response speed expectation?</div>
-    <div class="step-hint">Balances the trade-off between sub-second streaming and deliberate test-time compute thinking models.</div>
-    <div class="options">
-      <div class="option" data-step="6" data-val="instant">
-        <div class="option-icon">⚡</div>
-        <div class="option-text">
-          <div class="option-label">Real-time instant streaming (Sub-second start)</div>
-          <div class="option-desc">Users or interactive agent loops are waiting; output speed must be fast (&gt;100 tokens/sec)</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="6" data-val="balanced">
-        <div class="option-icon">⚖️</div>
-        <div class="option-text">
-          <div class="option-label">Balanced (3–8 seconds is completely fine)</div>
-          <div class="option-desc">Standard workflow speed; thoughtful responses without noticeable lag</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-      <div class="option" data-step="6" data-val="deliberate">
-        <div class="option-icon">🧠</div>
-        <div class="option-text">
-          <div class="option-label">Deep deliberate thinking (Wait 15–60s for verified accuracy)</div>
-          <div class="option-desc">I prefer the model to show extended chain-of-thought, verify its logic, and eliminate hallucinations</div>
-        </div>
-        <div class="option-check"></div>
-      </div>
-    </div>
-    <div class="step-nav">
-      <button class="btn btn-ghost" onclick="goBack(6)">← Back</button>
-      <button class="btn btn-primary" id="next6" disabled onclick="computeResults()">Get My Results →</button>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
+  <!-- RESULTS SECTION -->
   <div id="results">
     <div class="results-header">
-      <h2>🎯 Your Model Recommendation</h2>
-      <p>Based on your 6 answers, here's what works best for your workflow.</p>
+      <h2>🎯 Your Tailored Recommendation</h2>
+      <p id="resultsSubtitle">Based on your answers, here is the verified benchmark champion for your workload.</p>
     </div>
     <!-- Filled by JS -->
     <div id="resultsContent"></div>
     <div class="results-actions">
-      <a href="leaderboard.html" class="btn btn-secondary">View Full Leaderboard</a>
-      <a href="compare.html" class="btn btn-secondary">Compare Two Models</a>
-      <button class="btn btn-ghost" onclick="resetFinder()">↺ Start Over</button>
+      <a href="leaderboard.html" class="btn btn-secondary">View Full 384-Model Leaderboard</a>
+      <a href="compare.html" class="btn btn-secondary">Compare Two Models Head-to-Head</a>
+      <button class="btn btn-ghost" onclick="resetFinder()">↺ Start Over / Change Track</button>
     </div>
   </div>
 
@@ -516,7 +368,7 @@
       <a href="leaderboard.html">Leaderboard</a>
       <a href="compare.html">Compare</a>
     </div>
-    <p class="footer-copy">© 2026 ModelAtlas · Benchmark-informed AI model recommendations</p>
+    <p class="footer-copy">© 2026 ModelAtlas · Empirical AI benchmark recommendations verified with LMSYS Chatbot Arena & Artificial Analysis</p>
   </div>
 </footer>
 
@@ -525,269 +377,988 @@
 <script>
   const models = window.MODELS_DATA || [];
 
-  // ─── STATE ────────────────────────────────────────────────────────────────
-  let answers = {};
-  const STEPS = 6;
-
-  // ─── PROGRESS ─────────────────────────────────────────────────────────────
-  const stepLabels = ['Interface', 'Complexity', 'Context', 'Budget', 'Privacy', 'Speed'];
-  const labelsEl = document.getElementById('progressLabels');
-  stepLabels.forEach((l, i) => {
-    const el = document.createElement('span');
-    el.className = 'progress-label'; el.id = 'pl' + (i+1); el.textContent = l;
-    labelsEl.appendChild(el);
-  });
-
-  function updateProgress(step) {
-    document.getElementById('progressFill').style.width = ((step - 1) / STEPS * 100) + '%';
-    stepLabels.forEach((_, i) => {
-      const el = document.getElementById('pl' + (i+1));
-      el.classList.toggle('active-step', i + 1 === step);
-    });
-  }
-  updateProgress(1);
-
-  // ─── 1-CLICK PERSONA PRESETS ─────────────────────────────────────────────
-  const presets = {
-    student: {
-      step1: 'web_app', step2: 'drafting', step3: 'short', step4: 'free', step5: 'public', step6: 'instant'
-    },
+  // ─── DYNAMIC BRANCH SPECIFICATIONS ─────────────────────────────────────────
+  const BRANCHES = {
     coder: {
-      step1: 'ide', step2: 'reasoning', step3: 'medium', step4: 'value', step5: 'confidential', step6: 'balanced'
+      id: 'coder',
+      title: 'Software Engineer & Developer Track',
+      badge: '💻 Developer Track',
+      stepLabels: ['Track', 'Coding Scope', 'Environment', 'Reasoning Depth', 'Budget'],
+      questions: [
+        {
+          id: 'coding_scope',
+          title: 'What is your primary software development workflow?',
+          hint: 'Differentiates between quick inline autocomplete, repository-level multi-file refactoring, and autonomous terminal agents.',
+          options: [
+            {
+              val: 'inline_fim',
+              icon: '⚡',
+              label: 'Inline Tab-Autocomplete & Quick Edits (FIM)',
+              desc: 'Sub-150ms real-time typing completion inside VS Code or Cursor. Prioritizes tokens-per-second throughput and low latency over massive depth.',
+              pill: 'Sub-150ms'
+            },
+            {
+              val: 'repo_refactor',
+              icon: '🏗️',
+              label: 'Multi-File Repo Refactoring & Architecture',
+              desc: 'Understanding dependency graphs, cross-file imports, and whole-project redesigns. Demands top SWE-bench Verified scores.',
+              pill: 'SWE-bench Leader'
+            },
+            {
+              val: 'scripts_tests',
+              icon: '🧪',
+              label: 'Single-File Scripting & Unit Test Suites',
+              desc: 'Writing Python scripts, React UI components, and unit test suites from scratch with high accuracy on standard libraries.',
+              pill: 'General Dev'
+            },
+            {
+              val: 'agentic_loop',
+              icon: '🤖',
+              label: 'Autonomous Agentic Coding Loop (Devin / Claude Code style)',
+              desc: 'Terminal bash execution, git command handling, reading linter feedback, and applying clean patch diffs.',
+              pill: 'Tool & Terminal'
+            }
+          ]
+        },
+        {
+          id: 'env_target',
+          title: 'Where do you plan to run or host the model?',
+          hint: 'Determines whether you need open weights sized for your local GPU/RAM or premier managed cloud API endpoints.',
+          options: [
+            {
+              val: 'cloud_managed',
+              icon: '🌐',
+              label: 'Cloud Managed API / Copilot Extension (No local GPU required)',
+              desc: 'Anthropic, OpenAI, or Google Cloud hosted endpoints. Maximum capability with zero hardware management.',
+              pill: 'Cloud API'
+            },
+            {
+              val: 'local_consumer',
+              icon: '💻',
+              label: 'Local Laptop / Desktop (8GB – 16GB VRAM)',
+              desc: 'Run 100% offline via Ollama, llama.cpp, or LM Studio. Requires 7B–14B quantized models (GGUF/AWQ).',
+              pill: 'Local (8-16GB)'
+            },
+            {
+              val: 'local_workstation',
+              icon: '🖥️',
+              label: 'Local Workstation / Mac Studio (24GB – 64GB Unified RAM)',
+              desc: 'Run 32B–70B open models locally with high quantization quality (Q4/Q8) for total privacy and $0 cloud spend.',
+              pill: 'Local (24-64GB)'
+            }
+          ]
+        },
+        {
+          id: 'reasoning_mode',
+          title: 'Inference Speed vs Extended Thinking Depth',
+          hint: 'Test-time compute (extended thinking) produces deeper logical proofs but introduces a 10–30s deliberation delay.',
+          options: [
+            {
+              val: 'instant_stream',
+              icon: '⚡',
+              label: 'Instant Interactive Streaming (< 2 seconds)',
+              desc: 'Fast conversational feedback loop for rapid prototyping and continuous typing.',
+              pill: 'Fast Flow'
+            },
+            {
+              val: 'extended_thinking',
+              icon: '🧠',
+              label: 'Extended Thinking / Test-Time Compute (10s – 45s)',
+              desc: 'Deep multi-step reasoning models (e.g., Claude 3.7 Thinking, o3-mini, DeepSeek-R1) for intricate algorithmic bugs.',
+              pill: 'Deep Logic'
+            }
+          ]
+        },
+        {
+          id: 'budget_level',
+          title: 'Cost & Budget Preferences',
+          hint: 'Balances pricing per 1M tokens against frontier benchmark supremacy.',
+          options: [
+            {
+              val: 'zero_cost',
+              icon: '🆓',
+              label: 'Free / Open Weights Only ($0 recurring cost)',
+              desc: 'Strictly zero API spend via open weights or generous free API tiers.',
+              pill: '$0.00'
+            },
+            {
+              val: 'value_tier',
+              icon: '💵',
+              label: 'High-Efficiency Value Tier ($0.15 – $1.00 per 1M tokens)',
+              desc: 'Cost-conscious production development where output quality is 90% of frontier at 10% of the cost.',
+              pill: 'Cost-Efficient'
+            },
+            {
+              val: 'frontier_tier',
+              icon: '👑',
+              label: 'Frontier Intelligence ($3.00 – $15.00 per 1M tokens)',
+              desc: 'Best possible coding capability on earth regardless of token pricing.',
+              pill: 'Max Capability'
+            }
+          ]
+        }
+      ]
     },
-    freelancer: {
-      step1: 'web_app', step2: 'drafting', step3: 'medium', step4: 'value', step5: 'confidential', step6: 'instant'
+
+    api: {
+      id: 'api',
+      title: 'Product Builder & API Integrator Track',
+      badge: '🔌 API Builder Track',
+      stepLabels: ['Track', 'Interface', 'SLA Latency', 'Context Scope', 'Token Budget'],
+      questions: [
+        {
+          id: 'api_interface',
+          title: 'What is your production backend requirement?',
+          hint: 'Determines if you need deterministic JSON schema enforcement, multi-tool orchestration, or conversational streaming.',
+          options: [
+            {
+              val: 'strict_json',
+              icon: '📋',
+              label: 'Strict JSON Schema / Structured Outputs (Pydantic / Zod)',
+              desc: 'The model must natively adhere to strict schemas. Syntax errors or unexpected keys break your backend pipeline.',
+              pill: 'Strict Schema'
+            },
+            {
+              val: 'multi_tool',
+              icon: '🔧',
+              label: 'Parallel Function & Tool Calling (10+ Tools)',
+              desc: 'Agent pipelines selecting and executing between dozens of tools with nested parameters and zero hallucinations.',
+              pill: 'Agentic Tools'
+            },
+            {
+              val: 'chat_stream',
+              icon: '💬',
+              label: 'High-Concurrency Conversational Chat Stream',
+              desc: 'User-facing SaaS chat assistants with smooth SSE streaming, markdown formatting, and high token throughput.',
+              pill: 'Chatbot UX'
+            }
+          ]
+        },
+        {
+          id: 'latency_sla',
+          title: 'What is your Time-To-First-Token (TTFT) latency SLA?',
+          hint: 'Voice agents and live chat demand sub-400ms TTFT, while batch worker pipelines can tolerate multi-second response times.',
+          options: [
+            {
+              val: 'ultra_fast',
+              icon: '⚡',
+              label: 'Sub-400ms Ultra-Fast Streaming',
+              desc: 'Crucial for real-time customer UX, voice agents, and interactive autocomplete. Requires models with >100 tokens/sec.',
+              pill: '< 400ms TTFT'
+            },
+            {
+              val: 'balanced_sla',
+              icon: '⚖️',
+              label: '1s – 3s Balanced Response Time',
+              desc: 'Standard web application query response times for summaries, dashboards, and automated forms.',
+              pill: '1-3s SLA'
+            },
+            {
+              val: 'async_worker',
+              icon: '⏱️',
+              label: 'Asynchronous Background Processing (5s – 60s)',
+              desc: 'Offline message queues, data extraction, nighttime batch processing where depth beats speed.',
+              pill: 'Batch Queue'
+            }
+          ]
+        },
+        {
+          id: 'context_scale',
+          title: 'Input Payload & Context Volume',
+          hint: 'Defines whether standard 32k context is sufficient or if you ingest entire file histories or customer databases.',
+          options: [
+            {
+              val: 'standard_ctx',
+              icon: '📄',
+              label: 'Standard Context (< 32,000 tokens)',
+              desc: 'Typical user prompts, single documents, and vector RAG chunk injections.',
+              pill: 'Up to 32K'
+            },
+            {
+              val: 'large_ctx',
+              icon: '📚',
+              label: 'Massive Raw Context (128K – 2 Million tokens)',
+              desc: 'Ingesting massive log dumps, entire books, legal discovery files, or raw repositories directly in-context.',
+              pill: '128K - 2M'
+            }
+          ]
+        },
+        {
+          id: 'api_budget',
+          title: 'Daily API Volume & Cost Ceiling',
+          hint: 'Prevents budget blowouts when scaling to millions of customer API calls.',
+          options: [
+            {
+              val: 'scale_budget',
+              icon: '📉',
+              label: 'High Volume / Sub-$0.50 per 1M tokens',
+              desc: 'Processing millions of requests daily. Token economics dictate choosing models like Gemini Flash or GPT-4o mini.',
+              pill: '< $0.50 / 1M'
+            },
+            {
+              val: 'balanced_api',
+              icon: '⚖️',
+              label: 'Balanced Price-to-Performance ($1 – $3 per 1M tokens)',
+              desc: 'Solid mid-market unit economics with frontier-adjacent intelligence.',
+              pill: '$1 - $3 / 1M'
+            },
+            {
+              val: 'premium_api',
+              icon: '💎',
+              label: 'Zero Compromise on Quality ($5+ per 1M tokens)',
+              desc: 'High-value transactions where a single hallucination costs more than 100,000 tokens.',
+              pill: 'Frontier Quality'
+            }
+          ]
+        }
+      ]
     },
+
     enterprise: {
-      step1: 'enterprise', step2: 'reasoning', step3: 'massive', step4: 'pro', step5: 'on_prem', step6: 'balanced'
+      id: 'enterprise',
+      title: 'Enterprise & IT Decision Maker Track',
+      badge: '🏢 Enterprise Track',
+      stepLabels: ['Track', 'Compliance', 'Workload', 'Context Ceiling', 'Deployment'],
+      questions: [
+        {
+          id: 'enterprise_compliance',
+          title: 'Data Governance & Regulatory Boundaries',
+          hint: 'Filters models by legally enforceable data retention, HIPAA/SOC-2 policies, and air-gapped sovereign execution.',
+          options: [
+            {
+              val: 'zdr_commercial',
+              icon: '🛡️',
+              label: 'Commercial Cloud API with Zero Data Retention (ZDR)',
+              desc: 'SOC-2 Type II, HIPAA BAA eligible cloud endpoint with contractually verified no-training clauses on enterprise prompts.',
+              pill: 'SOC-2 / HIPAA'
+            },
+            {
+              val: 'private_cloud_vpc',
+              icon: '☁️',
+              label: 'Managed Private Cloud VPC (AWS Bedrock, Azure, Vertex AI)',
+              desc: 'Models deployed inside your corporate cloud perimeter with IAM, SSO, and internal network peering.',
+              pill: 'Private VPC'
+            },
+            {
+              val: 'air_gapped_onprem',
+              icon: '🏛️',
+              label: 'Fully Air-Gapped Sovereign On-Premises',
+              desc: 'Open weights executed strictly on company-owned hardware without external internet access or telemetry.',
+              pill: 'Air-Gapped'
+            }
+          ]
+        },
+        {
+          id: 'enterprise_workload',
+          title: 'Primary Enterprise Workload Type',
+          hint: 'Matches the model against specific enterprise risk profiles and functional departments.',
+          options: [
+            {
+              val: 'legal_finance',
+              icon: '⚖️',
+              label: 'Legal, Financial Auditing & Regulatory Risk',
+              desc: 'Zero-hallucination analysis of contracts, tax filings, and compliance mandates with verifiable grounding.',
+              pill: 'Zero Hallucination'
+            },
+            {
+              val: 'customer_ops',
+              icon: '🎧',
+              label: 'High-Volume Customer Support & Ticket Triage',
+              desc: 'Automating multi-channel email, chat, and support routing with high consistency and SLA uptime.',
+              pill: 'Customer Ops'
+            },
+            {
+              val: 'internal_rag',
+              icon: '🗄️',
+              label: 'Company-Wide Knowledge Base (Internal Search / RAG)',
+              desc: 'Synthesizing thousands of confluence pages, Notion workspaces, and internal wikis for employees.',
+              pill: 'Internal Wiki RAG'
+            }
+          ]
+        },
+        {
+          id: 'enterprise_context',
+          title: 'Document Archive Scope',
+          hint: 'Large context windows eliminate complex RAG chunking pipelines for multi-hundred page documents.',
+          options: [
+            {
+              val: 'standard_docs',
+              icon: '📑',
+              label: 'Standard Corporate Memos & Summaries (< 128K)',
+              desc: 'Routine business reports, emails, policy documents, and meeting transcripts.',
+              pill: 'Standard 128K'
+            },
+            {
+              val: 'archive_2m',
+              icon: '📦',
+              label: 'Full Repository & Historic Archive Ingestion (1M – 2M tokens)',
+              desc: 'Dumping 500-page SEC filings, technical specifications, or decade-old archives into a single prompt.',
+              pill: '1M - 2M Window'
+            }
+          ]
+        },
+        {
+          id: 'contracting_tier',
+          title: 'Procurement & SLA Requirement',
+          hint: 'Differentiates between pay-as-you-go credit card billing and reserved enterprise commitments.',
+          options: [
+            {
+              val: 'flexible_usage',
+              icon: '💳',
+              label: 'Flexible Usage (Monthly Invoicing / Consumption-based)',
+              desc: 'Elastic scaling without upfront annual capacity commitments.',
+              pill: 'Elastic Usage'
+            },
+            {
+              val: 'reserved_ptu',
+              icon: '🤝',
+              label: 'Provisioned Throughput (PTU) with 99.99% Uptime SLA',
+              desc: 'Reserved inference hardware guaranteeing fixed tokens-per-second during peak traffic periods.',
+              pill: 'Reserved PTU'
+            }
+          ]
+        }
+      ]
+    },
+
+    student: {
+      id: 'student',
+      title: 'Student & Academic Researcher Track',
+      badge: '🎒 Student Track',
+      stepLabels: ['Track', 'Workload', 'Budget Reality', 'Reasoning Depth'],
+      questions: [
+        {
+          id: 'academic_workload',
+          title: 'What is your core academic study focus?',
+          hint: 'Different models dominate mathematical theorem proving versus dense PDF research paper synthesis.',
+          options: [
+            {
+              val: 'stem_math_logic',
+              icon: '📐',
+              label: 'STEM, Math Proofs & Algorithmic Problem Solving',
+              desc: 'Calculus, discrete math, physics, and competitive algorithmic logic requiring step-by-step chain of thought.',
+              pill: 'MATH-500'
+            },
+            {
+              val: 'paper_synthesis',
+              icon: '📚',
+              label: 'Research Paper Synthesis & Literature Review',
+              desc: 'Reading dense 30-page arXiv PDFs, comparing methodologies, identifying flaws, and generating citations.',
+              pill: 'Paper Review'
+            },
+            {
+              val: 'cs_coding_help',
+              icon: '💻',
+              label: 'Computer Science Homework & Learning to Code',
+              desc: 'Explaining data structures, debugging code assignments, and tutoring programming fundamentals.',
+              pill: 'CS Tutoring'
+            },
+            {
+              val: 'humanities_essay',
+              icon: '✍️',
+              label: 'Essay Drafting, Thesis Structure & Tone Polish',
+              desc: 'Overcoming writer\'s block, refining academic arguments, and enhancing prose clarity without AI cliches.',
+              pill: 'Essay Polish'
+            }
+          ]
+        },
+        {
+          id: 'student_budget',
+          title: 'What is your budget situation?',
+          hint: 'We guarantee you won\'t get stuck with unexpected subscriptions you can\'t afford.',
+          options: [
+            {
+              val: 'strictly_free',
+              icon: '🆓',
+              label: '100% Free / Zero-Dollar Constraint',
+              desc: 'Must have a generous free web tier or be runnable on my personal laptop with no credit card required.',
+              pill: 'Free Tier ($0)'
+            },
+            {
+              val: 'student_sub',
+              icon: '☕',
+              label: 'Affordable Micro-Budget ($10 – $20/month or cheap API)',
+              desc: 'Willing to spend the cost of a couple of coffees for significantly better grades and research speed.',
+              pill: 'Low Cost'
+            }
+          ]
+        },
+        {
+          id: 'explanation_style',
+          title: 'How should the AI explain things to you?',
+          hint: 'Shapes whether the model behaves like a patient Socratic tutor or a concise answer dispenser.',
+          options: [
+            {
+              val: 'pedagogical_deep',
+              icon: '🧑‍🏫',
+              label: 'Pedagogical Socratic Depth (Show every step & explain why)',
+              desc: 'Breaks down complex concepts into first principles so you actually learn the material for your exams.',
+              pill: 'Step-by-Step'
+            },
+            {
+              val: 'concise_direct',
+              icon: '🎯',
+              label: 'Concise & Fast Answers (Give me the solution)',
+              desc: 'Direct solutions, clean code snippets, and fast summaries when deadlines are tight.',
+              pill: 'Fast Solution'
+            }
+          ]
+        }
+      ]
+    },
+
+    creator: {
+      id: 'creator',
+      title: 'Content Creator & Knowledge Worker Track',
+      badge: '✍️ Creator & Writer Track',
+      stepLabels: ['Track', 'Creative Focus', 'Voice Nuance', 'Deliberation', 'Budget'],
+      questions: [
+        {
+          id: 'creator_focus',
+          title: 'What is your primary creative output?',
+          hint: 'Matches models specializing in captivating long-form storytelling versus conversion-driven marketing copy.',
+          options: [
+            {
+              val: 'longform_prose',
+              icon: '📖',
+              label: 'Long-form Writing, Newsletters & Books',
+              desc: 'Nuanced editorial prose with natural cadence, depth, and storytelling structure.',
+              pill: 'Editorial Prose'
+            },
+            {
+              val: 'marketing_copy',
+              icon: '🎯',
+              label: 'Marketing Campaigns, Ad Hooks & Social Media',
+              desc: 'High-converting copy, viral hooks, email sequences, and brand messaging.',
+              pill: 'Marketing Copy'
+            },
+            {
+              val: 'executive_briefs',
+              icon: '📊',
+              label: 'Market Research, Industry Trends & Executive Summaries',
+              desc: 'Turning hours of interviews, earnings calls, and news into crisp, structured briefing memos.',
+              pill: 'Executive Briefs'
+            },
+            {
+              val: 'multimodal_art',
+              icon: '🎨',
+              label: 'Multimodal Media, Visual Critique & Image Prompts',
+              desc: 'Analyzing visual aesthetics, critiquing layouts, and crafting rich generative art prompts.',
+              pill: 'Visual & Art'
+            }
+          ]
+        },
+        {
+          id: 'voice_nuance',
+          title: 'Tone and "AI Cliché" Sensitivity',
+          hint: 'Anthropic\'s Claude models are renowned for avoiding the generic buzzwords typical of basic LLMs.',
+          options: [
+            {
+              val: 'avoid_cliches',
+              icon: '🌿',
+              label: 'Strictly Natural Human Tone (Zero Corporate Fluff)',
+              desc: 'Avoid phrases like "in today\'s fast-paced world" or "delve into". Demands organic sentence rhythm.',
+              pill: 'Organic Human'
+            },
+            {
+              val: 'structured_direct',
+              icon: '📋',
+              label: 'Crisp, Direct & Bulleted Efficiency',
+              desc: 'Clear, concise formatting with tables, action items, and executive summaries.',
+              pill: 'Bulleted & Crisp'
+            }
+          ]
+        },
+        {
+          id: 'deliberation_depth',
+          title: 'Speed vs Depth of Research',
+          hint: 'Balances immediate creative flow against deep contextual research.',
+          options: [
+            {
+              val: 'fast_brainstorm',
+              icon: '⚡',
+              label: 'Fast Iterative Brainstorming (< 2s)',
+              desc: 'Rapid idea generation, headline variations, and bouncing concepts back and forth.',
+              pill: 'Fast Flow'
+            },
+            {
+              val: 'deep_polish',
+              icon: '💎',
+              label: 'Deep Multi-Step Polish & Critique',
+              desc: 'Takes time to thoroughly review, refine arguments, and polish sentence craft.',
+              pill: 'Deep Polish'
+            }
+          ]
+        },
+        {
+          id: 'creator_budget',
+          title: 'Budget Consideration',
+          hint: 'Keeps creative tools affordable for solo creators and freelancers.',
+          options: [
+            {
+              val: 'free_accessible',
+              icon: '🆓',
+              label: 'Free or Low-Cost Tiers',
+              desc: 'Accessible tools with minimal to zero monthly overhead.',
+              pill: 'Budget-Friendly'
+            },
+            {
+              val: 'premium_pro',
+              icon: '⭐',
+              label: 'Premier Quality ($20/month subscription or API)',
+              desc: 'Willing to invest in the single best writing and reasoning partner on the market.',
+              pill: 'Frontier Quality'
+            }
+          ]
+        }
+      ]
     }
   };
 
-  function applyPreset(personaKey) {
-    const p = presets[personaKey];
-    if (!p) return;
+  // ─── STATE ────────────────────────────────────────────────────────────────
+  let currentPersona = 'coder';
+  let currentStepIndex = 1; // 1 = Step 1 (Persona); 2..N = Dynamic questions
+  let answers = { persona: 'coder' };
 
-    for (let step = 1; step <= 6; step++) {
-      const val = p['step' + step];
-      answers['step' + step] = val;
+  // ─── INIT PROGRESS BAR ───────────────────────────────────────────────────
+  function updateProgressBar() {
+    const branch = BRANCHES[currentPersona] || BRANCHES.coder;
+    const labels = branch.stepLabels;
+    const totalSteps = labels.length;
 
-      document.querySelectorAll(`.option[data-step="${step}"]`).forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.val === val);
-      });
+    const labelsEl = document.getElementById('progressLabels');
+    labelsEl.innerHTML = '';
+    labels.forEach((lbl, idx) => {
+      const span = document.createElement('span');
+      span.className = 'progress-label' + (idx + 1 === currentStepIndex ? ' active-step' : '');
+      span.textContent = lbl;
+      labelsEl.appendChild(span);
+    });
 
-      const nextBtn = document.getElementById('next' + step);
-      if (nextBtn) nextBtn.disabled = false;
-    }
-
-    // Immediately compute results for fast feedback
-    computeResults();
+    const pct = ((currentStepIndex - 1) / (totalSteps - 1)) * 100;
+    document.getElementById('progressFill').style.width = Math.min(100, Math.max(0, pct)) + '%';
   }
 
-  // ─── OPTION SELECTION ─────────────────────────────────────────────────────
-  document.querySelectorAll('.option').forEach(opt => {
+  // ─── RENDER DYNAMIC STEPS ────────────────────────────────────────────────
+  function renderDynamicSteps(personaKey) {
+    const branch = BRANCHES[personaKey];
+    if (!branch) return;
+
+    const container = document.getElementById('dynamicStepsContainer');
+    container.innerHTML = '';
+
+    branch.questions.forEach((q, idx) => {
+      const stepNum = idx + 2; // Step 2, 3, etc.
+      const isFinalStep = stepNum === branch.questions.length + 1;
+
+      const card = document.createElement('div');
+      card.className = 'step-card';
+      card.id = 'dynStep_' + stepNum;
+
+      let optionsHtml = q.options.map(opt => `
+        <div class="option" data-dynstep="${stepNum}" data-qid="${q.id}" data-val="${opt.val}">
+          <div class="option-icon">${opt.icon}</div>
+          <div class="option-text">
+            <div class="option-label-row">
+              <span class="option-label">${opt.label}</span>
+              ${opt.pill ? `<span class="option-pill">${opt.pill}</span>` : ''}
+            </div>
+            <div class="option-desc">${opt.desc}</div>
+          </div>
+          <div class="option-check"></div>
+        </div>
+      `).join('');
+
+      card.innerHTML = `
+        <div class="track-indicator">${branch.badge}</div>
+        <div class="step-num-pill">Step ${stepNum} of ${branch.questions.length + 1}</div>
+        <div class="step-question">${q.title}</div>
+        <div class="step-hint">${q.hint}</div>
+        <div class="options">${optionsHtml}</div>
+        <div class="step-nav">
+          <button class="btn btn-ghost" type="button" onclick="goDynamicStep(${stepNum - 1})">← Back</button>
+          <button class="btn ${isFinalStep ? 'btn-next' : 'btn-next'}" id="dynNextBtn_${stepNum}" type="button" disabled onclick="${isFinalStep ? 'computeDynamicResults()' : `goDynamicStep(${stepNum + 1})`}">
+            ${isFinalStep ? '🎯 Get Tailored Recommendation →' : 'Next →'}
+          </button>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    // Attach click listeners to dynamically created options
+    container.querySelectorAll('.option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const stepNum = opt.dataset.dynstep;
+        const qid = opt.dataset.qid;
+        const val = opt.dataset.val;
+
+        container.querySelectorAll(`.option[data-dynstep="${stepNum}"]`).forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+
+        answers[qid] = val;
+        const nextBtn = document.getElementById('dynNextBtn_' + stepNum);
+        if (nextBtn) nextBtn.disabled = false;
+      });
+    });
+  }
+
+  // ─── STEP NAVIGATION ─────────────────────────────────────────────────────
+  function goDynamicStep(targetIndex) {
+    // Hide all step cards
+    document.getElementById('step1').classList.remove('active');
+    document.querySelectorAll('#dynamicStepsContainer .step-card').forEach(c => c.classList.remove('active'));
+
+    currentStepIndex = targetIndex;
+    updateProgressBar();
+
+    if (targetIndex === 1) {
+      document.getElementById('step1').classList.add('active');
+    } else {
+      const targetCard = document.getElementById('dynStep_' + targetIndex);
+      if (targetCard) targetCard.classList.add('active');
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function confirmPersonaAndProceed() {
+    renderDynamicSteps(currentPersona);
+    goDynamicStep(2);
+  }
+
+  // Handle Step 1 (Persona) Option Selection
+  document.querySelectorAll('#step1 .option').forEach(opt => {
     opt.addEventListener('click', () => {
-      const step = opt.dataset.step;
-      document.querySelectorAll(`.option[data-step="${step}"]`).forEach(o => o.classList.remove('selected'));
+      document.querySelectorAll('#step1 .option').forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
-      answers['step' + step] = opt.dataset.val;
-      const nextBtn = document.getElementById('next' + step);
-      if (nextBtn) nextBtn.disabled = false;
+
+      currentPersona = opt.dataset.val;
+      answers = { persona: currentPersona };
+      document.getElementById('next1').disabled = false;
+      updateProgressBar();
     });
   });
 
-  // ─── NAVIGATION ───────────────────────────────────────────────────────────
-  function goNext(current) {
-    document.getElementById('step' + current).classList.remove('active');
-    const next = current + 1;
-    document.getElementById('step' + next).classList.add('active');
-    updateProgress(next);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ─── 1-CLICK FAST PRESETS ────────────────────────────────────────────────
+  const QUICK_PRESETS = {
+    coder: {
+      persona: 'coder',
+      coding_scope: 'repo_refactor',
+      env_target: 'cloud_managed',
+      reasoning_mode: 'extended_thinking',
+      budget_level: 'frontier_tier'
+    },
+    api: {
+      persona: 'api',
+      api_interface: 'strict_json',
+      latency_sla: 'ultra_fast',
+      context_scale: 'standard_ctx',
+      api_budget: 'scale_budget'
+    },
+    enterprise: {
+      persona: 'enterprise',
+      enterprise_compliance: 'zdr_commercial',
+      enterprise_workload: 'legal_finance',
+      enterprise_context: 'archive_2m',
+      contracting_tier: 'flexible_usage'
+    },
+    student: {
+      persona: 'student',
+      academic_workload: 'stem_math_logic',
+      student_budget: 'strictly_free',
+      explanation_style: 'pedagogical_deep'
+    },
+    creator: {
+      persona: 'creator',
+      creator_focus: 'longform_prose',
+      voice_nuance: 'avoid_cliches',
+      deliberation_depth: 'deep_polish',
+      creator_budget: 'premium_pro'
+    }
+  };
+
+  function applyQuickPreset(presetKey) {
+    const p = QUICK_PRESETS[presetKey];
+    if (!p) return;
+
+    currentPersona = p.persona;
+    answers = { ...p };
+
+    // Select in Step 1
+    document.querySelectorAll('#step1 .option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.val === currentPersona);
+    });
+    document.getElementById('next1').disabled = false;
+
+    // Render branch & pre-select options
+    renderDynamicSteps(currentPersona);
+    for (let k in p) {
+      if (k === 'persona') continue;
+      const val = p[k];
+      const matchOpt = document.querySelector(`.option[data-qid="${k}"][data-val="${val}"]`);
+      if (matchOpt) {
+        matchOpt.classList.add('selected');
+        const parentStep = matchOpt.dataset.dynstep;
+        const nb = document.getElementById('dynNextBtn_' + parentStep);
+        if (nb) nb.disabled = false;
+      }
+    }
+
+    // Immediately compute results for fast instant feedback
+    computeDynamicResults();
   }
 
-  function goBack(current) {
-    document.getElementById('step' + current).classList.remove('active');
-    const prev = current - 1;
-    document.getElementById('step' + prev).classList.add('active');
-    updateProgress(prev);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ─── SCORING ENGINE ───────────────────────────────────────────────────────
-  function scoreModel(model, ans) {
-    let weights = { quality: 0.30, cost: 0.20, speed: 0.15, context: 0.15, privacy: 0.10, reliability: 0.10 };
-
-    // Step 1: Interface
-    if (ans.step1 === 'ide') {
-      weights.quality += 0.10;
-      weights.speed += 0.05;
-    } else if (ans.step1 === 'api') {
-      weights.cost += 0.15;
-      weights.speed += 0.10;
-    } else if (ans.step1 === 'enterprise') {
-      weights.privacy += 0.15;
-      weights.reliability += 0.15;
-    }
-
-    // Step 2: Complexity
-    if (ans.step2 === 'reasoning') {
-      weights.quality += 0.25;
-      weights.cost -= 0.10;
-    } else if (ans.step2 === 'triage') {
-      weights.speed += 0.25;
-      weights.cost += 0.15;
-      weights.quality -= 0.10;
-    } else if (ans.step2 === 'multimodal') {
-      weights.quality += 0.15;
-      weights.context += 0.10;
-    }
-
-    // Step 3: Context
-    if (ans.step3 === 'massive') {
-      weights.context += 0.30;
-    } else if (ans.step3 === 'short') {
-      weights.context -= 0.10;
-    }
-
-    // Step 4: Budget
-    if (ans.step4 === 'free') {
-      weights.cost += 0.40;
-      weights.quality -= 0.10;
-    } else if (ans.step4 === 'value') {
-      weights.cost += 0.20;
-    } else if (ans.step4 === 'unlimited') {
-      weights.quality += 0.30;
-      weights.cost = 0.05;
-    }
-
-    // Step 5: Privacy
-    if (ans.step5 === 'on_prem') {
-      weights.privacy += 0.40;
-    } else if (ans.step5 === 'confidential') {
-      weights.privacy += 0.15;
-    }
-
-    // Step 6: Speed vs Deliberate
-    if (ans.step6 === 'instant') {
-      weights.speed += 0.30;
-    } else if (ans.step6 === 'deliberate') {
-      weights.quality += 0.25;
-      weights.speed -= 0.10;
-    }
-
-    // Ensure weights remain non-negative
-    for (let k in weights) weights[k] = Math.max(0.02, weights[k]);
-
-    // Normalize weights
-    const sum = Object.values(weights).reduce((a, b) => a + b, 0);
-    for (let k in weights) weights[k] /= sum;
-
+  // ─── DYNAMIC SCORING ENGINE ──────────────────────────────────────────────
+  function scoreModelDynamic(model, ans) {
+    const p = ans.persona || 'coder';
+    let weights = { quality: 0.25, cost: 0.20, speed: 0.15, context: 0.15, privacy: 0.15, reliability: 0.10 };
     let score = 0;
-    for (const [dim, w] of Object.entries(weights)) {
-      score += w * ((model.scores && model.scores[dim]) || 80);
-    }
 
-    // --- HARD PENALTIES & BOOSTS ---
+    // ────────────────────────────
+    // 1. DEVELOPER / CODER TRACK
+    // ────────────────────────────
+    if (p === 'coder') {
+      weights = { quality: 0.35, cost: 0.10, speed: 0.20, context: 0.15, privacy: 0.10, reliability: 0.10 };
 
-    // 1. On-premise strict requirement
-    if (ans.step5 === 'on_prem') {
-      if (model.license !== 'open_weights') {
-        score *= 0.12; // Massive penalty on cloud-only models
-      } else {
-        score *= 1.35; // Boost open-weights models
+      if (ans.coding_scope === 'inline_fim') {
+        weights.speed += 0.25;
+        weights.cost += 0.10;
+        weights.quality -= 0.10;
+      } else if (ans.coding_scope === 'repo_refactor' || ans.coding_scope === 'agentic_loop') {
+        weights.quality += 0.25;
+        weights.context += 0.15;
+      }
+
+      if (ans.reasoning_mode === 'extended_thinking') {
+        weights.quality += 0.25;
+        weights.speed -= 0.15;
+      }
+
+      if (ans.budget_level === 'zero_cost') {
+        weights.cost += 0.35;
+      } else if (ans.budget_level === 'frontier_tier') {
+        weights.quality += 0.30;
+        weights.cost = 0.02;
+      }
+
+      // Base dimension score
+      score = computeWeightedSum(model, weights);
+
+      // Multipliers & benchmark boosts
+      if (ans.coding_scope === 'repo_refactor' || ans.coding_scope === 'agentic_loop') {
+        if (model.benchmarks && model.benchmarks.sweBench >= 45) score *= 1.30;
+        if (model.benchmarks && model.benchmarks.arenaCoding >= 1350) score *= 1.25;
+      }
+      if (ans.coding_scope === 'inline_fim') {
+        if ((model.speedTps || 0) >= 100) score *= 1.25;
+        if (model.tags && model.tags.includes('coding')) score *= 1.20;
+      }
+      if (ans.env_target === 'local_consumer') {
+        if (model.license !== 'open_weights') score *= 0.10; // strict penalty
+        else if (model.name.includes('7B') || model.name.includes('8B') || model.name.includes('14B')) score *= 1.40;
+      } else if (ans.env_target === 'local_workstation') {
+        if (model.license !== 'open_weights') score *= 0.10;
+        else if (model.name.includes('32B') || model.name.includes('70B') || model.name.includes('72B')) score *= 1.40;
+      }
+      if (ans.reasoning_mode === 'extended_thinking' && model.tags && model.tags.includes('reasoning')) {
+        score *= 1.30;
+      }
+      if (ans.budget_level === 'zero_cost' && model.inputPrice > 0) {
+        score *= 0.35;
       }
     }
 
-    // 2. Free budget constraint
-    if (ans.step4 === 'free') {
-      if (model.inputPrice > 0.0) {
-        score *= 0.45; // Penalize paid models when user explicitly demands $0
-      } else {
-        score *= 1.25; // Boost free/open models
+    // ────────────────────────────
+    // 2. PRODUCT BUILDER / API TRACK
+    // ────────────────────────────
+    else if (p === 'api') {
+      weights = { quality: 0.25, cost: 0.30, speed: 0.25, context: 0.10, privacy: 0.05, reliability: 0.05 };
+
+      if (ans.latency_sla === 'ultra_fast') {
+        weights.speed += 0.30;
+        weights.cost += 0.10;
+      }
+      if (ans.context_scale === 'large_ctx') {
+        weights.context += 0.30;
+      }
+      if (ans.api_budget === 'scale_budget') {
+        weights.cost += 0.35;
+      }
+
+      score = computeWeightedSum(model, weights);
+
+      if (ans.api_interface === 'strict_json') {
+        if (model.provider === 'Google' || model.provider === 'OpenAI' || model.provider === 'Anthropic') score *= 1.25;
+      }
+      if (ans.latency_sla === 'ultra_fast') {
+        if ((model.speedTps || 0) >= 110) score *= 1.35;
+        else if ((model.speedTps || 0) < 50) score *= 0.70;
+      }
+      if (ans.context_scale === 'large_ctx') {
+        if ((model.contextTokens || 0) >= 1000000) score *= 1.40;
+        else if ((model.contextTokens || 0) < 128000) score *= 0.60;
+      }
+      if (ans.api_budget === 'scale_budget') {
+        if (model.inputPrice <= 0.25) score *= 1.35;
+        else if (model.inputPrice > 2.0) score *= 0.50;
       }
     }
 
-    // 3. Massive context requirement (200k to 2M)
-    if (ans.step3 === 'massive') {
-      if ((model.contextTokens || 0) >= 1000000) {
-        score *= 1.35; // Major boost to 1M / 2M models (Gemini 2.5 Pro/Flash)
-      } else if ((model.contextTokens || 0) < 200000) {
-        score *= 0.65; // Penalty for smaller context
+    // ────────────────────────────
+    // 3. ENTERPRISE TRACK
+    // ────────────────────────────
+    else if (p === 'enterprise') {
+      weights = { quality: 0.30, cost: 0.10, speed: 0.10, context: 0.20, privacy: 0.20, reliability: 0.10 };
+
+      if (ans.enterprise_compliance === 'air_gapped_onprem') {
+        weights.privacy += 0.35;
+      }
+      if (ans.enterprise_context === 'archive_2m') {
+        weights.context += 0.30;
+      }
+
+      score = computeWeightedSum(model, weights);
+
+      if (ans.enterprise_compliance === 'air_gapped_onprem') {
+        if (model.license !== 'open_weights') score *= 0.05; // total block
+        else score *= 1.45;
+      } else if (ans.enterprise_compliance === 'zdr_commercial' || ans.enterprise_compliance === 'private_cloud_vpc') {
+        if (model.provider === 'Anthropic' || model.provider === 'Google' || model.provider === 'OpenAI') score *= 1.25;
+      }
+
+      if (ans.enterprise_workload === 'legal_finance') {
+        if (model.benchmarks.arenaElo >= 1350) score *= 1.25;
+      } else if (ans.enterprise_workload === 'customer_ops') {
+        if ((model.speedTps || 0) >= 80 && model.inputPrice <= 0.5) score *= 1.30;
+      }
+
+      if (ans.enterprise_context === 'archive_2m') {
+        if ((model.contextTokens || 0) >= 1000000) score *= 1.40;
       }
     }
 
-    // 4. Heavy reasoning task
-    if (ans.step2 === 'reasoning') {
-      if (model.tags && model.tags.includes('reasoning')) {
-        score *= 1.25; // Boost reasoning models (o1, o3-mini, R1, Claude 3.7)
+    // ────────────────────────────
+    // 4. STUDENT & ACADEMIC TRACK
+    // ────────────────────────────
+    else if (p === 'student') {
+      weights = { quality: 0.30, cost: 0.35, speed: 0.10, context: 0.15, privacy: 0.05, reliability: 0.05 };
+
+      if (ans.academic_workload === 'stem_math_logic') {
+        weights.quality += 0.25;
+      } else if (ans.academic_workload === 'paper_synthesis') {
+        weights.context += 0.25;
+      }
+
+      score = computeWeightedSum(model, weights);
+
+      if (ans.academic_workload === 'stem_math_logic') {
+        if (model.benchmarks && model.benchmarks.mmluPro >= 80) score *= 1.25;
+        if (model.tags && model.tags.includes('reasoning')) score *= 1.35;
+      } else if (ans.academic_workload === 'paper_synthesis') {
+        if ((model.contextTokens || 0) >= 500000) score *= 1.35;
+      }
+
+      if (ans.student_budget === 'strictly_free') {
+        if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
+        else if (model.inputPrice <= 0.20) score *= 1.15; // accessible free web / micro tiers
+        else score *= 0.45;
       }
     }
 
-    // 5. IDE / Coding task
-    if (ans.step1 === 'ide' || (model.tags && model.tags.includes('coding') && ans.step2 === 'reasoning')) {
-      if (model.benchmarks && model.benchmarks.sweBench >= 45) {
-        score *= 1.20; // Boost SWE-bench verified leaders
+    // ────────────────────────────
+    // 5. CREATOR & WRITER TRACK
+    // ────────────────────────────
+    else if (p === 'creator') {
+      weights = { quality: 0.40, cost: 0.15, speed: 0.15, context: 0.15, privacy: 0.05, reliability: 0.10 };
+
+      score = computeWeightedSum(model, weights);
+
+      if (ans.voice_nuance === 'avoid_cliches' || ans.creator_focus === 'longform_prose') {
+        if (model.provider === 'Anthropic') score *= 1.35; // Claude renowned for natural literary cadence
+        else if (model.benchmarks.arenaElo >= 1350) score *= 1.20;
+      }
+      if (ans.creator_focus === 'marketing_copy') {
+        if (model.provider === 'OpenAI' || model.provider === 'Anthropic') score *= 1.20;
+      }
+      if (ans.deliberation_depth === 'fast_brainstorm' && (model.speedTps || 0) >= 80) {
+        score *= 1.20;
+      }
+      if (ans.creator_budget === 'free_accessible' && (model.inputPrice === 0 || model.inputPrice <= 0.20)) {
+        score *= 1.30;
       }
     }
 
     return score;
   }
 
-  function computeResults() {
-    const ans = answers;
-    const scored = models.map(m => ({ model: m, score: scoreModel(m, ans) }));
+  function computeWeightedSum(model, weights) {
+    for (let k in weights) weights[k] = Math.max(0.02, weights[k]);
+    const sum = Object.values(weights).reduce((a, b) => a + b, 0);
+    for (let k in weights) weights[k] /= sum;
+
+    let total = 0;
+    for (const [dim, w] of Object.entries(weights)) {
+      total += w * ((model.scores && model.scores[dim]) || 80);
+    }
+    return total;
+  }
+
+  // ─── EXECUTE DYNAMIC RECOMMENDATION ──────────────────────────────────────
+  function computeDynamicResults() {
+    const scored = models.map(m => ({ model: m, score: scoreModelDynamic(m, answers) }));
     scored.sort((a, b) => b.score - a.score);
 
     const primary = scored[0].model;
     const runner = scored[1].model;
-    // Budget pick = highest cost score among top 6, if different from primary
-    const budgetPick = scored.slice(0, 6).sort((a, b) => ((b.model.scores && b.model.scores.cost) || 0) - ((a.model.scores && a.model.scores.cost) || 0))[0].model;
+    const budgetPick = scored.slice(0, 8).sort((a, b) => ((b.model.scores && b.model.scores.cost) || 0) - ((a.model.scores && a.model.scores.cost) || 0))[0].model;
 
-    renderResults(primary, runner, budgetPick, ans, scored[0].score);
+    renderDynamicResults(primary, runner, budgetPick, answers, scored[0].score);
   }
 
-  function renderResults(primary, runner, budget, ans, rawScore) {
-    // Hide steps
+  function renderDynamicResults(primary, runner, budget, ans, rawScore) {
     document.getElementById('progressWrap').style.display = 'none';
     document.getElementById('finderHeader').style.display = 'none';
-    for (let i = 1; i <= 6; i++) document.getElementById('step' + i).style.display = 'none';
+    document.getElementById('step1').style.display = 'none';
+    document.querySelectorAll('#dynamicStepsContainer .step-card').forEach(c => c.style.display = 'none');
 
     const normScore = Math.min(99, Math.round(rawScore));
-    
-    // Label translations
-    const interfaceLabels = {
-      web_app: 'web & conversational use',
-      ide: 'IDE coding & software development',
-      api: 'API & product backend integration',
-      enterprise: 'enterprise infrastructure'
-    };
-    const taskLabels = {
-      drafting: 'clear drafting & communication',
-      reasoning: 'heavy logic, math & architecture',
-      triage: 'high-volume repetitive triage',
-      multimodal: 'visual & multimodal analysis'
-    };
+    const branch = BRANCHES[ans.persona] || BRANCHES.coder;
 
-    const taskText = taskLabels[ans.step2] || 'your core workload';
-    const interfaceText = interfaceLabels[ans.step1] || 'your workflow';
+    // Track-specific verdict generation
+    let verdictLines = [];
+    if (ans.persona === 'coder') {
+      verdictLines.push(`<strong>✅ ${primary.name} is your #1 coding champion</strong> for your software engineering track.`);
+      if (ans.coding_scope === 'repo_refactor') verdictLines.push(`Its top-tier SWE-bench Verified coding capability reliably navigates complex multi-file dependency trees.`);
+      if (ans.env_target === 'local_consumer' || ans.env_target === 'local_workstation') verdictLines.push(`It is available as open-weights and is properly sized to run directly on your hardware via Ollama or vLLM.`);
+      if (ans.reasoning_mode === 'extended_thinking') verdictLines.push(`Its deliberate reasoning engine eliminates hallucinations on complex algorithms.`);
+    } else if (ans.persona === 'api') {
+      verdictLines.push(`<strong>✅ ${primary.name} is your optimal API backend model</strong>.`);
+      if (ans.api_interface === 'strict_json') verdictLines.push(`It supports 100% compliant strict JSON schema output, preventing deserialization errors in production.`);
+      if (ans.latency_sla === 'ultra_fast') verdictLines.push(`Its high throughput (${primary.speedTps ? primary.speedTps + ' t/s' : 'Fast'}) satisfies your real-time sub-400ms TTFT SLA.`);
+      if (ans.api_budget === 'scale_budget') verdictLines.push(`Its ultra-competitive pricing (${primary.pricing}) ensures sustainable unit economics at scale.`);
+    } else if (ans.persona === 'enterprise') {
+      verdictLines.push(`<strong>✅ ${primary.name} meets your enterprise compliance and infrastructure standards</strong>.`);
+      if (ans.enterprise_compliance === 'air_gapped_onprem') verdictLines.push(`It is 100% open-weights, allowing sovereign, air-gapped on-premises deployment without third-party cloud data transmission.`);
+      if (ans.enterprise_compliance === 'zdr_commercial') verdictLines.push(`Available with enterprise Zero Data Retention (ZDR) and HIPAA / SOC-2 Type II agreements.`);
+      if (ans.enterprise_context === 'archive_2m') verdictLines.push(`Its massive ${primary.contextWindow} context window eliminates vector RAG chunking bottlenecks.`);
+    } else if (ans.persona === 'student') {
+      verdictLines.push(`<strong>✅ ${primary.name} is your best academic research and learning partner</strong>.`);
+      if (ans.academic_workload === 'stem_math_logic') verdictLines.push(`It delivers state-of-the-art step-by-step mathematical reasoning on STEM proofs.`);
+      if (ans.academic_workload === 'paper_synthesis') verdictLines.push(`Its large context window easily digests dense multi-page academic PDFs.`);
+      if (ans.student_budget === 'strictly_free') verdictLines.push(`Accessible completely free through zero-dollar tiers without financial barrier.`);
+    } else if (ans.persona === 'creator') {
+      verdictLines.push(`<strong>✅ ${primary.name} is your premier creative writing partner</strong>.`);
+      if (ans.voice_nuance === 'avoid_cliches') verdictLines.push(`Renowned for authentic human cadence, rich sentence structure, and freedom from repetitive AI buzzwords.`);
+      if (ans.creator_focus === 'longform_prose') verdictLines.push(`Maintains narrative coherence and stylistic voice across long-form chapters and editorial newsletters.`);
+    }
 
-    // Build verdict
-    let verdictLines = [`<strong>✅ ${primary.name} is your best match</strong> for ${taskText} via ${interfaceText}.`];
-    if (ans.step4 === 'free') verdictLines.push(`It supports zero-dollar cost constraints through open weights or accessible tiers.`);
-    if (ans.step4 === 'value') verdictLines.push(`It maximizes output quality while keeping token expenditures minimal.`);
-    if (ans.step6 === 'instant') verdictLines.push(`Its measured throughput (${primary.speedTps ? primary.speedTps + ' t/s' : 'high speed'}) meets your real-time latency needs.`);
-    if (ans.step3 === 'massive') verdictLines.push(`Its massive ${primary.contextWindow} context window natively handles whole codebases and archives.`);
-
-    // Privacy warning
     let warning = '';
-    if (ans.step5 === 'on_prem') {
-      warning = `<strong>🛡️ On-Premises Privacy Confirmed:</strong> ${primary.name} is open weights. You can run it on your own hardware via Ollama, vLLM, or private VPC without any third-party data transmission.`;
-    } else if (ans.step5 === 'confidential' && primary.license !== 'open_weights') {
-      warning = `<strong>🔒 Enterprise Privacy Note:</strong> ${primary.name} is accessed via API. Ensure your team enables Zero-Data-Retention (ZDR) and confirms terms prohibiting model training on your prompts.`;
+    if (ans.enterprise_compliance === 'air_gapped_onprem' || ans.env_target?.includes('local')) {
+      warning = `<strong>🛡️ Self-Hosted Privacy Confirmed:</strong> ${primary.name} is open weights. Run it locally via Ollama, vLLM, or private server with 0% data leakage.`;
     }
 
     const runnerReason = runner.desc || `${runner.name} is a strong runner-up with Arena Elo ${runner.benchmarks.arenaElo} and ${runner.bestForLabel}.`;
-
-    // Budget check
     const budgetIsUnique = budget.id !== primary.id;
 
     const dimColors = { quality: '#a78bfa', cost: '#22c55e', speed: '#f59e0b', context: '#06b6d4', privacy: '#f472b6', reliability: '#818cf8' };
@@ -805,7 +1376,7 @@
 
     const html = `
       <div class="top-pick">
-        <div class="top-pick-badge">🏆 Top Recommendation</div>
+        <div class="top-pick-badge">🏆 Top Recommendation · ${branch.badge}</div>
         <div class="top-pick-model-row">
           <div>
             <div class="top-pick-name">${primary.name}</div>
@@ -823,7 +1394,7 @@
         <div class="pick-meta">
           <div class="pick-meta-item"><span>📏</span>${primary.contextWindow} tokens</div>
           <div class="pick-meta-item"><span>💵</span>${primary.pricing}</div>
-          <div class="pick-meta-item"><span>⚡</span>${primary.speedTps ? primary.speedTps + ' t/s' : 'Fast'}</div>
+          <div class="pick-meta-item"><span>⚡</span>${primary.speedTps ? primary.speedTps + ' t/s' : 'High Speed'}</div>
           <div class="pick-meta-item"><span>🛡️</span>${primary.license === 'open_weights' ? 'Open Weights' : 'API Service'}</div>
         </div>
       </div>
@@ -840,7 +1411,7 @@
           <div class="alt-card-badge badge-budget">Budget pick</div>
           <div class="alt-card-name">${budget.name}</div>
           <div style="font-size:0.78rem;color:${budget.providerColor || '#7a8a9a'};margin-bottom:0.5rem;">${budget.provider}</div>
-          <div class="alt-card-reason">Best cost-efficiency among top models. Cost score: ${(budget.scores && budget.scores.cost) || 90}/100. ${budget.pricing}.</div>
+          <div class="alt-card-reason">Best cost-efficiency in class. Cost score: ${(budget.scores && budget.scores.cost) || 90}/100. ${budget.pricing}.</div>
           <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${budget.contextWindow} · ${budget.pricing}</div>
         </div>` : `<div class="alt-card">
           <div class="alt-card-badge badge-budget">Best Value</div>
@@ -861,7 +1432,7 @@
             <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How much will 10M tokens cost on ${escapeAttr(primary.name)}?')">💵 Token Pricing</button>
           </div>
         </div>
-        <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('I selected ${escapeAttr(primary.name)}. Help me plan my setup and trade-offs.')" style="white-space:nowrap;padding:0.75rem 1.4rem;">
+        <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('I selected ${escapeAttr(primary.name)} on the ${branch.badge}. Help me plan my setup and trade-offs.')" style="white-space:nowrap;padding:0.75rem 1.4rem;">
           Chat with Advisor &rarr;
         </button>
       </div>`;
@@ -869,11 +1440,10 @@
     document.getElementById('resultsContent').innerHTML = html;
     document.getElementById('results').classList.add('active');
 
-    // Notify Advisor of current quiz results
+    // Sync state with AI Advisor
     if (window.ModelAtlasChat) {
       window.ModelAtlasChat.setQuizContext({
-        task: taskText,
-        interface: interfaceText,
+        track: branch.title,
         answers: ans,
         primary: primary,
         runner: runner,
@@ -893,22 +1463,27 @@
   }
 
   function resetFinder() {
-    answers = {};
+    answers = { persona: 'coder' };
+    currentPersona = 'coder';
+    currentStepIndex = 1;
+
     document.getElementById('progressWrap').style.display = '';
     document.getElementById('finderHeader').style.display = '';
     document.getElementById('results').classList.remove('active');
     document.getElementById('resultsContent').innerHTML = '';
-    for (let i = 1; i <= 6; i++) {
-      const step = document.getElementById('step' + i);
-      step.style.display = '';
-      step.classList.remove('active');
-      document.querySelectorAll(`.option[data-step="${i}"]`).forEach(o => o.classList.remove('selected'));
-      const nb = document.getElementById('next' + i);
-      if (nb) nb.disabled = true;
-    }
+
+    document.getElementById('step1').style.display = '';
     document.getElementById('step1').classList.add('active');
-    updateProgress(1);
+    document.querySelectorAll('#step1 .option').forEach(o => o.classList.remove('selected'));
+    document.getElementById('next1').disabled = true;
+
+    document.getElementById('dynamicStepsContainer').innerHTML = '';
+    updateProgressBar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // Initial load
+  updateProgressBar();
 </script>
 <script src="chat_widget.js"></script>
 </body>
