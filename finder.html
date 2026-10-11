@@ -1194,7 +1194,9 @@
       // Multipliers & benchmark boosts
       if (ans.coding_scope === 'repo_refactor' || ans.coding_scope === 'agentic_loop') {
         if (model.benchmarks && model.benchmarks.sweBench >= 45) score *= 1.30;
+        else if (model.benchmarks && model.benchmarks.sweBench >= 38) score *= 1.25;
         if (model.benchmarks && model.benchmarks.arenaCoding >= 1350) score *= 1.25;
+        else if (model.benchmarks && model.benchmarks.arenaCoding >= 1300) score *= 1.15;
       }
       if (ans.coding_scope === 'inline_fim') {
         if ((model.speedTps || 0) >= 100) score *= 1.25;
@@ -1205,12 +1207,15 @@
         else if (model.name.includes('7B') || model.name.includes('8B') || model.name.includes('14B')) score *= 1.40;
       } else if (ans.env_target === 'local_workstation') {
         if (model.license !== 'open_weights') score *= 0.10;
-        else if (model.name.includes('32B') || model.name.includes('70B') || model.name.includes('72B')) score *= 1.40;
+        else {
+          if (model.name.includes('32B') || model.name.includes('70B') || model.name.includes('72B')) score *= 1.40;
+          if (model.id === 'qwq-32b-preview' || model.id === 'qwen-2-5-coder-32b' || model.id === 'llama-3-3-70b' || model.id === 'deepseek-r1') score *= 1.30;
+        }
       }
       if (ans.reasoning_mode === 'extended_thinking' && model.tags && model.tags.includes('reasoning')) {
         score *= 1.30;
       }
-      if (ans.budget_level === 'zero_cost' && model.inputPrice > 0) {
+      if (ans.budget_level === 'zero_cost' && model.inputPrice > 0 && model.license !== 'open_weights') {
         score *= 0.35;
       }
     }
@@ -1230,24 +1235,36 @@
       }
       if (ans.api_budget === 'scale_budget') {
         weights.cost += 0.35;
+      } else if (ans.api_budget === 'premium_api') {
+        weights.quality += 0.35;
+        weights.cost = 0.02;
       }
 
       score = computeWeightedSum(model, weights);
 
       if (ans.api_interface === 'strict_json') {
         if (model.provider === 'Google' || model.provider === 'OpenAI' || model.provider === 'Anthropic') score *= 1.25;
+      } else if (ans.api_interface === 'multi_tool') {
+        if (model.name.includes('Claude 3.7') || model.name.includes('Claude 3.5') || model.name.includes('GPT-4o') || model.name.includes('Gemini 2.5 Pro')) {
+          score *= 1.35;
+        }
+        if (model.benchmarks && model.benchmarks.sweBench >= 45) score *= 1.20;
       }
+
       if (ans.latency_sla === 'ultra_fast') {
         if ((model.speedTps || 0) >= 110) score *= 1.35;
         else if ((model.speedTps || 0) < 50) score *= 0.70;
       }
       if (ans.context_scale === 'large_ctx') {
-        if ((model.contextTokens || 0) >= 1000000) score *= 1.40;
+        if ((model.contextTokens || 0) >= 1000000) score *= 1.35;
+        else if ((model.contextTokens || 0) >= 200000) score *= 1.25;
         else if ((model.contextTokens || 0) < 128000) score *= 0.60;
       }
       if (ans.api_budget === 'scale_budget') {
         if (model.inputPrice <= 0.25) score *= 1.35;
         else if (model.inputPrice > 2.0) score *= 0.50;
+      } else if (ans.api_budget === 'premium_api') {
+        if (model.scores && model.scores.quality >= 93) score *= 1.25;
       }
     }
 
@@ -1268,13 +1285,20 @@
 
       if (ans.enterprise_compliance === 'air_gapped_onprem') {
         if (model.license !== 'open_weights') score *= 0.05; // total block
-        else score *= 1.45;
+        else {
+          score *= 1.45;
+          if (model.id === 'deepseek-r1' || model.id === 'llama-3-3-70b' || model.id === 'qwen-2-5-72b') score *= 1.30;
+        }
       } else if (ans.enterprise_compliance === 'zdr_commercial' || ans.enterprise_compliance === 'private_cloud_vpc') {
         if (model.provider === 'Anthropic' || model.provider === 'Google' || model.provider === 'OpenAI') score *= 1.25;
       }
 
       if (ans.enterprise_workload === 'legal_finance') {
-        if (model.benchmarks.arenaElo >= 1350) score *= 1.25;
+        if (model.benchmarks && model.benchmarks.mmluPro >= 75) score *= 1.30;
+        if (model.benchmarks && model.benchmarks.arenaElo >= 1350) score *= 1.20;
+        // Enterprise scale filter: penalize small sub-14B models for legal/financial audits
+        if (model.name.match(/\b(7B|8B|3B|1B|6B|OpenChat)\b/i)) score *= 0.60;
+        if (model.name.match(/\b(70B|72B|405B|R1|8x22B)\b/i) || model.id === 'deepseek-r1') score *= 1.25;
       } else if (ans.enterprise_workload === 'customer_ops') {
         if ((model.speedTps || 0) >= 80 && model.inputPrice <= 0.5) score *= 1.30;
       }
