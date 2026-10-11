@@ -410,3 +410,150 @@
   }
 }
 
+/* ==========================================================================
+   IN-CHAT INTERACTIVE RECOMMENDATION CARD STYLES
+   ========================================================================== */
+.atlas-card-recom {
+  background: linear-gradient(145deg, rgba(20, 32, 48, 0.95) 0%, rgba(10, 18, 28, 0.98) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 8px 0;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.1);
+}
+.atlas-card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+}
+.atlas-card-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fbbf24;
+}
+.atlas-card-track {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #06b6d4;
+  background: rgba(6, 182, 212, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(6, 182, 212, 0.25);
+}
+.atlas-card-body {
+  padding: 12px;
+}
+.atlas-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.atlas-card-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+.atlas-card-provider {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.atlas-card-score-pill {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #040b13;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.95rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+  flex-shrink: 0;
+}
+.atlas-card-score-sub {
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-top: 1px;
+}
+.atlas-card-verdict {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+  margin: 0 0 10px 0;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2.5px solid #f59e0b;
+  border-radius: 0 6px 6px 0;
+}
+.atlas-card-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.atlas-spec-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.atlas-spec-item span {
+  font-size: 0.8rem;
+}
+.atlas-spec-item strong {
+  color: #e2e8f0;
+}
+.atlas-card-runner {
+  font-size: 0.74rem;
+  color: #7a8a9a;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+}
+.atlas-card-runner strong {
+  color: #cbd5e1;
+}
+.atlas-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.atlas-action-btn {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.atlas-action-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+}
+
+
