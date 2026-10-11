@@ -146,7 +146,11 @@
   // ─── CONVERSATIONAL INTENT & CONSTRAINT EXTRACTOR ─────────────────────────
   function detectRecommendationIntent(text) {
     const t = text.toLowerCase();
-    return /(recommend|suggest|which.*model|what.*model|should i use|best.*model|help me pick|i need an ai|find me.*model|looking for.*model|i want to run|what to use|good.*model|model to use|pick a model)/i.test(t);
+    // Exclude purely informational queries like "which models have 1M context", "list models with", etc.
+    if (/which models (have|support|are)|list models|what models (have|support|are)/i.test(t)) {
+      return false;
+    }
+    return /(recommend|suggest|which.*model.*should|what.*model.*should|should i use|best.*model|help me pick|i need an? (ai|model)|we need an? (ai|model)|find me.*(ai|model)|looking for.*(ai|model)|want to run.*(ai|model)|want an? (ai|model)|what to use|good.*model.*for|model to use|pick a model|need a.*model|need an.*model|run.*model)/i.test(t);
   }
 
   function extractConstraintsFromChat(text, prevMemory) {
@@ -154,14 +158,14 @@
     let persona = prevMemory?.activeTrack || 'coder';
 
     // Persona identification
-    if (/student|homework|study|exam|test prep|mock test|quiz|textbook|medical|usmle|doctor|engineering|calculus|math|biology|college|university|school|thesis|essay/i.test(t)) {
+    if (/novel|fiction|writing|writer|blog|article|author|prose|clich|copywriting|creative/i.test(t)) {
+      persona = 'creator';
+    } else if (/student|homework|study|exam|test prep|mock test|quiz|textbook|medical|usmle|doctor|engineering|calculus|math|biology|college|university|school|thesis|essay/i.test(t)) {
       persona = 'student';
     } else if (/api|json|schema|saas|backend|latency|throughput|ttft|tool calling|function calling/i.test(t)) {
       persona = 'api';
-    } else if (/enterprise|corporate|compliance|hipaa|soc-2|soc2|zdr|air-gap|airgapped|on-prem|sovereign|legal|audit|finance/i.test(t)) {
+    } else if (/enterprise|corporate|compliance|hipaa|soc-2|soc2|zdr|air-gap|airgapped|on-prem|sovereign|legal|contract|audit|finance/i.test(t)) {
       persona = 'enterprise';
-    } else if (/writing|writer|blog|article|novel|author|prose|copywriting|marketing|creative/i.test(t)) {
-      persona = 'creator';
     } else if (/code|coding|developer|python|react|refactor|software|git|bug|swe|cursor|terminal/i.test(t)) {
       persona = 'coder';
     }
@@ -255,6 +259,11 @@
       else if (ans.budget_level === 'frontier_tier') { weights.quality += 0.30; weights.cost = 0.02; }
 
       score = computeWeightedSum(model, weights);
+
+      // Boost dedicated coding models
+      if (model.tags && model.tags.includes('coding')) score *= 1.25;
+      if (model.id.includes('coder') || model.id === 'qwen-2-5-7b' || model.id === 'qwen-2-5-14b' || model.id === 'ibm-granite-3-8b') score *= 1.20;
+
       if (ans.coding_scope === 'repo_refactor' || ans.coding_scope === 'agentic_loop') {
         if (model.benchmarks && model.benchmarks.sweBench >= 45) score *= 1.30;
         else if (model.benchmarks && model.benchmarks.sweBench >= 38) score *= 1.25;
@@ -263,12 +272,11 @@
       }
       if (ans.coding_scope === 'inline_fim') {
         if ((model.speedTps || 0) >= 100) score *= 1.25;
-        if (model.tags && model.tags.includes('coding')) score *= 1.20;
       }
       if (ans.env_target === 'local_consumer') {
         if (model.license !== 'open_weights') score *= 0.10;
         else if (model.name.includes('7B') || model.name.includes('8B') || model.name.includes('14B')) score *= 1.40;
-        else score *= 0.40; // Penalize oversized models (32B, 70B, 671B) for consumer laptops
+        else score *= 0.35; // Penalize oversized models (32B, 70B, 671B) for consumer laptops
       } else if (ans.env_target === 'local_workstation') {
         if (model.license !== 'open_weights') score *= 0.10;
         else {
@@ -435,6 +443,8 @@
             <button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('Show integration code and setup for ${safePrimary}')">💻 Code Setup</button>
             <button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('What hardware and VRAM is needed for ${safePrimary}?')">🖥️ Hardware Specs</button>
             ${runner ? `<button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('Compare ${safePrimary} vs ${safeRunner}')">⚖️ Compare vs ${safeRunner}</button>` : ''}
+            ${runner ? `<a href="compare.html?m1=${encodeURIComponent(primary.id)}&m2=${encodeURIComponent(runner.id)}" class="atlas-action-btn" style="text-decoration:none">📊 Compare Page &rarr;</a>` : ''}
+            <a href="leaderboard.html" class="atlas-action-btn" style="text-decoration:none">🏆 Leaderboard &rarr;</a>
           </div>
         </div>
       </div>
@@ -506,8 +516,58 @@
       `;
     }
 
-    // ─── PATH 3: HARDWARE & VRAM SIZING ───
-    if (q.includes('hardware') || q.includes('vram') || q.includes('ram') || q.includes('local') || q.includes('self-host') || q.includes('run')) {
+    // ─── PATH 3: CODE INTEGRATION SNIPPET (Checked before hardware) ───
+    if (q.includes('code') || q.includes('python') || q.includes('curl') || q.includes('sdk') || q.includes('integrate') || q.includes('ollama run') || q.includes('snippet') || q.includes('script')) {
+      const target = findModel(q) || sessionMemory.lastRecommendedModel || models.find(m => m.id === 'claude-3-7-sonnet');
+      if (target.license === 'open_weights') {
+        const ollamaTag = target.id.replace(/-instruct|-chat/g, '');
+        return `
+          💻 <strong>Local Ollama Execution (${target.name}):</strong><br>
+          <pre style="position:relative"><button class="atlas-copy-code-btn" type="button" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.textContent='✓ Copied!'; setTimeout(()=>this.textContent='📋 Copy', 1500)">📋 Copy</button><code># 1. Pull and run locally via Ollama
+ollama run ${ollamaTag}
+
+# 2. Test in Python (OpenAI-compatible local server)
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+response = client.chat.completions.create(
+    model="${ollamaTag}",
+    messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
+)
+print(response.choices[0].message.content)</code></pre>
+        `;
+      }
+      if (target.provider === 'Anthropic') {
+        return `
+          💻 <strong>Anthropic Python Integration (${target.name}):</strong><br>
+          <pre style="position:relative"><button class="atlas-copy-code-btn" type="button" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.textContent='✓ Copied!'; setTimeout(()=>this.textContent='📋 Copy', 1500)">📋 Copy</button><code>import anthropic
+
+client = anthropic.Anthropic()
+response = client.messages.create(
+    model="${target.id}",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
+)
+print(response.content[0].text)</code></pre>
+        `;
+      }
+      return `
+        💻 <strong>OpenAI-Compatible Python Integration (${target.name}):</strong><br>
+        <pre style="position:relative"><button class="atlas-copy-code-btn" type="button" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.textContent='✓ Copied!'; setTimeout(()=>this.textContent='📋 Copy', 1500)">📋 Copy</button><code>from openai import OpenAI
+
+client = OpenAI()
+response = client.chat.completions.create(
+    model="${target.id}",
+    messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
+)
+print(response.choices[0].message.content)</code></pre>
+      `;
+    }
+
+    // ─── PATH 4: HARDWARE & VRAM SIZING ───
+    if (q.includes('hardware') || q.includes('vram') || q.includes('gpu memory') || q.includes('quantiz') || 
+        (q.includes('run') && (q.includes('local') || q.includes('offline') || q.includes('laptop') || q.includes('mac') || q.includes('workstation') || q.includes('gpu') || q.includes('spec') || q.includes('self-host'))) ||
+        (q.includes('ram') && !q.includes('program'))) {
       const targetModel = findModel(q) || sessionMemory.lastRecommendedModel;
       if (targetModel && (targetModel.name.includes('70B') || targetModel.name.includes('72B'))) {
         return `
@@ -551,7 +611,21 @@
       `;
     }
 
-    // ─── PATH 4: HEAD-TO-HEAD COMPARISON ───
+    // ─── PATH 5: CONTEXT WINDOW LEADERS ───
+    if (q.includes('context') || q.includes('1m') || q.includes('2m') || q.includes('long document') || q.includes('largest context') || q.includes('million tokens')) {
+      return `
+        📚 <strong>Ultra-Long Context Leaders:</strong><br><br>
+        <ul>
+          <li><strong>Gemini 2.5 Pro:</strong> <strong>2,000,000 tokens</strong> (~1.5 million words / 3,000 pages of code or text in a single prompt).</li>
+          <li><strong>Gemini 2.5 Flash:</strong> <strong>1,000,000 tokens</strong> with sub-second retrieval at $0.15 / $0.60 per M.</li>
+          <li><strong>Amazon Nova Pro:</strong> <strong>300,000 tokens</strong> on AWS Bedrock.</li>
+          <li><strong>Codestral 22B:</strong> <strong>256,000 tokens</strong> for massive code repositories.</li>
+          <li><strong>Claude 3.7 Sonnet / OpenAI o3-mini:</strong> <strong>200,000 tokens</strong> with high needle-in-haystack accuracy.</li>
+        </ul>
+      `;
+    }
+
+    // ─── PATH 6: HEAD-TO-HEAD COMPARISON ───
     if (q.includes('compare') || q.includes(' vs ') || q.includes('versus') || q.includes('difference between')) {
       const m1 = findModel(q) || sessionMemory.lastRecommendedModel;
       const remaining = m1 ? q.replace(m1.id, '').replace(m1.name.toLowerCase(), '') : q;
@@ -574,51 +648,80 @@
       }
     }
 
-    // ─── PATH 5: CODE INTEGRATION SNIPPET ───
-    if (q.includes('code') || q.includes('python') || q.includes('curl') || q.includes('sdk') || q.includes('integrate') || q.includes('ollama run')) {
-      const target = findModel(q) || sessionMemory.lastRecommendedModel || models.find(m => m.id === 'claude-3-7-sonnet');
-      if (target.license === 'open_weights') {
-        const ollamaTag = target.id.replace(/-instruct|-chat/g, '');
-        return `
-          💻 <strong>Local Ollama Execution (${target.name}):</strong><br>
-          <pre># Run directly on your machine
-ollama run ${ollamaTag}
+    // ─── PATH 7: TOKEN COST CALCULATIONS ───
+    if (q.includes('cost') || q.includes('price') || q.includes('pricing') || q.includes('how much') || q.includes('tokens')) {
+      const target = findModel(q) || sessionMemory.lastRecommendedModel || models[0];
+      const millionMatch = q.match(/(\d+)\s*(million|m\b)/i);
+      const numMillions = millionMatch ? parseInt(millionMatch[1], 10) : 1;
 
-# Test with Python
-from openai import OpenAI
+      const inCost = ((target.inputPrice || 0.15) * numMillions).toFixed(2);
+      const outCost = ((target.outputPrice || 0.60) * numMillions).toFixed(2);
+      const blendedCost = (((target.inputPrice || 0.15) * 0.75 + (target.outputPrice || 0.60) * 0.25) * numMillions).toFixed(2);
 
-client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
-response = client.chat.completions.create(
-    model="${ollamaTag}",
-    messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
-)
-print(response.choices[0].message.content)</pre>
-        `;
-      }
-      if (target.provider === 'Anthropic') {
-        return `
-          💻 <strong>Anthropic Python Integration (${target.name}):</strong><br>
-          <pre>import anthropic
-
-client = anthropic.Anthropic()
-response = client.messages.create(
-    model="${target.id}",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
-)
-print(response.content[0].text)</pre>
-        `;
-      }
       return `
-        💻 <strong>OpenAI-Compatible Python Integration (${target.name}):</strong><br>
-        <pre>from openai import OpenAI
+        💵 <strong>Cost Estimation for ${target.name} (${numMillions}M Tokens):</strong><br><br>
+        Standard pricing: <code>$${target.inputPrice || 0} input / $${target.outputPrice || 0} output per 1M tokens</code><br><br>
+        For <strong>${numMillions} million tokens</strong>:<br>
+        • All Input tokens: <strong>$${inCost}</strong><br>
+        • All Output tokens: <strong>$${outCost}</strong><br>
+        • Typical Blended workflow (3:1 input-to-output ratio): <strong>~$${blendedCost}</strong><br><br>
+        ${target.license === 'open_weights' ? '💡 <em>This model is open-weights. You can also self-host it for $0 API token costs!</em>' : ''}
+      `;
+    }
 
-client = OpenAI()
-response = client.chat.completions.create(
-    model="${target.id}",
-    messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
-)
-print(response.choices[0].message.content)</pre>
+    // ─── PATH 8: STUDENT DOMAIN WORKFLOWS ───
+    if (q.includes('free student') || q.includes('without a credit card') || q.includes('free access') || (q.includes('free') && q.includes('student'))) {
+      return `
+        🆓 <strong>How to Use Top AI Models 100% Free as a Student:</strong><br><br>
+        You do <strong>not</strong> need to pay $20/month. Here is how to access frontier intelligence at zero cost:<br><br>
+        <ol>
+          <li><strong>Google AI Studio (Gemini 2.5 Pro & Flash):</strong> Free access with your Google account. Gives you a <strong>2 Million token context window</strong> for full textbooks completely free.</li>
+          <li><strong>DeepSeek Web (chat.deepseek.com):</strong> 100% free web chat with <strong>DeepSeek R1</strong> (world-class math reasoning) and <strong>DeepSeek V3</strong> with no credit card required.</li>
+          <li><strong>Local Ollama (Offline Laptop):</strong> Download <strong>Ollama</strong> (free) and run <strong>Qwen 2.5 Coder 7B</strong> or <strong>Llama 3.1 8B</strong> on your laptop with zero internet required.</li>
+        </ol>
+      `;
+    }
+    if (q.includes('exam') || q.includes('sample question') || q.includes('mock') || q.includes('quiz') || q.includes('test prep')) {
+      const target = sessionMemory.lastRecommendedModel || findModel(q) || { name: 'Claude 3.7 Sonnet' };
+      return `
+        🎯 <strong>Exam Prep & Practice Test Generator with ${target.name}:</strong><br><br>
+        High reasoning models excel at generating authentic exam questions because they understand curriculum standards.<br><br>
+        <strong>Recommended Exam Prompt Template:</strong><br>
+        <pre>Act as a university professor in [Subject, e.g., Fluid Mechanics / Organic Chemistry].
+Generate 5 challenging exam questions (3 Multiple Choice with tricky distractors + 2 Conceptual Proofs).
+Provide an answer key with detailed step-by-step rationales explaining why incorrect options are wrong.</pre>
+        <strong>Top Models for Exam Creation:</strong>
+        <ul>
+          <li><strong>Claude 3.7 Sonnet:</strong> Best for conceptual essay questions and clinical vignettes.</li>
+          <li><strong>DeepSeek R1 / OpenAI o3-mini:</strong> Best for STEM, physics derivations, and calculus.</li>
+          <li><strong>Gemini 2.5 Flash:</strong> Ultra-fast generation of 50+ question flashcard decks in seconds.</li>
+        </ul>
+      `;
+    }
+    if (q.includes('textbook') || q.includes('summarize book') || q.includes('300 page') || q.includes('whole book') || q.includes('chapter')) {
+      return `
+        📖 <strong>Textbook & Whole-Book Summarization Strategy:</strong><br><br>
+        To summarize entire 300+ page books or textbooks without hitting context limits or losing details:<br><br>
+        <ul>
+          <li><strong>#1 Pick — Gemini 2.5 Pro (2M Tokens):</strong> Fits an entire 1,500-page textbook in a single prompt. Free in Google AI Studio.</li>
+          <li><strong>#2 Pick — Gemini 2.5 Flash (1M Tokens):</strong> Ultra-fast generation of chapter flashcards and outlines in under 5 seconds.</li>
+          <li><strong>#3 Pick — Claude 3.7 Sonnet (200K Tokens):</strong> Ideal for 50–100 page course packets, retaining high academic nuance.</li>
+        </ul>
+      `;
+    }
+    if (q.includes('medical') || q.includes('engineering') || q.includes('clinical') || q.includes('coursework') || q.includes('usmle')) {
+      return `
+        🩺 <strong>Medical & Engineering Coursework Research:</strong><br><br>
+        Technical courses require high benchmark scores on domain-specific evaluations (MedQA, MMLU-Pro STEM, MATH-500) where hallucinations can be dangerous:<br><br>
+        <ul>
+          <li><strong>Medicine & Life Sciences (USMLE / Anatomy / Pharmacology):</strong>
+            <br>• <strong>Claude 3.7 Sonnet / GPT-4o:</strong> Highest accuracy on multi-step clinical diagnostic vignettes.
+            <br>• <strong>DeepSeek R1:</strong> Outstanding at biochemical reaction mechanisms and genetics proofs.
+          </li>
+          <li><strong>Engineering (Mechanical, Electrical, Chemical, Civil):</strong>
+            <br>• <strong>OpenAI o3-mini / DeepSeek R1:</strong> Chain-of-thought models that derive formulas and thermodynamics integrals step-by-step.
+          </li>
+        </ul>
       `;
     }
 

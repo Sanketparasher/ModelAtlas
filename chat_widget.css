@@ -549,11 +549,32 @@
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .atlas-action-btn:hover {
   background: rgba(245, 158, 11, 0.25);
   border-color: #f59e0b;
   transform: translateY(-1px);
+}
+.atlas-copy-code-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fbbf24;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.atlas-copy-code-btn:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: #f59e0b;
 }
 
 
