@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Finder — ModelAtlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="chat_widget.css" />
+  <style>
+    :root {
+      --bg: #040b13; --bg2: #071018; --bg3: #0d1a26;
+      --border: rgba(255,255,255,0.07); --border-hover: rgba(245,158,11,0.4);
+      --amber: #f59e0b; --amber-light: #fbbf24; --amber-dim: rgba(245,158,11,0.15);
+      --cyan: #06b6d4; --purple: #7c3aed;
+      --text: #e8edf2; --text-muted: #7a8a9a; --text-dim: #4a5a6a;
+      --green: #22c55e; --radius: 12px; --radius-lg: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,11,19,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 0 2rem;
+    }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--amber), var(--cyan)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #040b13; }
+    .nav-links { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
+
+    /* FINDER SHELL */
+    .finder-wrap { max-width: 820px; margin: 0 auto; padding: 3.5rem 1.5rem 6rem; }
+    .finder-header { text-align: center; margin-bottom: 2.5rem; }
+    .finder-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.6rem; }
+    .finder-header p { color: var(--text-muted); font-size: 1.05rem; }
+
+    /* PRESETS */
+    .preset-banner {
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+      margin-bottom: 1.75rem; padding: 0.85rem 1.1rem;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .preset-title { font-size: 0.78rem; font-weight: 700; color: var(--amber-light); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px; }
+    .preset-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.8rem; font-weight: 600;
+      padding: 0.35rem 0.75rem; border-radius: 8px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .preset-btn:hover { border-color: var(--amber); color: var(--amber-light); background: var(--amber-dim); transform: translateY(-1px); }
+
+    /* PROGRESS */
+    .progress-wrap { margin-bottom: 2.25rem; }
+    .progress-labels { display: flex; justify-content: space-between; margin-bottom: 0.6rem; }
+    .progress-label { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); transition: color 0.2s; }
+    .progress-label.active-step { color: var(--amber-light); }
+    .progress-bar-bg { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--cyan)); border-radius: 99px; transition: width 0.35s ease; }
+
+    /* STEPS */
+    .step-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 2.25rem;
+      display: none; animation: fadeIn 0.25s ease;
+    }
+    .step-card.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-num-pill {
+      display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--amber); margin-bottom: 0.6rem;
+    }
+    .step-question { font-size: clamp(1.25rem, 2.5vw, 1.6rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; line-height: 1.3; }
+    .step-hint { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.75rem; line-height: 1.5; }
+
+    /* OPTIONS */
+    .options { display: grid; gap: 0.85rem; }
+    .option {
+      background: var(--bg3); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 1.1rem 1.25rem;
+      cursor: pointer; transition: all 0.18s;
+      display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .option:hover { border-color: rgba(245,158,11,0.35); background: rgba(255,255,255,0.03); transform: translateY(-1px); }
+    .option.selected {
+      border-color: var(--amber); background: rgba(245,158,11,0.07);
+      box-shadow: 0 0 20px rgba(245,158,11,0.12);
+    }
+    .option-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1.2; margin-top: 2px; }
+    .option-text { flex: 1; }
+    .option-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--text); }
+    .option-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.45; }
+    .option-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--border); flex-shrink: 0;
+      margin-top: 3px; transition: all 0.15s;
+    }
+    .option.selected .option-check {
+      border-color: var(--amber); background: var(--amber);
+      box-shadow: inset 0 0 0 3px var(--bg3);
+    }
+
+    /* STEP NAVIGATION */
+    .step-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+      text-decoration: none; cursor: pointer; transition: all 0.2s; border: none; font-family: inherit;
+    }
+    .btn-next { background: var(--amber); color: #040b13; }
+    .btn-next:hover:not(:disabled) { background: var(--amber-light); transform: translateY(-1px); }
+    .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    /* RESULTS SECTION */
+    #results { display: none; animation: fadeIn 0.35s ease; }
+    #results.active { display: block; }
+
+    .results-header { text-align: center; margin-bottom: 2rem; }
+    .results-header h2 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    .results-header p { color: var(--text-muted); }
+
+    .top-pick {
+      background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(124,58,237,0.08) 100%);
+      border: 1.5px solid rgba(245,158,11,0.4);
+      border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .top-pick-badge {
+      position: absolute; top: -13px; left: 24px;
+      background: var(--amber); color: #040b13;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.25rem 0.85rem; border-radius: 99px;
+    }
+    .top-pick-model-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .top-pick-name { font-size: 1.7rem; font-weight: 900; letter-spacing: -0.02em; }
+    .top-pick-provider { font-size: 0.85rem; font-weight: 600; margin-top: 2px; }
+    .top-pick-score { text-align: right; }
+    .top-pick-score-val { font-size: 2.4rem; font-weight: 900; color: var(--amber-light); line-height: 1; }
+    .top-pick-score-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .top-pick-desc { color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.25rem; }
+
+    .verdict-box {
+      background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25);
+      border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+      font-size: 0.88rem; line-height: 1.6; color: #bbf7d0;
+    }
+    .warning-box {
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+      border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+      font-size: 0.88rem; line-height: 1.6; color: #fde68a;
+    }
+
+    /* SCORE BARS */
+    .score-bars { display: grid; gap: 0.6rem; margin-bottom: 1.5rem; }
+    .score-bar-row { display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; }
+    .score-bar-label { width: 90px; color: var(--text-muted); font-weight: 500; }
+    .score-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+    .score-bar-val { width: 30px; text-align: right; font-weight: 700; }
+
+    .pick-meta {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      padding-top: 1rem; border-top: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    .pick-meta-item { display: flex; align-items: center; gap: 6px; }
+
+    /* ALT CARDS */
+    .alt-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+    @media (max-width: 600px) { .alt-cards { grid-template-columns: 1fr; } }
+    .alt-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem;
+    }
+    .alt-card-badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.2rem 0.6rem; border-radius: 99px; margin-bottom: 0.85rem;
+    }
+    .badge-runner { background: rgba(6,182,212,0.15); color: var(--cyan); }
+    .badge-budget { background: rgba(34,197,94,0.12); color: var(--green); }
+    .alt-card-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .alt-card-reason { font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; }
+
+    .results-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem; }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .footer-links a { text-decoration: none; color: var(--text-muted); font-size: 0.88rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--amber); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+
+    @media (max-width: 700px) {
+      .step-card { padding: 1.5rem 1.25rem; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">M</div>
+      ModelAtlas
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="finder.html" class="active">Finder</a></li>
+      <li><a href="leaderboard.html">Leaderboard</a></li>
+      <li><a href="compare.html">Compare</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="finder-wrap">
+  <div class="finder-header" id="finderHeader">
+    <h1>🧭 Universal Model Finder</h1>
+    <p>6 practical questions · Tailored for students, coders, freelancers & enterprises</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-labels" id="progressLabels"></div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: INTERFACE & WORKFLOW SURFACE -->
+  <div class="step-card active" id="step1">
+    <div class="preset-banner">
+      <span class="preset-title">⚡ 1-Click Presets:</span>
+      <button type="button" class="preset-btn" onclick="applyPreset('student')">🎒 Student</button>
+      <button type="button" class="preset-btn" onclick="applyPreset('coder')">💻 Developer</button>
+      <button type="button" class="preset-btn" onclick="applyPreset('freelancer')">💼 Freelancer</button>
+      <button type="button" class="preset-btn" onclick="applyPreset('enterprise')">🏢 Enterprise</button>
+    </div>
+
+    <div class="step-num-pill">Step 1 of 6 · Workflow Surface</div>
+    <div class="step-question">How do you plan to interact with the AI?</div>
+    <div class="step-hint">Choose your primary working environment — this shapes whether we prioritize premier web apps, IDE copilot completion, backend APIs, or enterprise cloud VPCs.</div>
+    <div class="options">
+      <div class="option" data-step="1" data-val="web_app">
+        <div class="option-icon">🎒</div>
+        <div class="option-text">
+          <div class="option-label">In a clean web browser or mobile app (No coding required)</div>
+          <div class="option-desc">Students, writers, general researchers — I just want a clean UI to chat, draft essays, or analyze documents online</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="1" data-val="ide">
+        <div class="option-icon">💻</div>
+        <div class="option-text">
+          <div class="option-label">Inside my IDE / Code Editor (Cursor, VS Code, Windsurf, Copilot)</div>
+          <div class="option-desc">Individual developers & engineers — I need high SWE-bench scores, fast autocomplete, and multi-file code editing</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="1" data-val="api">
+        <div class="option-icon">🔌</div>
+        <div class="option-text">
+          <div class="option-label">Via API / Backend Code into my own app, product, or agent</div>
+          <div class="option-desc">Indie hackers & software builders — I care about $/1M token pricing, low latency, rate limits, and structured JSON outputs</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="1" data-val="enterprise">
+        <div class="option-icon">🏢</div>
+        <div class="option-text">
+          <div class="option-label">Enterprise Infrastructure (Private VPC, SSO, SLA, Compliance)</div>
+          <div class="option-desc">CTOs, architects & teams — deploying via AWS Bedrock, Azure, Vertex AI, or on-premises servers with rigorous SLAs</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <span></span>
+      <button class="btn btn-next" id="next1" disabled onclick="goNext(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: COGNITIVE INTENSITY & TASK -->
+  <div class="step-card" id="step2">
+    <div class="step-num-pill">Step 2 of 6 · Cognitive Intensity</div>
+    <div class="step-question">What is the hardest part of the work you need the AI to do?</div>
+    <div class="step-hint">Differentiates between creative drafting, deliberate math/logic reasoning, fast repetitive triage, and visual multimodal analysis.</div>
+    <div class="options">
+      <div class="option" data-step="2" data-val="drafting">
+        <div class="option-icon">📝</div>
+        <div class="option-text">
+          <div class="option-label">Clear drafting, prose, and everyday communication</div>
+          <div class="option-desc">Polishing emails, essays, blogs, translating languages, rewriting, and summarizing meetings</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="2" data-val="reasoning">
+        <div class="option-icon">🧠</div>
+        <div class="option-text">
+          <div class="option-label">Heavy logic, advanced STEM, math, or complex software architecture</div>
+          <div class="option-desc">Multi-step reasoning, tricky algorithms, graduate-level math, deep debugging, and formal verification</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="2" data-val="triage">
+        <div class="option-icon">⚡</div>
+        <div class="option-text">
+          <div class="option-label">High-volume repetitive triage & data processing</div>
+          <div class="option-desc">Classifying thousands of tickets, data tagging, fast routing, automated customer support at scale</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="2" data-val="multimodal">
+        <div class="option-icon">👁️</div>
+        <div class="option-text">
+          <div class="option-label">Visual & Multimodal inspection (PDF charts, UI mockups, diagrams)</div>
+          <div class="option-desc">Extracting data from messy scans, interpreting UI screenshots, analyzing video, mixed media</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goBack(2)">← Back</button>
+      <button class="btn btn-next" id="next2" disabled onclick="goNext(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: CONTEXT BREADTH -->
+  <div class="step-card" id="step3">
+    <div class="step-num-pill">Step 3 of 6 · Context Breadth</div>
+    <div class="step-question">How much information does the AI need to read in a single prompt?</div>
+    <div class="step-hint">Context window capacity determines whether the model can digest long documents without forgetting early details.</div>
+    <div class="options">
+      <div class="option" data-step="3" data-val="short">
+        <div class="option-icon">📄</div>
+        <div class="option-text">
+          <div class="option-label">Quick exchanges or short text (&lt;8,000 tokens)</div>
+          <div class="option-desc">1–5 pages, single code functions, quick Q&A, or casual back-and-forth chat</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="3" data-val="medium">
+        <div class="option-icon">📑</div>
+        <div class="option-text">
+          <div class="option-label">Medium documents & multi-file context (8K–128K tokens)</div>
+          <div class="option-desc">Research papers, 20–50 page reports, multi-file code snippets, moderate project context</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="3" data-val="massive">
+        <div class="option-icon">📚</div>
+        <div class="option-text">
+          <div class="option-label">Massive archives, full codebases, or books (200K–2M tokens)</div>
+          <div class="option-desc">Entire Git repositories, 300+ page legal contracts, hours of video, or entire textbooks</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goBack(3)">← Back</button>
+      <button class="btn btn-next" id="next3" disabled onclick="goNext(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: ECONOMIC ENVELOPE -->
+  <div class="step-card" id="step4">
+    <div class="step-num-pill">Step 4 of 6 · Budget & Economics</div>
+    <div class="step-question">What is your budget structure for this workflow?</div>
+    <div class="step-hint">Sets practical boundaries between zero-cost open models, pay-as-you-go developer APIs, and enterprise budgets.</div>
+    <div class="options">
+      <div class="option" data-step="4" data-val="free">
+        <div class="option-icon">🆓</div>
+        <div class="option-text">
+          <div class="option-label">Strictly $0 / Free tier or local execution</div>
+          <div class="option-desc">I am a student or hobbyist and cannot pay per prompt; I need free web tools or local models</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="4" data-val="value">
+        <div class="option-icon">🪙</div>
+        <div class="option-text">
+          <div class="option-label">Budget-conscious pay-as-you-go ($5–$25 / month)</div>
+          <div class="option-desc">I want maximum price-to-performance; keeping cost under $0.50 per 1M tokens matters</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="4" data-val="pro">
+        <div class="option-icon">💼</div>
+        <div class="option-text">
+          <div class="option-label">Professional project budget ($50–$250 / month)</div>
+          <div class="option-desc">I will happily pay standard market rates for top-tier quality that saves hours of professional time</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="4" data-val="unlimited">
+        <div class="option-icon">🚀</div>
+        <div class="option-text">
+          <div class="option-label">Mission-critical / Best possible output regardless of cost</div>
+          <div class="option-desc">A single mistake costs more than the API bill; I want maximum benchmark accuracy</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goBack(4)">← Back</button>
+      <button class="btn btn-next" id="next4" disabled onclick="goNext(4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: DATA GOVERNANCE & PRIVACY -->
+  <div class="step-card" id="step5">
+    <div class="step-num-pill">Step 5 of 6 · Data Governance</div>
+    <div class="step-question">What are the privacy requirements for the data you enter?</div>
+    <div class="step-hint">Crucial filter separating commercial cloud APIs from isolated zero-retention or on-premises deployments.</div>
+    <div class="options">
+      <div class="option" data-step="5" data-val="public">
+        <div class="option-icon">🌐</div>
+        <div class="option-text">
+          <div class="option-label">Public or low-sensitivity data</div>
+          <div class="option-desc">General knowledge, public documents, school coursework, or open-source code</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="5" data-val="confidential">
+        <div class="option-icon">🔒</div>
+        <div class="option-text">
+          <div class="option-label">Business confidential / Client NDA protected</div>
+          <div class="option-desc">Client deliverables, internal company memos — requires Zero-Data-Retention &amp; no model training</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="5" data-val="on_prem">
+        <div class="option-icon">🛡️</div>
+        <div class="option-text">
+          <div class="option-label">Strictly isolated / On-premises or air-gapped only</div>
+          <div class="option-desc">Healthcare (HIPAA), banking, national security — data CANNOT touch third-party cloud APIs</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goBack(5)">← Back</button>
+      <button class="btn btn-next" id="next5" disabled onclick="goNext(5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: SPEED VS DELIBERATE THINKING -->
+  <div class="step-card" id="step6">
+    <div class="step-num-pill">Step 6 of 6 · Speed vs. Thinking Depth</div>
+    <div class="step-question">What is your response speed expectation?</div>
+    <div class="step-hint">Balances the trade-off between sub-second streaming and deliberate test-time compute thinking models.</div>
+    <div class="options">
+      <div class="option" data-step="6" data-val="instant">
+        <div class="option-icon">⚡</div>
+        <div class="option-text">
+          <div class="option-label">Real-time instant streaming (Sub-second start)</div>
+          <div class="option-desc">Users or interactive agent loops are waiting; output speed must be fast (&gt;100 tokens/sec)</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="6" data-val="balanced">
+        <div class="option-icon">⚖️</div>
+        <div class="option-text">
+          <div class="option-label">Balanced (3–8 seconds is completely fine)</div>
+          <div class="option-desc">Standard workflow speed; thoughtful responses without noticeable lag</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+      <div class="option" data-step="6" data-val="deliberate">
+        <div class="option-icon">🧠</div>
+        <div class="option-text">
+          <div class="option-label">Deep deliberate thinking (Wait 15–60s for verified accuracy)</div>
+          <div class="option-desc">I prefer the model to show extended chain-of-thought, verify its logic, and eliminate hallucinations</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goBack(6)">← Back</button>
+      <button class="btn btn-primary" id="next6" disabled onclick="computeResults()">Get My Results →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="results-header">
+      <h2>🎯 Your Model Recommendation</h2>
+      <p>Based on your 6 answers, here's what works best for your workflow.</p>
+    </div>
+    <!-- Filled by JS -->
+    <div id="resultsContent"></div>
+    <div class="results-actions">
+      <a href="leaderboard.html" class="btn btn-secondary">View Full Leaderboard</a>
+      <a href="compare.html" class="btn btn-secondary">Compare Two Models</a>
+      <button class="btn btn-ghost" onclick="resetFinder()">↺ Start Over</button>
+    </div>
+  </div>
+
+</div><!-- /finder-wrap -->
+
+<footer>
+  <div class="footer-inner" style="max-width:1200px;margin:0 auto;">
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="finder.html">Finder</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="compare.html">Compare</a>
+    </div>
+    <p class="footer-copy">© 2026 ModelAtlas · Benchmark-informed AI model recommendations</p>
+  </div>
+</footer>
+
+<!-- Load Unified Dataset -->
+<script src="models.js"></script>
+<script>
+  const models = window.MODELS_DATA || [];
+
+  // ─── STATE ────────────────────────────────────────────────────────────────
+  let answers = {};
+  const STEPS = 6;
+
+  // ─── PROGRESS ─────────────────────────────────────────────────────────────
+  const stepLabels = ['Interface', 'Complexity', 'Context', 'Budget', 'Privacy', 'Speed'];
+  const labelsEl = document.getElementById('progressLabels');
+  stepLabels.forEach((l, i) => {
+    const el = document.createElement('span');
+    el.className = 'progress-label'; el.id = 'pl' + (i+1); el.textContent = l;
+    labelsEl.appendChild(el);
+  });
+
+  function updateProgress(step) {
+    document.getElementById('progressFill').style.width = ((step - 1) / STEPS * 100) + '%';
+    stepLabels.forEach((_, i) => {
+      const el = document.getElementById('pl' + (i+1));
+      el.classList.toggle('active-step', i + 1 === step);
+    });
+  }
+  updateProgress(1);
+
+  // ─── 1-CLICK PERSONA PRESETS ─────────────────────────────────────────────
+  const presets = {
+    student: {
+      step1: 'web_app', step2: 'drafting', step3: 'short', step4: 'free', step5: 'public', step6: 'instant'
+    },
+    coder: {
+      step1: 'ide', step2: 'reasoning', step3: 'medium', step4: 'value', step5: 'confidential', step6: 'balanced'
+    },
+    freelancer: {
+      step1: 'web_app', step2: 'drafting', step3: 'medium', step4: 'value', step5: 'confidential', step6: 'instant'
+    },
+    enterprise: {
+      step1: 'enterprise', step2: 'reasoning', step3: 'massive', step4: 'pro', step5: 'on_prem', step6: 'balanced'
+    }
+  };
+
+  function applyPreset(personaKey) {
+    const p = presets[personaKey];
+    if (!p) return;
+
+    for (let step = 1; step <= 6; step++) {
+      const val = p['step' + step];
+      answers['step' + step] = val;
+
+      document.querySelectorAll(`.option[data-step="${step}"]`).forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.val === val);
+      });
+
+      const nextBtn = document.getElementById('next' + step);
+      if (nextBtn) nextBtn.disabled = false;
+    }
+
+    // Immediately compute results for fast feedback
+    computeResults();
+  }
+
+  // ─── OPTION SELECTION ─────────────────────────────────────────────────────
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const step = opt.dataset.step;
+      document.querySelectorAll(`.option[data-step="${step}"]`).forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      answers['step' + step] = opt.dataset.val;
+      const nextBtn = document.getElementById('next' + step);
+      if (nextBtn) nextBtn.disabled = false;
+    });
+  });
+
+  // ─── NAVIGATION ───────────────────────────────────────────────────────────
+  function goNext(current) {
+    document.getElementById('step' + current).classList.remove('active');
+    const next = current + 1;
+    document.getElementById('step' + next).classList.add('active');
+    updateProgress(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack(current) {
+    document.getElementById('step' + current).classList.remove('active');
+    const prev = current - 1;
+    document.getElementById('step' + prev).classList.add('active');
+    updateProgress(prev);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── SCORING ENGINE ───────────────────────────────────────────────────────
+  function scoreModel(model, ans) {
+    let weights = { quality: 0.30, cost: 0.20, speed: 0.15, context: 0.15, privacy: 0.10, reliability: 0.10 };
+
+    // Step 1: Interface
+    if (ans.step1 === 'ide') {
+      weights.quality += 0.10;
+      weights.speed += 0.05;
+    } else if (ans.step1 === 'api') {
+      weights.cost += 0.15;
+      weights.speed += 0.10;
+    } else if (ans.step1 === 'enterprise') {
+      weights.privacy += 0.15;
+      weights.reliability += 0.15;
+    }
+
+    // Step 2: Complexity
+    if (ans.step2 === 'reasoning') {
+      weights.quality += 0.25;
+      weights.cost -= 0.10;
+    } else if (ans.step2 === 'triage') {
+      weights.speed += 0.25;
+      weights.cost += 0.15;
+      weights.quality -= 0.10;
+    } else if (ans.step2 === 'multimodal') {
+      weights.quality += 0.15;
+      weights.context += 0.10;
+    }
+
+    // Step 3: Context
+    if (ans.step3 === 'massive') {
+      weights.context += 0.30;
+    } else if (ans.step3 === 'short') {
+      weights.context -= 0.10;
+    }
+
+    // Step 4: Budget
+    if (ans.step4 === 'free') {
+      weights.cost += 0.40;
+      weights.quality -= 0.10;
+    } else if (ans.step4 === 'value') {
+      weights.cost += 0.20;
+    } else if (ans.step4 === 'unlimited') {
+      weights.quality += 0.30;
+      weights.cost = 0.05;
+    }
+
+    // Step 5: Privacy
+    if (ans.step5 === 'on_prem') {
+      weights.privacy += 0.40;
+    } else if (ans.step5 === 'confidential') {
+      weights.privacy += 0.15;
+    }
+
+    // Step 6: Speed vs Deliberate
+    if (ans.step6 === 'instant') {
+      weights.speed += 0.30;
+    } else if (ans.step6 === 'deliberate') {
+      weights.quality += 0.25;
+      weights.speed -= 0.10;
+    }
+
+    // Ensure weights remain non-negative
+    for (let k in weights) weights[k] = Math.max(0.02, weights[k]);
+
+    // Normalize weights
+    const sum = Object.values(weights).reduce((a, b) => a + b, 0);
+    for (let k in weights) weights[k] /= sum;
+
+    let score = 0;
+    for (const [dim, w] of Object.entries(weights)) {
+      score += w * ((model.scores && model.scores[dim]) || 80);
+    }
+
+    // --- HARD PENALTIES & BOOSTS ---
+
+    // 1. On-premise strict requirement
+    if (ans.step5 === 'on_prem') {
+      if (model.license !== 'open_weights') {
+        score *= 0.12; // Massive penalty on cloud-only models
+      } else {
+        score *= 1.35; // Boost open-weights models
+      }
+    }
+
+    // 2. Free budget constraint
+    if (ans.step4 === 'free') {
+      if (model.inputPrice > 0.0) {
+        score *= 0.45; // Penalize paid models when user explicitly demands $0
+      } else {
+        score *= 1.25; // Boost free/open models
+      }
+    }
+
+    // 3. Massive context requirement (200k to 2M)
+    if (ans.step3 === 'massive') {
+      if ((model.contextTokens || 0) >= 1000000) {
+        score *= 1.35; // Major boost to 1M / 2M models (Gemini 2.5 Pro/Flash)
+      } else if ((model.contextTokens || 0) < 200000) {
+        score *= 0.65; // Penalty for smaller context
+      }
+    }
+
+    // 4. Heavy reasoning task
+    if (ans.step2 === 'reasoning') {
+      if (model.tags && model.tags.includes('reasoning')) {
+        score *= 1.25; // Boost reasoning models (o1, o3-mini, R1, Claude 3.7)
+      }
+    }
+
+    // 5. IDE / Coding task
+    if (ans.step1 === 'ide' || (model.tags && model.tags.includes('coding') && ans.step2 === 'reasoning')) {
+      if (model.benchmarks && model.benchmarks.sweBench >= 45) {
+        score *= 1.20; // Boost SWE-bench verified leaders
+      }
+    }
+
+    return score;
+  }
+
+  function computeResults() {
+    const ans = answers;
+    const scored = models.map(m => ({ model: m, score: scoreModel(m, ans) }));
+    scored.sort((a, b) => b.score - a.score);
+
+    const primary = scored[0].model;
+    const runner = scored[1].model;
+    // Budget pick = highest cost score among top 6, if different from primary
+    const budgetPick = scored.slice(0, 6).sort((a, b) => ((b.model.scores && b.model.scores.cost) || 0) - ((a.model.scores && a.model.scores.cost) || 0))[0].model;
+
+    renderResults(primary, runner, budgetPick, ans, scored[0].score);
+  }
+
+  function renderResults(primary, runner, budget, ans, rawScore) {
+    // Hide steps
+    document.getElementById('progressWrap').style.display = 'none';
+    document.getElementById('finderHeader').style.display = 'none';
+    for (let i = 1; i <= 6; i++) document.getElementById('step' + i).style.display = 'none';
+
+    const normScore = Math.min(99, Math.round(rawScore));
+    
+    // Label translations
+    const interfaceLabels = {
+      web_app: 'web & conversational use',
+      ide: 'IDE coding & software development',
+      api: 'API & product backend integration',
+      enterprise: 'enterprise infrastructure'
+    };
+    const taskLabels = {
+      drafting: 'clear drafting & communication',
+      reasoning: 'heavy logic, math & architecture',
+      triage: 'high-volume repetitive triage',
+      multimodal: 'visual & multimodal analysis'
+    };
+
+    const taskText = taskLabels[ans.step2] || 'your core workload';
+    const interfaceText = interfaceLabels[ans.step1] || 'your workflow';
+
+    // Build verdict
+    let verdictLines = [`<strong>✅ ${primary.name} is your best match</strong> for ${taskText} via ${interfaceText}.`];
+    if (ans.step4 === 'free') verdictLines.push(`It supports zero-dollar cost constraints through open weights or accessible tiers.`);
+    if (ans.step4 === 'value') verdictLines.push(`It maximizes output quality while keeping token expenditures minimal.`);
+    if (ans.step6 === 'instant') verdictLines.push(`Its measured throughput (${primary.speedTps ? primary.speedTps + ' t/s' : 'high speed'}) meets your real-time latency needs.`);
+    if (ans.step3 === 'massive') verdictLines.push(`Its massive ${primary.contextWindow} context window natively handles whole codebases and archives.`);
+
+    // Privacy warning
+    let warning = '';
+    if (ans.step5 === 'on_prem') {
+      warning = `<strong>🛡️ On-Premises Privacy Confirmed:</strong> ${primary.name} is open weights. You can run it on your own hardware via Ollama, vLLM, or private VPC without any third-party data transmission.`;
+    } else if (ans.step5 === 'confidential' && primary.license !== 'open_weights') {
+      warning = `<strong>🔒 Enterprise Privacy Note:</strong> ${primary.name} is accessed via API. Ensure your team enables Zero-Data-Retention (ZDR) and confirms terms prohibiting model training on your prompts.`;
+    }
+
+    const runnerReason = runner.desc || `${runner.name} is a strong runner-up with Arena Elo ${runner.benchmarks.arenaElo} and ${runner.bestForLabel}.`;
+
+    // Budget check
+    const budgetIsUnique = budget.id !== primary.id;
+
+    const dimColors = { quality: '#a78bfa', cost: '#22c55e', speed: '#f59e0b', context: '#06b6d4', privacy: '#f472b6', reliability: '#818cf8' };
+    const dimLabels = { quality: 'Quality', cost: 'Cost eff.', speed: 'Speed', context: 'Context', privacy: 'Privacy', reliability: 'Reliability' };
+
+    const barsHtml = Object.entries(primary.scores || { quality: 90, cost: 85, speed: 85, context: 85, privacy: 85, reliability: 85 }).map(([dim, val]) => {
+      const color = dimColors[dim] || '#aaa';
+      const scoreColor = val >= 90 ? '#22c55e' : val >= 80 ? '#f59e0b' : '#7a8a9a';
+      return `<div class="score-bar-row">
+        <div class="score-bar-label">${dimLabels[dim]}</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:${val}%;background:${color}"></div></div>
+        <div class="score-bar-val" style="color:${scoreColor}">${val}</div>
+      </div>`;
+    }).join('');
+
+    const html = `
+      <div class="top-pick">
+        <div class="top-pick-badge">🏆 Top Recommendation</div>
+        <div class="top-pick-model-row">
+          <div>
+            <div class="top-pick-name">${primary.name}</div>
+            <div class="top-pick-provider" style="color:${primary.providerColor || '#4ade80'}">${primary.provider} · <span style="color:var(--text-dim)">LMSYS Arena Elo ${primary.benchmarks.arenaElo}</span></div>
+          </div>
+          <div class="top-pick-score">
+            <div class="top-pick-score-val">${normScore}</div>
+            <div class="top-pick-score-label">match score</div>
+          </div>
+        </div>
+        <div class="top-pick-desc">${primary.desc}</div>
+        <div class="verdict-box">${verdictLines.join(' ')}</div>
+        ${warning ? `<div class="warning-box">${warning}</div>` : ''}
+        <div class="score-bars">${barsHtml}</div>
+        <div class="pick-meta">
+          <div class="pick-meta-item"><span>📏</span>${primary.contextWindow} tokens</div>
+          <div class="pick-meta-item"><span>💵</span>${primary.pricing}</div>
+          <div class="pick-meta-item"><span>⚡</span>${primary.speedTps ? primary.speedTps + ' t/s' : 'Fast'}</div>
+          <div class="pick-meta-item"><span>🛡️</span>${primary.license === 'open_weights' ? 'Open Weights' : 'API Service'}</div>
+        </div>
+      </div>
+
+      <div class="alt-cards">
+        <div class="alt-card">
+          <div class="alt-card-badge badge-runner">Runner-up</div>
+          <div class="alt-card-name">${runner.name}</div>
+          <div style="font-size:0.78rem;color:${runner.providerColor || '#7a8a9a'};margin-bottom:0.5rem;">${runner.provider} · Arena Elo ${runner.benchmarks.arenaElo}</div>
+          <div class="alt-card-reason">${runnerReason}</div>
+          <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${runner.contextWindow} · ${runner.pricing}</div>
+        </div>
+        ${budgetIsUnique ? `<div class="alt-card">
+          <div class="alt-card-badge badge-budget">Budget pick</div>
+          <div class="alt-card-name">${budget.name}</div>
+          <div style="font-size:0.78rem;color:${budget.providerColor || '#7a8a9a'};margin-bottom:0.5rem;">${budget.provider}</div>
+          <div class="alt-card-reason">Best cost-efficiency among top models. Cost score: ${(budget.scores && budget.scores.cost) || 90}/100. ${budget.pricing}.</div>
+          <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${budget.contextWindow} · ${budget.pricing}</div>
+        </div>` : `<div class="alt-card">
+          <div class="alt-card-badge badge-budget">Best Value</div>
+          <div class="alt-card-name">${primary.name} is also the budget pick</div>
+          <div class="alt-card-reason">Your top recommendation already gives you the best price-to-performance ratio for your use case. No need to compromise.</div>
+        </div>`}
+      </div>
+
+      <!-- Contextual AI Advisor Banner -->
+      <div class="finder-chat-banner">
+        <div class="finder-chat-banner-left">
+          <h3>💬 Have questions? Ask your ModelAtlas AI Advisor</h3>
+          <p>Get instant guidance on VRAM hardware specs, token cost projections, or integration code tailored to <strong>${escapeHtml(primary.name)}</strong>.</p>
+          <div class="finder-chat-pills-row">
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What hardware and VRAM do I need to run ${escapeAttr(primary.name)} locally?')">🖥️ VRAM & Hardware</button>
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Show Python API code for ${escapeAttr(primary.name)}')">💻 Python Code</button>
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} in detail')">⚖️ vs ${escapeAttr(runner.name)}</button>
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How much will 10M tokens cost on ${escapeAttr(primary.name)}?')">💵 Token Pricing</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('I selected ${escapeAttr(primary.name)}. Help me plan my setup and trade-offs.')" style="white-space:nowrap;padding:0.75rem 1.4rem;">
+          Chat with Advisor &rarr;
+        </button>
+      </div>`;
+
+    document.getElementById('resultsContent').innerHTML = html;
+    document.getElementById('results').classList.add('active');
+
+    // Notify Advisor of current quiz results
+    if (window.ModelAtlasChat) {
+      window.ModelAtlasChat.setQuizContext({
+        task: taskText,
+        interface: interfaceText,
+        answers: ans,
+        primary: primary,
+        runner: runner,
+        budget: budget
+      });
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function escapeHtml(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function escapeAttr(str) {
+    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  function resetFinder() {
+    answers = {};
+    document.getElementById('progressWrap').style.display = '';
+    document.getElementById('finderHeader').style.display = '';
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('resultsContent').innerHTML = '';
+    for (let i = 1; i <= 6; i++) {
+      const step = document.getElementById('step' + i);
+      step.style.display = '';
+      step.classList.remove('active');
+      document.querySelectorAll(`.option[data-step="${i}"]`).forEach(o => o.classList.remove('selected'));
+      const nb = document.getElementById('next' + i);
+      if (nb) nb.disabled = true;
+    }
+    document.getElementById('step1').classList.add('active');
+    updateProgress(1);
+  }
+</script>
+<script src="chat_widget.js"></script>
+</body>
+</html>

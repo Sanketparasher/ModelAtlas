@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compare AI Models — ModelAtlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="chat_widget.css" />
+  <style>
+    :root {
+      --bg: #040b13; --bg2: #071018; --bg3: #0d1a26;
+      --border: rgba(255,255,255,0.07); --border-hover: rgba(245,158,11,0.4);
+      --amber: #f59e0b; --amber-light: #fbbf24; --amber-dim: rgba(245,158,11,0.15);
+      --cyan: #06b6d4; --purple: #7c3aed;
+      --text: #e8edf2; --text-muted: #7a8a9a; --text-dim: #4a5a6a;
+      --green: #22c55e; --radius: 12px; --radius-lg: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,11,19,0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 0 2rem;
+    }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--amber), var(--cyan)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #040b13; }
+    .nav-links { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
+    .nav-cta { background: var(--amber) !important; color: #040b13 !important; font-weight: 600 !important; }
+
+    /* PAGE */
+    .page-header {
+      padding: 3.5rem 2rem 2.5rem; text-align: center;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(124,58,237,0.18) 0%, transparent 70%);
+    }
+    .page-tag { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.75rem; }
+    .page-header h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.65rem; }
+    .page-header p { color: var(--text-muted); font-size: 1rem; max-width: 580px; margin: 0 auto; }
+
+    /* COMPARE WRAP */
+    .compare-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+    /* SELECTORS */
+    .selectors {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center;
+      margin-bottom: 2.5rem;
+    }
+    .selector-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    .selector-group select {
+      width: 100%; padding: 0.8rem 1rem;
+      background: var(--bg3); border: 1.5px solid var(--border);
+      color: var(--text); font-size: 0.92rem; font-family: inherit; font-weight: 600;
+      border-radius: var(--radius); cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a8a9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .selector-group select:focus { border-color: var(--amber); outline: none; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+
+    .vs-badge {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--amber), var(--cyan));
+      color: #040b13; font-weight: 900; font-size: 0.88rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1.4rem; box-shadow: 0 0 20px rgba(245,158,11,0.3);
+      flex-shrink: 0;
+    }
+
+    /* CARDS GRID */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .compare-card {
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.75rem;
+      position: relative; transition: border-color 0.2s;
+    }
+    .compare-card.winner-card { border-color: rgba(34,197,94,0.4); box-shadow: 0 0 30px rgba(34,197,94,0.06); }
+    .winner-badge {
+      position: absolute; top: -12px; right: 20px;
+      background: #22c55e; color: #040b13; font-size: 0.72rem; font-weight: 800;
+      padding: 0.2rem 0.75rem; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+
+    .model-header { margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .model-provider-pill { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 6px; margin-bottom: 0.5rem; }
+    .model-big-name { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+
+    .benchmark-badges-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 0.85rem; }
+    .bench-tag {
+      font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    }
+    .bench-tag strong { color: var(--amber); }
+
+    .model-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* DIMENSIONS */
+    .dim-section { margin-bottom: 1.5rem; }
+    .dim-section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 1rem; }
+    .dim-row { margin-bottom: 0.9rem; }
+    .dim-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; font-size: 0.84rem; }
+    .dim-label { font-weight: 500; }
+    .dim-val { font-weight: 800; font-size: 0.9rem; }
+    .dim-val-winner { color: #4ade80; }
+    .dim-val-loser { color: var(--text-muted); }
+    .dim-val-tie { color: var(--amber); }
+    .dim-winner-tag { font-size: 0.65rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: rgba(34,197,94,0.15); color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 6px; }
+
+    .dim-bar-bg { height: 7px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+    .dim-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+    /* META TABLE */
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .meta-table tr { border-top: 1px solid var(--border); }
+    .meta-table td { padding: 0.6rem 0; }
+    .meta-table td:first-child { color: var(--text-muted); width: 45%; }
+    .meta-table td:last-child { font-weight: 600; text-align: right; }
+
+    /* VERDICT */
+    .verdict-section {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 2rem;
+    }
+    .verdict-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
+    .verdict-body { color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; }
+    .verdict-body strong { color: var(--text); }
+
+    /* DIM SUMMARY TABLE */
+    .dim-compare-table { width: 100%; border-collapse: collapse; }
+    .dim-compare-table thead td { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+    .dim-compare-table tbody tr { border-bottom: 1px solid var(--border); }
+    .dim-compare-table tbody tr:last-child { border-bottom: none; }
+    .dim-compare-table td { padding: 0.75rem 0.5rem; font-size: 0.88rem; }
+    .dim-score-a { text-align: right; font-weight: 700; width: 35%; }
+    .dim-score-b { text-align: left; font-weight: 700; width: 35%; }
+    .dim-name { text-align: center; font-size: 0.8rem; font-weight: 600; width: 30%; }
+
+    /* CTA */
+    .cta-row { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 2rem; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.75rem 1.4rem; border-radius: 10px; font-weight: 700; font-size: 0.92rem; text-decoration: none; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; }
+    .btn-primary { background: var(--amber); color: #040b13; }
+    .btn-primary:hover { background: var(--amber-light); }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    footer { border-top: 1px solid var(--border); padding: 2.5rem 2rem; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .footer-links a { text-decoration: none; color: var(--text-muted); font-size: 0.88rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--amber); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .selectors { grid-template-columns: 1fr; }
+      .vs-badge { margin: 0 auto; }
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">M</div>
+      ModelAtlas
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="finder.html">Finder</a></li>
+      <li><a href="leaderboard.html">Leaderboard</a></li>
+      <li><a href="compare.html" class="active">Compare</a></li>
+      <li><a href="finder.html" class="nav-cta btn" style="padding:0.4rem 1rem;font-size:0.88rem;">Start Finder →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-tag">Head-to-Head Benchmarks</div>
+  <h1>Compare Any Two AI Models</h1>
+  <p>Select any two models from our 26-model database to analyze empirical benchmarks, throughput speed, context capacity, and pricing.</p>
+</div>
+
+<div class="compare-wrap">
+  <div class="selectors">
+    <div class="selector-group">
+      <label for="selectA">Model A</label>
+      <select id="selectA"></select>
+    </div>
+    <div class="vs-badge">VS</div>
+    <div class="selector-group">
+      <label for="selectB">Model B</label>
+      <select id="selectB"></select>
+    </div>
+  </div>
+
+  <div id="compareOutput"></div>
+
+  <div class="cta-row">
+    <a href="finder.html" class="btn btn-primary">🧭 Get personalized recommendation</a>
+    <a href="leaderboard.html" class="btn btn-secondary">View Full Leaderboard</a>
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="finder.html">Finder</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="compare.html">Compare</a>
+    </div>
+    <p class="footer-copy">© 2026 ModelAtlas · Empirical AI benchmark comparisons verified with LMSYS Chatbot Arena & Artificial Analysis</p>
+  </div>
+</footer>
+
+<!-- Load Unified Dataset -->
+<script src="models.js"></script>
+<script>
+  const models = window.MODELS_DATA || [];
+
+  const dims = [
+    { key: 'quality', label: 'Output Quality', color: '#a78bfa' },
+    { key: 'cost', label: 'Cost Efficiency', color: '#22c55e' },
+    { key: 'speed', label: 'Throughput Speed', color: '#f59e0b' },
+    { key: 'context', label: 'Context Handling', color: '#06b6d4' },
+    { key: 'privacy', label: 'Privacy & Self-Host', color: '#f472b6' },
+    { key: 'reliability', label: 'Reliability', color: '#818cf8' },
+  ];
+
+  // Group and populate selects
+  const selA = document.getElementById('selectA');
+  const selB = document.getElementById('selectB');
+
+  // Group models by provider
+  const providers = [...new Set(models.map(m => m.provider))];
+  providers.forEach(prov => {
+    const provModels = models.filter(m => m.provider === prov);
+    const grpA = document.createElement('optgroup');
+    grpA.label = prov;
+    const grpB = document.createElement('optgroup');
+    grpB.label = prov;
+
+    provModels.forEach(m => {
+      const openTag = m.license === 'open_weights' ? ' [Open]' : '';
+      const optA = `<option value="${m.id}">${m.name}${openTag} (Elo ${m.benchmarks.arenaElo})</option>`;
+      const optB = `<option value="${m.id}">${m.name}${openTag} (Elo ${m.benchmarks.arenaElo})</option>`;
+      grpA.innerHTML += optA;
+      grpB.innerHTML += optB;
+    });
+
+    selA.appendChild(grpA);
+    selB.appendChild(grpB);
+  });
+
+  // Read URL params
+  const params = new URLSearchParams(window.location.search);
+  const paramA = params.get('a');
+  const paramB = params.get('b');
+
+  if (paramA && models.find(m => m.id === paramA)) {
+    selA.value = paramA;
+  } else {
+    selA.value = 'claude-3-7-sonnet';
+  }
+
+  if (paramB && models.find(m => m.id === paramB)) {
+    selB.value = paramB;
+  } else {
+    // Pick DeepSeek R1 as default comparison
+    selB.value = selA.value === 'deepseek-r1' ? 'openai-o3-mini' : 'deepseek-r1';
+  }
+
+  function modelById(id) { return models.find(m => m.id === id); }
+
+  function renderComparison() {
+    const a = modelById(selA.value);
+    const b = modelById(selB.value);
+    if (!a || !b || a.id === b.id) {
+      document.getElementById('compareOutput').innerHTML = `
+        <div style="text-align:center;padding:3rem;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius-lg);color:var(--text-muted);">
+          ${a && b && a.id === b.id ? 'Please select two different models to compare.' : 'Select two models above to compare them.'}
+        </div>`;
+      return;
+    }
+
+    // Compute overall score
+    const aTotal = a.benchmarks.arenaElo || 0;
+    const bTotal = b.benchmarks.arenaElo || 0;
+    const aWins = aTotal >= bTotal;
+    const winner = aWins ? a : b;
+    const loser = aWins ? b : a;
+
+    // Dimension wins
+    const dimWins = { a: 0, b: 0, tie: 0 };
+    dims.forEach(d => {
+      const av = a.scores[d.key], bv = b.scores[d.key];
+      if (av > bv) dimWins.a++;
+      else if (bv > av) dimWins.b++;
+      else dimWins.tie++;
+    });
+
+    function modelCard(m, isWinner, side) {
+      const dimHtml = dims.map(d => {
+        const mv = m.scores[d.key];
+        const ov = side === 'a' ? b.scores[d.key] : a.scores[d.key];
+        const isWin = mv > ov, isTie = mv === ov;
+        const valClass = isWin ? 'dim-val-winner' : isTie ? 'dim-val-tie' : 'dim-val-loser';
+        return `<div class="dim-row">
+          <div class="dim-row-top">
+            <span class="dim-label">${d.label}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${isWin ? `<span class="dim-winner-tag">Winner</span>` : ''}
+              <span class="dim-val ${valClass}">${mv}</span>
+            </div>
+          </div>
+          <div class="dim-bar-bg">
+            <div class="dim-bar-fill" style="width:${mv}%;background:${d.color}"></div>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="compare-card ${isWinner ? 'winner-card' : ''}">
+        ${isWinner ? `<div class="winner-badge">🏆 Higher Arena Elo</div>` : ''}
+        <div class="model-header">
+          <div class="model-provider-pill" style="background:${m.providerColor}22;color:${m.providerColor}">${m.provider}</div>
+          <div class="model-big-name">${m.name}</div>
+          
+          <div class="benchmark-badges-row">
+            <div class="bench-tag">Arena Elo: <strong>${m.benchmarks.arenaElo}</strong></div>
+            <div class="bench-tag">Coding Elo: <strong>${m.benchmarks.arenaCoding || '—'}</strong></div>
+            <div class="bench-tag">MMLU-Pro: <strong>${m.benchmarks.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</strong></div>
+            <div class="bench-tag">Speed: <strong>${m.speedTps ? m.speedTps + ' t/s' : '—'}</strong></div>
+          </div>
+
+          <div class="model-desc">${m.desc}</div>
+        </div>
+        <div class="dim-section">
+          <div class="dim-section-title">Performance by dimension</div>
+          ${dimHtml}
+        </div>
+        <table class="meta-table">
+          <tr><td>Context Window</td><td>${m.contextWindow} tokens</td></tr>
+          <tr><td>API Pricing</td><td>${m.pricing}</td></tr>
+          <tr><td>Deployment Type</td><td>${m.license === 'open_weights' ? 'Open Weights (Self-Hostable)' : 'Proprietary Cloud API'}</td></tr>
+        </table>
+      </div>`;
+    }
+
+    // Verdict paragraph
+    const winDims = dims.filter(d => winner.scores[d.key] > loser.scores[d.key]).map(d => d.label);
+    const loseDims = dims.filter(d => loser.scores[d.key] > winner.scores[d.key]).map(d => d.label);
+    
+    let specialNote = '';
+    if (a.license === 'open_weights' && b.license !== 'open_weights') {
+      specialNote = `<strong>Key Advantage:</strong> ${a.name} is open weights and can be hosted locally or on private cloud servers, ensuring 100% data privacy.`;
+    } else if (b.license === 'open_weights' && a.license !== 'open_weights') {
+      specialNote = `<strong>Key Advantage:</strong> ${b.name} is open weights and can be hosted locally or on private cloud servers, ensuring 100% data privacy.`;
+    } else if (a.contextTokens >= 1000000 && b.contextTokens < 1000000) {
+      specialNote = `<strong>Key Advantage:</strong> ${a.name} provides a massive ${a.contextWindow} context window for ingesting entire codebases or hundreds of PDF pages at once.`;
+    } else if (b.contextTokens >= 1000000 && a.contextTokens < 1000000) {
+      specialNote = `<strong>Key Advantage:</strong> ${b.name} provides a massive ${b.contextWindow} context window for ingesting entire codebases or hundreds of PDF pages at once.`;
+    }
+
+    const verdictHtml = `
+      <strong>${winner.name}</strong> has a higher Chatbot Arena Elo rating (<strong>${winner.benchmarks.arenaElo}</strong> vs <strong>${loser.benchmarks.arenaElo}</strong>), winning ${dimWins[aWins ? 'a' : 'b']} of the 6 core metrics (${winDims.join(', ')}).
+      ${loseDims.length ? `<br><br>However, <strong>${loser.name}</strong> holds the advantage on <strong>${loseDims.join(', ')}</strong>.` : ''}
+      ${specialNote ? `<br><br>${specialNote}` : ''}`;
+
+    const output = `
+      <div class="compare-grid">
+        ${modelCard(a, aWins, 'a')}
+        ${modelCard(b, !aWins, 'b')}
+      </div>
+
+      <div class="verdict-section">
+        <div class="verdict-title">⚖️ Verdict: Which should you choose?</div>
+        <div class="verdict-body">${verdictHtml}</div>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:1rem;">Dimension-by-dimension summary</div>
+        <table class="dim-compare-table">
+          <thead>
+            <tr>
+              <td style="text-align:right;width:35%">${a.name}</td>
+              <td style="text-align:center;width:30%">Metric</td>
+              <td style="text-align:left;width:35%">${b.name}</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="dim-score-a" style="${a.benchmarks.arenaElo >= b.benchmarks.arenaElo ? 'color:#4ade80' : 'color:var(--text-muted)'}">
+                ${a.benchmarks.arenaElo} ${a.benchmarks.arenaElo > b.benchmarks.arenaElo ? '✓' : ''}
+              </td>
+              <td class="dim-name" style="color:var(--amber)">LMSYS Arena Elo</td>
+              <td class="dim-score-b" style="${b.benchmarks.arenaElo >= a.benchmarks.arenaElo ? 'color:#4ade80' : 'color:var(--text-muted)'}">
+                ${b.benchmarks.arenaElo > a.benchmarks.arenaElo ? '✓' : ''} ${b.benchmarks.arenaElo}
+              </td>
+            </tr>
+            <tr>
+              <td class="dim-score-a" style="${(a.speedTps||0) >= (b.speedTps||0) ? 'color:#4ade80' : 'color:var(--text-muted)'}">
+                ${a.speedTps ? a.speedTps + ' t/s' : '—'}
+              </td>
+              <td class="dim-name" style="color:#38bdf8">Speed (Tokens/s)</td>
+              <td class="dim-score-b" style="${(b.speedTps||0) >= (a.speedTps||0) ? 'color:#4ade80' : 'color:var(--text-muted)'}">
+                ${b.speedTps ? b.speedTps + ' t/s' : '—'}
+              </td>
+            </tr>
+            ${dims.map(d => {
+              const av = a.scores[d.key], bv = b.scores[d.key];
+              const aWin = av > bv, bWin = bv > av, tie = av === bv;
+              return `<tr>
+                <td class="dim-score-a" style="${aWin ? 'color:#4ade80;font-weight:800' : tie ? 'color:var(--amber)' : 'color:var(--text-muted)'}">
+                  ${av} ${aWin ? '✓' : tie ? '≈' : ''}
+                </td>
+                <td class="dim-name" style="color:${d.color}">${d.label}</td>
+                <td class="dim-score-b" style="${bWin ? 'color:#4ade80;font-weight:800' : tie ? 'color:var(--amber)' : 'color:var(--text-muted)'}">
+                  ${bWin ? '✓' : tie ? '≈' : ''} ${bv}
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Advisor Comparison Banner -->
+      <div class="finder-chat-banner" style="margin-top:1.5rem">
+        <div class="finder-chat-banner-left">
+          <h3>💬 Need help deciding between ${escapeHtml(a.name)} and ${escapeHtml(b.name)}?</h3>
+          <p>Tell the advisor your constraints (budget, latency SLA, deployment target) for an instant breakdown.</p>
+          <div class="finder-chat-pills-row">
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(a.name)} vs ${escapeAttr(b.name)} for coding and software development')">💻 Best for Coding</button>
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Which is cheaper between ${escapeAttr(a.name)} and ${escapeAttr(b.name)} at scale?')">💵 Cost Analysis</button>
+            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Can I self-host ${escapeAttr(a.name)} or ${escapeAttr(b.name)} locally?')">🖥️ Self-hosting Check</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(a.name)} vs ${escapeAttr(b.name)} in detail and recommend the winner')">
+          Ask Advisor &rarr;
+        </button>
+      </div>`;
+
+    document.getElementById('compareOutput').innerHTML = output;
+  }
+
+  function escapeHtml(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function escapeAttr(str) {
+    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  selA.addEventListener('change', renderComparison);
+  selB.addEventListener('change', renderComparison);
+
+  renderComparison();
+</script>
+<script src="chat_widget.js"></script>
+</body>
+</html>

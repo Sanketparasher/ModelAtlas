@@ -1,252 +1,755 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ModelAtlas | Leaderboard</title>
-    <style>
-      :root {
-        --bg: #050b15;
-        --bg-2: #0d1725;
-        --panel: rgba(18, 26, 38, 0.88);
-        --panel-soft: rgba(15, 23, 42, 0.75);
-        --text: #edf6ff;
-        --muted: #9fb2cb;
-        --border: rgba(148, 163, 184, 0.18);
-        --amber: #f59e0b;
-        --purple: #a855f7;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Leaderboard — ModelAtlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="chat_widget.css" />
+  <style>
+    :root {
+      --bg: #040b13; --bg2: #071018; --bg3: #0d1a26;
+      --border: rgba(255,255,255,0.07); --border-hover: rgba(245,158,11,0.4);
+      --amber: #f59e0b; --amber-light: #fbbf24; --amber-dim: rgba(245,158,11,0.15);
+      --cyan: #06b6d4; --purple: #7c3aed;
+      --text: #e8edf2; --text-muted: #7a8a9a; --text-dim: #4a5a6a;
+      --green: #22c55e; --radius: 12px; --radius-lg: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-      * { box-sizing: border-box; }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,11,19,0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 0 2rem;
+    }
+    .nav-inner { max-width: 1360px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--amber), var(--cyan)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #040b13; }
+    .nav-links { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
+    .nav-cta { background: var(--amber) !important; color: #040b13 !important; font-weight: 600 !important; }
+    .nav-cta:hover { background: var(--amber-light) !important; }
 
-      html, body {
-        margin: 0;
-        min-height: 100%;
-        font-family: Inter, "Segoe UI", Arial, sans-serif;
-        background:
-          radial-gradient(circle at 12% 20%, rgba(168, 85, 247, 0.18), transparent 20%),
-          radial-gradient(circle at 85% 15%, rgba(34, 211, 238, 0.12), transparent 18%),
-          linear-gradient(180deg, #040b13 0%, #0b1220 28%, #07131d 100%);
-        color: var(--text);
-      }
+    /* PAGE HEADER */
+    .page-header {
+      padding: 3.5rem 2rem 2rem;
+      text-align: center;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(124,58,237,0.18) 0%, transparent 70%);
+    }
+    .page-tag { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.75rem; }
+    .page-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.65rem; }
+    .page-header p { color: var(--text-muted); font-size: 1rem; max-width: 720px; margin: 0 auto 1.5rem; }
 
-      body {
-        min-height: 100vh;
-      }
+    /* SOURCES BANNER */
+    .sources-banner {
+      display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.8rem;
+      margin-top: 1rem;
+    }
+    .source-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600;
+      padding: 0.35rem 0.85rem; border-radius: 99px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      color: var(--text-muted); text-decoration: none;
+      transition: all 0.2s;
+    }
+    .source-pill:hover { border-color: rgba(245,158,11,0.4); color: var(--text); }
+    .source-pill span { color: var(--amber); font-weight: 700; }
 
-      .page-shell {
-        width: min(1200px, calc(100% - 32px));
-        margin: 0 auto;
-        padding: 24px 0 64px;
-      }
+    /* CONTAINER */
+    .leaderboard-wrap { max-width: 1360px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-      .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 12px 0 18px;
-        border-bottom: 1px solid var(--border);
-      }
+    /* TOP CONTROLS BAR */
+    .controls-row {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 1rem; margin-bottom: 1.25rem;
+    }
+    .search-input-wrap {
+      position: relative; min-width: 280px; flex: 1; max-width: 380px;
+    }
+    .search-input {
+      width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text); font-size: 0.88rem; font-family: inherit;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
+    .action-btns {
+      display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    }
+    .btn-tool {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.8rem; font-weight: 600;
+      padding: 0.55rem 0.9rem; border-radius: 8px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.15s; font-family: inherit; text-decoration: none;
+    }
+    .btn-tool:hover { background: rgba(255,255,255,0.1); border-color: rgba(245,158,11,0.3); }
+    .btn-tool-amber { background: var(--amber-dim); border-color: rgba(245,158,11,0.4); color: var(--amber-light); }
 
-      .brand-mark {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, #fbbf24, #f59e0b 60%, #f97316);
-        color: #101827;
-        font-weight: 800;
-      }
+    /* FILTERS ROW */
+    .filters-row {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .filter-btn {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.78rem; font-weight: 600;
+      padding: 0.35rem 0.8rem; border-radius: 99px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .filter-btn:hover { border-color: rgba(245,158,11,0.3); color: var(--text); }
+    .filter-btn.active { background: var(--amber-dim); border-color: rgba(245,158,11,0.4); color: var(--amber-light); }
 
-      .brand-name {
-        font-size: 2rem;
-        font-weight: 800;
-        letter-spacing: -0.05em;
-      }
+    .lab-select {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.8rem; font-weight: 600;
+      padding: 0.38rem 0.85rem; border-radius: 8px; cursor: pointer;
+      outline: none; font-family: inherit;
+    }
 
-      .nav-link {
-        text-decoration: none;
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 10px 14px;
-        background: rgba(148, 163, 184, 0.06);
-      }
+    /* META BAR */
+    .meta-bar {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+      gap: 1rem; margin-bottom: 0.85rem; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .legend { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
 
-      .panel {
-        margin-top: 28px;
-        background: rgba(10, 15, 23, 0.82);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 24px 20px;
-      }
+    /* TABLE */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg2); }
+    table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+    thead tr { background: var(--bg3); }
+    thead th {
+      padding: 0.85rem 0.9rem; text-align: left;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-muted); cursor: pointer; user-select: none;
+      white-space: nowrap; border-bottom: 1px solid var(--border);
+      transition: color 0.15s;
+    }
+    thead th:hover { color: var(--amber-light); }
+    thead th.sort-active { color: var(--amber); }
+    thead th .sort-arrow { display: inline-block; margin-left: 4px; opacity: 0.5; }
+    thead th.sort-active .sort-arrow { opacity: 1; }
 
-      .eyebrow {
-        display: block;
-        margin: 0 0 8px;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-size: 0.72rem;
-      }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.035); }
+    tbody td { padding: 0.85rem 0.9rem; font-size: 0.85rem; vertical-align: middle; }
 
-      h1 {
-        margin: 0 0 6px;
-        font-size: clamp(2rem, 4vw, 3rem);
-        letter-spacing: -0.05em;
-      }
+    .rank-cell { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); width: 44px; }
+    .rank-cell.rank-1 { color: #fbbf24; }
+    .rank-cell.rank-2 { color: #94a3b8; }
+    .rank-cell.rank-3 { color: #cd7f32; }
 
-      .subtitle {
-        margin: 0 0 18px;
-        color: var(--muted);
-        font-size: 1rem;
-      }
+    .model-cell { display: flex; flex-direction: column; gap: 2px; }
+    .model-name-row { display: flex; align-items: center; gap: 6px; }
+    .model-cell-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+    .license-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-open { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-prop { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+    .model-cell-provider { font-size: 0.73rem; font-weight: 600; }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
+    .arena-elo-val { font-size: 1.05rem; font-weight: 800; }
 
-      th, td {
-        text-align: left;
-        padding: 12px 14px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-      }
+    .score-chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700;
+      padding: 0.2rem 0.48rem; border-radius: 6px; min-width: 36px;
+    }
+    .chip-green { background: rgba(34,197,94,0.12); color: #4ade80; }
+    .chip-amber { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .chip-muted { background: rgba(255,255,255,0.05); color: var(--text-muted); }
 
-      th {
-        color: var(--muted);
-        font-size: 0.74rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
+    .best-for-tag {
+      display: inline-block; font-size: 0.7rem; font-weight: 600;
+      padding: 0.18rem 0.5rem; border-radius: 6px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text-muted); white-space: nowrap;
+    }
+    .price-cell { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; font-family: monospace; }
+    .speed-cell { font-size: 0.82rem; font-weight: 700; color: #38bdf8; }
 
-      td {
-        color: var(--text);
-      }
+    .compare-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.75rem; font-weight: 600; color: var(--cyan); text-decoration: none;
+      padding: 0.22rem 0.6rem; border-radius: 6px;
+      border: 1px solid rgba(6,182,212,0.25);
+      transition: all 0.15s;
+    }
+    .compare-link:hover { background: rgba(6,182,212,0.12); border-color: var(--cyan); }
 
-      .rank {
-        font-weight: 700;
-        color: #fbbf24;
-      }
+    /* PAGINATION BAR */
+    .pagination-bar {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+      gap: 1rem; margin-top: 1.5rem; padding: 1rem 0;
+      font-size: 0.85rem; color: var(--text-muted);
+    }
+    .pagination-controls {
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .page-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.8rem; font-weight: 600;
+      padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--amber); color: var(--amber-light); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-size-select {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.8rem; font-weight: 600;
+      padding: 0.35rem 0.7rem; border-radius: 6px; cursor: pointer;
+      outline: none; font-family: inherit;
+    }
 
-      .model {
-        font-weight: 700;
-      }
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); width: 100%; max-width: 580px;
+      padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .modal-header h3 { font-size: 1.2rem; font-weight: 800; }
+    .modal-close { background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer; }
+    .modal-dropzone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 2rem; text-align: center; margin-bottom: 1.25rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .modal-dropzone:hover { border-color: var(--amber); background: rgba(245,158,11,0.03); }
+    .modal-textarea {
+      width: 100%; height: 120px; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.8rem; color: var(--text); font-family: monospace;
+      font-size: 0.8rem; resize: vertical; margin-bottom: 1.25rem; outline: none;
+    }
+    .modal-textarea:focus { border-color: var(--amber); }
 
-      @media (max-width: 760px) {
-        .header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 2.5rem 2rem; text-align: center; margin-top: 4rem; }
+    .footer-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .footer-links a { text-decoration: none; color: var(--text-muted); font-size: 0.88rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--amber); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
 
-        .brand-name {
-          font-size: 1.5rem;
-        }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .controls-row { flex-direction: column; align-items: stretch; }
+      .search-input-wrap { max-width: 100%; }
+      .pagination-bar { flex-direction: column; align-items: stretch; text-align: center; }
+    }
+  </style>
+</head>
+<body>
 
-        table {
-          display: block;
-          overflow-x: auto;
-          white-space: nowrap;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="header">
-        <div class="brand">
-          <div class="brand-mark">M</div>
-          <div class="brand-name">ModelAtlas</div>
-        </div>
-        <a class="nav-link" href="index.html">Back to home</a>
-      </header>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">M</div>
+      ModelAtlas
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="finder.html">Finder</a></li>
+      <li><a href="leaderboard.html" class="active">Leaderboard</a></li>
+      <li><a href="compare.html">Compare</a></li>
+      <li><a href="finder.html" class="nav-cta btn" style="padding:0.4rem 1rem;font-size:0.88rem;">Start Finder →</a></li>
+    </ul>
+  </div>
+</nav>
 
-      <main class="panel">
-        <span class="eyebrow">Leaderboard</span>
-        <h1>Model rankings</h1>
-        <p class="subtitle">Benchmark-informed tracking for quality, cost, speed, context, reliability, and privacy.</p>
+<div class="page-header">
+  <div class="page-tag">Massive Verified Database</div>
+  <h1>Global AI Model Leaderboard</h1>
+  <p>Tracking 380+ publicly available frontier and open-weights models backed by LMSYS Chatbot Arena human preference battles and empirical lab benchmarks.</p>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Model</th>
-              <th>Benchmark</th>
-              <th>Quality</th>
-              <th>Cost</th>
-              <th>Speed</th>
-              <th>Context</th>
-              <th>Reliability</th>
-              <th>Privacy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="rank">#1</td>
-              <td class="model">GPT-4.1</td>
-              <td>94</td>
-              <td>95</td>
-              <td>82</td>
-              <td>88</td>
-              <td>90</td>
-              <td>91</td>
-              <td>80</td>
-            </tr>
-            <tr>
-              <td class="rank">#2</td>
-              <td class="model">Claude 3.5 Sonnet</td>
-              <td>92</td>
-              <td>93</td>
-              <td>86</td>
-              <td>87</td>
-              <td>88</td>
-              <td>90</td>
-              <td>84</td>
-            </tr>
-            <tr>
-              <td class="rank">#3</td>
-              <td class="model">Gemini 2.5 Flash</td>
-              <td>90</td>
-              <td>89</td>
-              <td>92</td>
-              <td>96</td>
-              <td>86</td>
-              <td>89</td>
-              <td>88</td>
-            </tr>
-            <tr>
-              <td class="rank">#4</td>
-              <td class="model">Llama 3.3 70B</td>
-              <td>87</td>
-              <td>88</td>
-              <td>90</td>
-              <td>84</td>
-              <td>82</td>
-              <td>85</td>
-              <td>92</td>
-            </tr>
-            <tr>
-              <td class="rank">#5</td>
-              <td class="model">GPT-4o mini</td>
-              <td>85</td>
-              <td>84</td>
-              <td>94</td>
-              <td>97</td>
-              <td>80</td>
-              <td>83</td>
-              <td>76</td>
-            </tr>
-          </tbody>
-        </table>
-      </main>
+  <div class="sources-banner">
+    <div class="source-pill"><span>🏛️ Source 1</span> LMSYS Chatbot Arena (1M+ Human Elo battles)</div>
+    <div class="source-pill"><span>⚡ Source 2</span> Artificial Analysis (TPS Speed & API Pricing)</div>
+    <div class="source-pill"><span>🤗 Source 3</span> HF Open LLM Leaderboard (MMLU-Pro & SWE-bench)</div>
+  </div>
+</div>
+
+<div class="leaderboard-wrap">
+  <!-- SEARCH & ACTIONS -->
+  <div class="controls-row">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="modelSearch" class="search-input" placeholder="Search 380+ models (Claude, DeepSeek, Llama, Qwen, Mistral...)" />
     </div>
-  </body>
+
+    <div class="action-btns">
+      <select id="labFilter" class="lab-select">
+        <option value="all">🏢 All Labs & Providers</option>
+      </select>
+      <button class="btn-tool btn-tool-amber" id="openImportBtn">📥 Import Data</button>
+      <button class="btn-tool" id="exportCsvBtn">📤 Export CSV</button>
+      <button class="btn-tool" id="exportJsonBtn">📤 Export JSON</button>
+    </div>
+  </div>
+
+  <!-- CATEGORY PILLS -->
+  <div class="filters-row">
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">All Models</button>
+      <button class="filter-btn" data-filter="open_weights">Open Weights (Self-Host)</button>
+      <button class="filter-btn" data-filter="reasoning">Reasoning (o1 / R1)</button>
+      <button class="filter-btn" data-filter="coding">SWE & Coding</button>
+      <button class="filter-btn" data-filter="long_context">1M+ Context</button>
+      <button class="filter-btn" data-filter="budget">Budget / Fast</button>
+      <button class="filter-btn" data-filter="flagship">Frontier Flagship</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:0.78rem;color:var(--text-muted)">Per page:</span>
+      <select id="pageSizeSelect" class="page-size-select">
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- META & LEGEND -->
+  <div class="meta-bar">
+    <div id="modelCountLabel">Showing models...</div>
+    <div class="legend">
+      <div class="legend-item"><div class="score-chip chip-green" style="padding:1px 6px">1300+</div> Elite Tier</div>
+      <div class="legend-item"><div class="score-chip chip-amber" style="padding:1px 6px">1200+</div> High Capability</div>
+      <div class="legend-item"><div class="score-chip chip-muted" style="padding:1px 6px">&lt;1200</div> Standard</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table id="lbTable">
+      <thead>
+        <tr>
+          <th data-col="rank">Rank <span class="sort-arrow">↕</span></th>
+          <th data-col="name">Model & Provider <span class="sort-arrow">↕</span></th>
+          <th data-col="arenaElo" title="LMSYS Chatbot Arena human preference rating">Arena Elo <span class="sort-arrow">↕</span></th>
+          <th data-col="arenaCoding" title="LMSYS Coding Arena score">Coding Elo <span class="sort-arrow">↕</span></th>
+          <th data-col="mmluPro" title="MMLU-Pro higher-order reasoning benchmark">MMLU-Pro <span class="sort-arrow">↕</span></th>
+          <th data-col="speedTps" title="Output Tokens per second measured by Artificial Analysis">Speed (t/s) <span class="sort-arrow">↕</span></th>
+          <th data-col="contextTokens" title="Context window capacity">Context <span class="sort-arrow">↕</span></th>
+          <th data-col="quality" title="Normalized quality score">Quality <span class="sort-arrow">↕</span></th>
+          <th data-col="pricing">Pricing (Input / Output)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="lbBody">
+        <!-- Rendered dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination-bar">
+    <div id="pageInfo">Page 1 of 1</div>
+    <div class="pagination-controls">
+      <button class="page-btn" id="btnFirst">« First</button>
+      <button class="page-btn" id="btnPrev">‹ Prev</button>
+      <span id="pageNumbers" style="font-weight:700;color:var(--text);margin:0 6px;">1</span>
+      <button class="page-btn" id="btnNext">Next ›</button>
+      <button class="page-btn" id="btnLast">Last »</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>📥 Import Model Data</h3>
+      <button class="modal-close" id="closeImportBtn">&times;</button>
+    </div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
+      Upload or drop any CSV file from LMSYS Chatbot Arena, Hugging Face, or paste a JSON array of model objects.
+    </p>
+    <div class="modal-dropzone" id="dropzone">
+      <div style="font-size:2rem;margin-bottom:0.5rem">📄</div>
+      <div style="font-weight:700;font-size:0.92rem;margin-bottom:4px;">Click to select CSV / JSON file</div>
+      <div style="font-size:0.75rem;color:var(--text-muted)">or drag and drop here</div>
+      <input type="file" id="fileInput" accept=".csv,.json" style="display:none" />
+    </div>
+    <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;">Or paste JSON / CSV text:</div>
+    <textarea class="modal-textarea" id="importText" placeholder="[ { 'name': 'New Model', 'provider': 'Lab', 'benchmarks': { 'arenaElo': 1300 } } ]"></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+      <button class="btn-tool" id="cancelImportBtn">Cancel</button>
+      <button class="btn-tool btn-tool-amber" id="doImportBtn">Add to Database</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="finder.html">Finder</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="compare.html">Compare</a>
+    </div>
+    <p class="footer-copy">© 2026 ModelAtlas · Empirical AI benchmark database verified with LMSYS Chatbot Arena & Artificial Analysis</p>
+  </div>
+</footer>
+
+<!-- Load Unified Dataset -->
+<script src="models.js"></script>
+<script>
+  let allModels = [...(window.MODELS_DATA || [])];
+
+  let currentSort = { col: 'arenaElo', dir: -1 };
+  let currentFilter = 'all';
+  let currentLab = 'all';
+  let searchQuery = '';
+  let currentPage = 1;
+  let pageSize = 25;
+
+  // Populate Lab dropdown
+  function initLabDropdown() {
+    const labs = [...new Set(allModels.map(m => m.provider))].filter(Boolean).sort();
+    const sel = document.getElementById('labFilter');
+    sel.innerHTML = '<option value="all">🏢 All Labs & Providers</option>';
+    labs.forEach(lab => {
+      const count = allModels.filter(m => m.provider === lab).length;
+      sel.innerHTML += `<option value="${lab}">${lab} (${count})</option>`;
+    });
+  }
+  initLabDropdown();
+
+  function scoreChip(val) {
+    if (val >= 90) return `<span class="score-chip chip-green">${val}</span>`;
+    if (val >= 80) return `<span class="score-chip chip-amber">${val}</span>`;
+    return `<span class="score-chip chip-muted">${val}</span>`;
+  }
+
+  function getEloColor(elo) {
+    if (elo >= 1350) return '#4ade80';
+    if (elo >= 1300) return '#fbbf24';
+    if (elo >= 1250) return '#38bdf8';
+    return '#94a3b8';
+  }
+
+  function getFilteredData() {
+    let data = [...allModels];
+
+    // Filter by tag
+    if (currentFilter !== 'all') {
+      if (currentFilter === 'open_weights') {
+        data = data.filter(m => m.license === 'open_weights');
+      } else {
+        data = data.filter(m => m.tags && m.tags.includes(currentFilter));
+      }
+    }
+
+    // Filter by lab
+    if (currentLab !== 'all') {
+      data = data.filter(m => m.provider === currentLab);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      data = data.filter(m =>
+        m.name.toLowerCase().includes(q) ||
+        (m.provider && m.provider.toLowerCase().includes(q)) ||
+        (m.bestForLabel && m.bestForLabel.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort
+    const col = currentSort.col;
+    const dir = currentSort.dir;
+    data.sort((a, b) => {
+      if (col === 'name') {
+        return a.name.localeCompare(b.name) * dir;
+      } else if (col === 'arenaElo') {
+        return ((a.benchmarks.arenaElo || 0) - (b.benchmarks.arenaElo || 0)) * dir;
+      } else if (col === 'arenaCoding') {
+        return ((a.benchmarks.arenaCoding || 0) - (b.benchmarks.arenaCoding || 0)) * dir;
+      } else if (col === 'mmluPro') {
+        return ((a.benchmarks.mmluPro || 0) - (b.benchmarks.mmluPro || 0)) * dir;
+      } else if (col === 'speedTps') {
+        return ((a.speedTps || 0) - (b.speedTps || 0)) * dir;
+      } else if (col === 'contextTokens') {
+        return ((a.contextTokens || 0) - (b.contextTokens || 0)) * dir;
+      } else if (col === 'quality') {
+        return (((a.scores && a.scores.quality) || 0) - ((b.scores && b.scores.quality) || 0)) * dir;
+      }
+      return ((a.benchmarks.arenaElo || 0) - (b.benchmarks.arenaElo || 0)) * dir;
+    });
+
+    return data;
+  }
+
+  function renderTable() {
+    const fullFiltered = getFilteredData();
+    const totalCount = fullFiltered.length;
+
+    // Pagination bounds
+    const limit = pageSize === 'all' ? totalCount : parseInt(pageSize, 10);
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIndex = (currentPage - 1) * limit;
+    const pageItems = pageSize === 'all' ? fullFiltered : fullFiltered.slice(startIndex, startIndex + limit);
+
+    document.getElementById('modelCountLabel').textContent = `Showing ${pageItems.length} of ${totalCount} models (${allModels.length} in database)`;
+    document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${totalCount} models)`;
+    document.getElementById('pageNumbers').textContent = `${currentPage} / ${totalPages}`;
+    document.getElementById('btnFirst').disabled = currentPage === 1;
+    document.getElementById('btnPrev').disabled = currentPage === 1;
+    document.getElementById('btnNext').disabled = currentPage === totalPages;
+    document.getElementById('btnLast').disabled = currentPage === totalPages;
+
+    const body = document.getElementById('lbBody');
+    body.innerHTML = '';
+
+    if (pageItems.length === 0) {
+      body.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:3rem;color:var(--text-muted)">No models match your search or filter criteria.</td></tr>`;
+      return;
+    }
+
+    pageItems.forEach((m, idx) => {
+      const overallRank = startIndex + idx + 1;
+      const rankClass = overallRank === 1 ? 'rank-1' : overallRank === 2 ? 'rank-2' : overallRank === 3 ? 'rank-3' : '';
+      const rankEmoji = overallRank === 1 ? '🥇' : overallRank === 2 ? '🥈' : overallRank === 3 ? '🥉' : `#${overallRank}`;
+      const eloColor = getEloColor(m.benchmarks.arenaElo);
+
+      const licenseTag = m.license === 'open_weights'
+        ? `<span class="license-badge badge-open">Open Weights</span>`
+        : `<span class="license-badge badge-prop">API</span>`;
+
+      const tr = document.createElement('tr');
+      tr.dataset.id = m.id;
+      tr.innerHTML = `
+        <td><div class="rank-cell ${rankClass}">${rankEmoji}</div></td>
+        <td>
+          <div class="model-cell">
+            <div class="model-name-row">
+              <span class="model-cell-name">${m.name}</span>
+              ${licenseTag}
+            </div>
+            <div class="model-cell-provider" style="color:${m.providerColor || '#7a8a9a'}">${m.provider} · <span style="color:var(--text-dim)">${m.bestForLabel || 'AI Model'}</span></div>
+          </div>
+        </td>
+        <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks.arenaElo}</span></td>
+        <td><strong style="color:var(--text)">${m.benchmarks.arenaCoding || '—'}</strong></td>
+        <td>${m.benchmarks.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
+        <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+        <td><strong>${m.contextWindow || '128K'}</strong></td>
+        <td>${scoreChip((m.scores && m.scores.quality) || 85)}</td>
+        <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <a href="compare.html?a=${m.id}" class="compare-link" onclick="event.stopPropagation()">Compare ↗</a>
+            <button type="button" class="compare-link" style="color:var(--amber);border-color:rgba(245,158,11,0.3)" onclick="event.stopPropagation();window.ModelAtlasChat && window.ModelAtlasChat.open('Tell me about ${m.name.replace(/'/g, &quot;\\'&quot;)}: benchmarks, specs, and trade-offs')">Ask 💬</button>
+          </div>
+        </td>
+      `;
+      tr.addEventListener('click', () => {
+        window.location.href = `compare.html?a=${m.id}`;
+      });
+      body.appendChild(tr);
+    });
+  }
+
+  // Header sorting
+  document.querySelectorAll('thead th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (currentSort.col === col) {
+        currentSort.dir *= -1;
+      } else {
+        currentSort.col = col;
+        currentSort.dir = col === 'name' ? 1 : -1;
+      }
+      document.querySelectorAll('thead th').forEach(t => {
+        t.classList.remove('sort-active');
+        const arr = t.querySelector('.sort-arrow');
+        if (arr) arr.textContent = '↕';
+      });
+      th.classList.add('sort-active');
+      const arr = th.querySelector('.sort-arrow');
+      if (arr) arr.textContent = currentSort.dir === -1 ? '↓' : '↑';
+      currentPage = 1;
+      renderTable();
+    });
+  });
+
+  // Filters
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      currentPage = 1;
+      renderTable();
+    });
+  });
+
+  // Lab select
+  document.getElementById('labFilter').addEventListener('change', (e) => {
+    currentLab = e.target.value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Search
+  document.getElementById('modelSearch').addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Page size select
+  document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+    pageSize = e.target.value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Pagination buttons
+  document.getElementById('btnFirst').addEventListener('click', () => { currentPage = 1; renderTable(); });
+  document.getElementById('btnPrev').addEventListener('click', () => { currentPage--; renderTable(); });
+  document.getElementById('btnNext').addEventListener('click', () => { currentPage++; renderTable(); });
+  document.getElementById('btnLast').addEventListener('click', () => {
+    const full = getFilteredData();
+    const limit = pageSize === 'all' ? full.length : parseInt(pageSize, 10);
+    currentPage = Math.ceil(full.length / limit);
+    renderTable();
+  });
+
+  // Export functions
+  document.getElementById('exportCsvBtn').addEventListener('click', () => {
+    const data = getFilteredData();
+    let csv = 'Rank,Model,Provider,License,Arena Elo,Coding Elo,MMLU Pro,Speed TPS,Context,Pricing\n';
+    data.forEach((m, i) => {
+      csv += `"${i+1}","${m.name}","${m.provider}","${m.license}","${m.benchmarks.arenaElo}","${m.benchmarks.arenaCoding||''}","${m.benchmarks.mmluPro||''}","${m.speedTps||''}","${m.contextWindow||''}","${m.pricing||''}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'modelatlas_benchmarks.csv'; a.click();
+  });
+
+  document.getElementById('exportJsonBtn').addEventListener('click', () => {
+    const data = getFilteredData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'modelatlas_benchmarks.json'; a.click();
+  });
+
+  // Import Modal Handlers
+  const modal = document.getElementById('importModal');
+  document.getElementById('openImportBtn').addEventListener('click', () => modal.classList.add('open'));
+  document.getElementById('closeImportBtn').addEventListener('click', () => modal.classList.remove('open'));
+  document.getElementById('cancelImportBtn').addEventListener('click', () => modal.classList.remove('open'));
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById('importText').value = event.target.result;
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  document.getElementById('doImportBtn').addEventListener('click', () => {
+    const text = document.getElementById('importText').value.trim();
+    if (!text) return alert('Please paste JSON or CSV text to import.');
+    try {
+      if (text.startsWith('[') || text.startsWith('{')) {
+        const parsed = JSON.parse(text);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        list.forEach(item => {
+          if (item.name) {
+            allModels.unshift({
+              id: item.id || item.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+              name: item.name,
+              provider: item.provider || 'Custom',
+              providerColor: '#f59e0b',
+              license: item.license || 'open_weights',
+              benchmarks: item.benchmarks || { arenaElo: 1250, arenaCoding: 1220, mmluPro: 65 },
+              scores: item.scores || { quality: 85, cost: 90, speed: 85, context: 80, privacy: 85, reliability: 85 },
+              speedTps: item.speedTps || 90,
+              contextWindow: item.contextWindow || '128K',
+              contextTokens: item.contextTokens || 128000,
+              pricing: item.pricing || 'Free / Self-host',
+              bestForLabel: item.bestForLabel || 'Custom Model',
+              tags: item.tags || ['open_weights']
+            });
+          }
+        });
+        alert(`Successfully imported ${list.length} models!`);
+      } else {
+        // Parse CSV text
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
+        let count = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const parts = lines[i].split(',').map(s => s.replace(/^"|"$/g, '').trim());
+          if (parts.length >= 2) {
+            allModels.unshift({
+              id: parts[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
+              name: parts[1] || parts[0],
+              provider: parts[2] || 'Community',
+              providerColor: '#f59e0b',
+              license: 'open_weights',
+              benchmarks: { arenaElo: parseInt(parts[3]) || 1220, arenaCoding: 1200, mmluPro: 60 },
+              scores: { quality: 84, cost: 90, speed: 85, context: 80, privacy: 85, reliability: 85 },
+              speedTps: 85, contextWindow: '128K', pricing: 'Free / Self-host',
+              bestForLabel: 'Imported Model', tags: ['open_weights']
+            });
+            count++;
+          }
+        }
+        alert(`Successfully imported ${count} models from CSV!`);
+      }
+      modal.classList.remove('open');
+      initLabDropdown();
+      renderTable();
+    } catch (err) {
+      alert('Failed to parse input: ' + err.message);
+    }
+  });
+
+  // Default active header
+  const initialTh = document.querySelector('thead th[data-col="arenaElo"]');
+  if (initialTh) {
+    initialTh.classList.add('sort-active');
+    const arr = initialTh.querySelector('.sort-arrow');
+    if (arr) arr.textContent = '↓';
+  }
+
+  renderTable();
+</script>
+<script src="chat_widget.js"></script>
+</body>
 </html>
