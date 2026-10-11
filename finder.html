@@ -1584,14 +1584,20 @@
     document.getElementById('results').classList.add('active');
 
     // Sync state with AI Advisor
+    const quizCtx = {
+      track: branch.title,
+      answers: ans,
+      primary: primary,
+      runner: runner,
+      budget: budget,
+      timestamp: Date.now()
+    };
+    try {
+      localStorage.setItem('modelatlas_quiz_context', JSON.stringify(quizCtx));
+    } catch (e) {}
+
     if (window.ModelAtlasChat) {
-      window.ModelAtlasChat.setQuizContext({
-        track: branch.title,
-        answers: ans,
-        primary: primary,
-        runner: runner,
-        budget: budget
-      });
+      window.ModelAtlasChat.setQuizContext(quizCtx);
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -131,3 +131,28 @@ console.log(`Turn 2: Follow-up on "it" resolved to ${m1?.name}: ${t2Ok ? '✅ PA
 const t3 = window.ModelAtlasChat.query('Show me python code to run it');
 const t3Ok = t3.includes('python') || t3.includes('ollama run') || t3.includes('client');
 console.log(`Turn 3: Code generation for ${m1?.name}: ${t3Ok ? '✅ PASS' : '❌ FAIL'}`);
+
+// Agentic Tool & Generative UI Verification
+console.log('\n=== AGENTIC TOOLS & GENERATIVE UI TESTS ===');
+
+// Tool 1: Interactive VRAM Hardware Sizer
+const hwQuery = window.ModelAtlasChat.query('Open interactive VRAM hardware sizer');
+const hwHasWidget = hwQuery.includes('atlas-widget-card') && hwQuery.includes('Interactive Hardware &amp; VRAM Sizer') && hwQuery.includes('atlas-slider');
+const hwCalc16 = window.ModelAtlasChat.calculateHardware(16);
+const hw16Ok = hwCalc16.vram === 16 && hwCalc16.topModels.length > 0 && hwCalc16.fitDesc.includes('14B');
+console.log(`Tool 1 [Hardware Sizer Slider]: Widget: ${hwHasWidget ? '✅ PASS' : '❌ FAIL'} | 16GB Calc (${hwCalc16.topModels[0]?.name}): ${hw16Ok ? '✅ PASS' : '❌ FAIL'}`);
+
+// Tool 2: Interactive Token Budget Simulator
+const bgQuery = window.ModelAtlasChat.query('Open interactive token budget simulator');
+const bgHasWidget = bgQuery.includes('atlas-widget-card') && bgQuery.includes('Token Budget &amp; Workload Simulator') && bgQuery.includes('atlas-delta-table');
+const bgSim = window.ModelAtlasChat.simulateBudget(15, 20); // $15 budget, 20M tokens
+const bgSimOk = bgSim.budget === 15 && bgSim.results.length > 0 && bgSim.results.some(r => r.fits);
+console.log(`Tool 2 [Token Budget Simulator]: Widget: ${bgHasWidget ? '✅ PASS' : '❌ FAIL'} | $15/20M Calc: ${bgSimOk ? '✅ PASS' : '❌ FAIL'}`);
+
+// Tool 3: Spec Delta Comparator
+const mAnthropic = models.find(m => m.id === 'claude-3-7-sonnet');
+const mOpenAI = models.find(m => m.id === 'openai-o3-mini');
+const deltaQuery = window.ModelAtlasChat.query('Compare Claude 3.7 vs OpenAI o3-mini');
+const deltaHasBar = deltaQuery.includes('atlas-bar-wrap') && deltaQuery.includes('Benchmark Spec Delta');
+console.log(`Tool 3 [Benchmark Spec Delta]: Visual Bars & Delta: ${deltaHasBar ? '✅ PASS' : '❌ FAIL'}`);
+

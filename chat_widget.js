@@ -379,6 +379,261 @@
     return score;
   }
 
+  // ─── AGENTIC TOOLS & GENERATIVE UI BUILDERS ────────────────────────────────
+  const AGENT_TOOLS = {
+    // Tool 1: Hardware & VRAM Compatibility Calculator
+    calculateHardwareCompatibility: function (vramGB) {
+      const vram = parseInt(vramGB, 10) || 16;
+      const models = window.MODELS_DATA || [];
+      const openModels = models.filter(m => m.license === 'open_weights');
+
+      let fitDesc = '';
+      let targetFilter = null;
+
+      if (vram <= 6) {
+        fitDesc = 'Ultra-low VRAM setup. Fits 7B/8B models in Q3/Q4_K_M quantization with >90 tokens/sec throughput.';
+        targetFilter = m => /\b(7B|8B|3B|1B)\b/i.test(m.name);
+      } else if (vram <= 10) {
+        fitDesc = 'Consumer GPU (8GB VRAM). Fits 7B/8B models in high precision Q4/Q5 with ~2GB KV cache overhead.';
+        targetFilter = m => /\b(7B|8B)\b/i.test(m.name);
+      } else if (vram <= 18) {
+        fitDesc = 'Mainstream 12GB–16GB VRAM. Fits up to 14B models (e.g. Qwen 2.5 14B, Phi-4) in Q4/Q5 comfortably, or 8B in FP16.';
+        targetFilter = m => /\b(14B|8B|7B)\b/i.test(m.name);
+      } else if (vram <= 36) {
+        fitDesc = 'High-end 24GB–32GB VRAM (RTX 3090/4090 or Mac Studio 32GB). Fits 32B models in Q4/Q5 with extended context.';
+        targetFilter = m => /\b(32B|14B)\b/i.test(m.name);
+      } else {
+        fitDesc = 'Workstation / Multi-GPU (40GB–64GB+ VRAM). Fits 70B/72B frontier open weights (Llama 3.3 70B, Qwen 2.5 72B) in 4-bit.';
+        targetFilter = m => /\b(70B|72B|32B)\b/i.test(m.name);
+      }
+
+      let matches = openModels.filter(targetFilter);
+      matches.sort((a, b) => {
+        // Prioritize optimal parameter sizes for the hardware tier
+        if (vram >= 40) {
+          const a70 = /\b(70B|72B)\b/i.test(a.name);
+          const b70 = /\b(70B|72B)\b/i.test(b.name);
+          if (a70 !== b70) return a70 ? -1 : 1;
+        } else if (vram >= 20) {
+          const a32 = /\b32B\b/i.test(a.name);
+          const b32 = /\b32B\b/i.test(b.name);
+          if (a32 !== b32) return a32 ? -1 : 1;
+        } else if (vram >= 12) {
+          const a14 = /\b14B\b/i.test(a.name);
+          const b14 = /\b14B\b/i.test(b.name);
+          if (a14 !== b14) return a14 ? -1 : 1;
+        }
+        return (b.benchmarks?.arenaElo || 0) - (a.benchmarks?.arenaElo || 0);
+      });
+      if (matches.length < 3) {
+        matches = openModels.slice(0, 3);
+      }
+      return {
+        vram,
+        fitDesc,
+        topModels: matches.slice(0, 3)
+      };
+    },
+
+    // Tool 2: Token Budget & Workload Simulator
+    simulateTokenBudget: function (monthlyBudget, monthlyTokensM) {
+      const budget = parseFloat(monthlyBudget) || 20;
+      const volumeM = parseFloat(monthlyTokensM) || 10;
+      const models = window.MODELS_DATA || [];
+
+      // Key candidates across pricing spectrum
+      const candidates = models.filter(m => 
+        m.inputPrice !== undefined && 
+        ['Gemini 2.5 Flash', 'Gemini 2.0 Flash', 'DeepSeek V3', 'GPT-4o mini', 'Claude 3.5 Haiku', 'Claude 3.7 Sonnet', 'GPT-4o', 'DeepSeek R1'].some(name => m.name.includes(name))
+      );
+
+      const computed = candidates.map(m => {
+        // Blended cost: 75% input, 25% output
+        const blendedRate = (m.inputPrice * 0.75) + (m.outputPrice * 0.25);
+        const totalMonthlyCost = blendedRate * volumeM;
+        const fits = totalMonthlyCost <= budget;
+        return {
+          model: m,
+          blendedRate: blendedRate.toFixed(2),
+          totalMonthlyCost: totalMonthlyCost.toFixed(2),
+          fits,
+          delta: (budget - totalMonthlyCost).toFixed(2)
+        };
+      });
+
+      computed.sort((a, b) => {
+        if (a.fits && !b.fits) return -1;
+        if (!a.fits && b.fits) return 1;
+        return (b.model.benchmarks?.arenaElo || 0) - (a.model.benchmarks?.arenaElo || 0);
+      });
+
+      return {
+        budget,
+        volumeM,
+        results: computed.slice(0, 5)
+      };
+    },
+
+    // Tool 3: Benchmark Spec Delta Comparator
+    compareModelSpecs: function (m1, m2) {
+      const elo1 = m1.benchmarks?.arenaElo || 1200;
+      const elo2 = m2.benchmarks?.arenaElo || 1200;
+      const code1 = m1.benchmarks?.arenaCoding || 1200;
+      const code2 = m2.benchmarks?.arenaCoding || 1200;
+      const speed1 = m1.speedTps || 40;
+      const speed2 = m2.speedTps || 40;
+      const price1 = (m1.inputPrice || 0) * 0.75 + (m1.outputPrice || 0) * 0.25;
+      const price2 = (m2.inputPrice || 0) * 0.75 + (m2.outputPrice || 0) * 0.25;
+
+      return {
+        m1,
+        m2,
+        elo: { m1: elo1, m2: elo2, winner: elo1 >= elo2 ? m1.name : m2.name },
+        coding: { m1: code1, m2: code2, winner: code1 >= code2 ? m1.name : m2.name },
+        speed: { m1: speed1, m2: speed2, winner: speed1 >= speed2 ? m1.name : m2.name },
+        price: { m1: price1.toFixed(2), m2: price2.toFixed(2), winner: price1 <= price2 ? m1.name : m2.name }
+      };
+    }
+  };
+
+  // ─── GENERATIVE UI BUILDERS ────────────────────────────────────────────────
+  function renderHardwareSizerWidget(initialVram = 16, widgetId) {
+    const wId = widgetId || 'hw-widget-' + Math.floor(Math.random() * 100000);
+    const data = AGENT_TOOLS.calculateHardwareCompatibility(initialVram);
+
+    const presets = [6, 8, 12, 16, 24, 32, 48, 64];
+    const presetPills = presets.map(p => `
+      <button type="button" class="atlas-preset-pill ${p === data.vram ? 'active' : ''}" onclick="window.ModelAtlasChat && window.ModelAtlasChat.updateHardwareWidget(${p}, '${wId}')">${p}GB</button>
+    `).join('');
+
+    const modelRows = data.topModels.map(m => {
+      const tag = m.id.replace(/-instruct|-chat/g, '');
+      return `
+        <div class="atlas-hw-model-row">
+          <div class="atlas-hw-model-info">
+            <span class="atlas-hw-model-name">${escapeHtml(m.name)}</span>
+            <span class="atlas-hw-model-specs">Arena Elo ${m.benchmarks?.arenaElo || 'Top'} · Context ${m.contextWindow}</span>
+          </div>
+          <button type="button" class="atlas-action-btn" onclick="navigator.clipboard.writeText('ollama run ${tag}'); this.textContent='✓ Copied'; setTimeout(()=>this.textContent='ollama run', 1500)">ollama run</button>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="atlas-widget-card" id="${wId}">
+        <div class="atlas-widget-hdr">
+          <div class="atlas-widget-title">🖥️ Interactive Hardware &amp; VRAM Sizer</div>
+          <span class="atlas-widget-badge">Agentic Tool</span>
+        </div>
+        <div class="atlas-widget-slider-box">
+          <div class="atlas-slider-label-row">
+            <span>Available GPU / Unified Memory:</span>
+            <span class="atlas-slider-val" id="${wId}-val">${data.vram} GB VRAM</span>
+          </div>
+          <input type="range" class="atlas-slider" min="6" max="64" step="2" value="${data.vram}" oninput="window.ModelAtlasChat && window.ModelAtlasChat.updateHardwareWidget(this.value, '${wId}')" />
+          <div class="atlas-preset-pills">${presetPills}</div>
+        </div>
+        <div class="atlas-hw-output" id="${wId}-output">
+          <div class="atlas-hw-fit-desc">${data.fitDesc}</div>
+          <div style="font-size:0.72rem;color:#94a3b8;margin-bottom:6px;font-weight:700">Top Recommended Local Models for ${data.vram}GB:</div>
+          ${modelRows}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderBudgetSimulatorWidget(initialBudget = 20, initialVolume = 10, widgetId) {
+    const wId = widgetId || 'bg-widget-' + Math.floor(Math.random() * 100000);
+    const data = AGENT_TOOLS.simulateTokenBudget(initialBudget, initialVolume);
+
+    const rows = data.results.map(r => {
+      const statusBadge = r.fits 
+        ? `<span style="color:#10b981;font-weight:800">✅ $${r.totalMonthlyCost}/mo</span>`
+        : `<span style="color:#ef4444;font-weight:800">❌ $${r.totalMonthlyCost}/mo</span>`;
+      return `
+        <tr>
+          <td><strong>${escapeHtml(r.model.name)}</strong></td>
+          <td>${r.model.pricing}</td>
+          <td>${statusBadge}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <div class="atlas-widget-card" id="${wId}">
+        <div class="atlas-widget-hdr">
+          <div class="atlas-widget-title">💰 Token Budget &amp; Workload Simulator</div>
+          <span class="atlas-widget-badge">Agentic Tool</span>
+        </div>
+        <div class="atlas-widget-slider-box">
+          <div class="atlas-slider-label-row">
+            <span>Monthly Budget:</span>
+            <span class="atlas-slider-val" id="${wId}-budget-val">$${data.budget} / mo</span>
+          </div>
+          <input type="range" class="atlas-slider" min="5" max="100" step="5" value="${data.budget}" id="${wId}-budget-slider" oninput="window.ModelAtlasChat && window.ModelAtlasChat.updateBudgetWidget(this.value, document.getElementById('${wId}-vol-slider') ? document.getElementById('${wId}-vol-slider').value : 10, '${wId}')" />
+
+          <div class="atlas-slider-label-row" style="margin-top:8px">
+            <span>Monthly Volume:</span>
+            <span class="atlas-slider-val" id="${wId}-vol-val">${data.volumeM} Million Tokens</span>
+          </div>
+          <input type="range" class="atlas-slider" min="1" max="50" step="1" value="${data.volumeM}" id="${wId}-vol-slider" oninput="window.ModelAtlasChat && window.ModelAtlasChat.updateBudgetWidget(document.getElementById('${wId}-budget-slider') ? document.getElementById('${wId}-budget-slider').value : 20, this.value, '${wId}')" />
+        </div>
+        <div id="${wId}-output">
+          <div style="font-size:0.72rem;color:#94a3b8;margin-bottom:6px;font-weight:700">Cost Projection for ${data.volumeM}M tokens/mo under $${data.budget} budget:</div>
+          <table class="atlas-delta-table">
+            <thead>
+              <tr><th>Model</th><th>Rate</th><th>Est. Total</th></tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSpecDeltaWidget(m1, m2) {
+    const delta = AGENT_TOOLS.compareModelSpecs(m1, m2);
+    const maxElo = Math.max(delta.elo.m1, delta.elo.m2) || 1400;
+    const maxCode = Math.max(delta.coding.m1, delta.coding.m2) || 1400;
+
+    const eloPct1 = Math.round((delta.elo.m1 / maxElo) * 100);
+    const eloPct2 = Math.round((delta.elo.m2 / maxElo) * 100);
+    const codePct1 = Math.round((delta.coding.m1 / maxCode) * 100);
+    const codePct2 = Math.round((delta.coding.m2 / maxCode) * 100);
+
+    return `
+      <div class="atlas-widget-card">
+        <div class="atlas-widget-hdr">
+          <div class="atlas-widget-title">⚖️ Benchmark Spec Delta</div>
+          <span class="atlas-widget-badge">Comparator</span>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px">
+            <span><strong>${escapeHtml(m1.name)}</strong>: ${delta.elo.m1} Elo</span>
+            <span><strong>${escapeHtml(m2.name)}</strong>: ${delta.elo.m2} Elo</span>
+          </div>
+          <div class="atlas-bar-wrap"><div class="atlas-bar-fill" style="width:${eloPct1}%;background:#f59e0b"></div></div>
+          <div class="atlas-bar-wrap" style="margin-top:2px"><div class="atlas-bar-fill" style="width:${eloPct2}%;background:#06b6d4"></div></div>
+        </div>
+
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px">
+            <span>Coding: <strong>${delta.coding.m1}</strong></span>
+            <span>Coding: <strong>${delta.coding.m2}</strong></span>
+          </div>
+          <div class="atlas-bar-wrap"><div class="atlas-bar-fill" style="width:${codePct1}%;background:#f59e0b"></div></div>
+          <div class="atlas-bar-wrap" style="margin-top:2px"><div class="atlas-bar-fill" style="width:${codePct2}%;background:#06b6d4"></div></div>
+        </div>
+
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <a href="compare.html?m1=${encodeURIComponent(m1.id)}&m2=${encodeURIComponent(m2.id)}" class="atlas-action-btn" style="text-decoration:none">📊 Full Side-by-Side Comparison &rarr;</a>
+        </div>
+      </div>
+    `;
+  }
+
   // ─── INTERACTIVE IN-CHAT RECOMMENDATION CARD BUILDER ──────────────────────
   function renderRecommendationCard(primary, runner, budget, ans, rawScore) {
     const normScore = Math.min(99, Math.round(rawScore));
@@ -442,6 +697,8 @@
           <div class="atlas-card-actions">
             <button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('Show integration code and setup for ${safePrimary}')">💻 Code Setup</button>
             <button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('What hardware and VRAM is needed for ${safePrimary}?')">🖥️ Hardware Specs</button>
+            <button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('Open interactive VRAM hardware sizer')">🎛️ VRAM Slider</button>
+            <button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('Open interactive token budget simulator')">💰 Budget Sim</button>
             ${runner ? `<button type="button" class="atlas-action-btn" onclick="window.ModelAtlasChat.sendQuick('Compare ${safePrimary} vs ${safeRunner}')">⚖️ Compare vs ${safeRunner}</button>` : ''}
             ${runner ? `<a href="compare.html?m1=${encodeURIComponent(primary.id)}&m2=${encodeURIComponent(runner.id)}" class="atlas-action-btn" style="text-decoration:none">📊 Compare Page &rarr;</a>` : ''}
             <a href="leaderboard.html" class="atlas-action-btn" style="text-decoration:none">🏆 Leaderboard &rarr;</a>
@@ -564,6 +821,27 @@ print(response.choices[0].message.content)</code></pre>
       `;
     }
 
+    // ─── PATH 3.5: INTERACTIVE TOOL WIDGET TRIGGERS ───
+    if (q.includes('vram slider') || q.includes('vram sizer') || q.includes('hardware sizer') || q.includes('hardware calculator') || q.includes('interactive hardware') || (q.includes('vram') && (q.includes('slider') || q.includes('interactive') || q.includes('sizer') || q.includes('tool')))) {
+      const vramMatch = q.match(/(\d+)\s*(?:gb|g\b)/i);
+      const vram = vramMatch ? parseInt(vramMatch[1], 10) : (sessionMemory.userHardware?.vram || 16);
+      return `
+        🖥️ <strong>Interactive Hardware &amp; VRAM Sizer:</strong><br><br>
+        Drag the slider or click presets to see which open-weights models fit your machine in real-time:<br><br>
+        ${renderHardwareSizerWidget(vram)}
+      `;
+    }
+
+    if (q.includes('budget simulator') || q.includes('token simulator') || q.includes('pricing simulator') || q.includes('budget sim') || q.includes('cost calculator') || (q.includes('budget') && (q.includes('slider') || q.includes('simulator') || q.includes('tool')))) {
+      const bMatch = q.match(/\$(\d+)/);
+      const budget = bMatch ? parseInt(bMatch[1], 10) : 20;
+      return `
+        💰 <strong>Interactive Token Budget &amp; Volume Simulator:</strong><br><br>
+        Adjust your monthly budget and token volume to find the highest-performing model that stays strictly within budget:<br><br>
+        ${renderBudgetSimulatorWidget(budget, 10)}
+      `;
+    }
+
     // ─── PATH 4: HARDWARE & VRAM SIZING ───
     if (q.includes('hardware') || q.includes('vram') || q.includes('gpu memory') || q.includes('quantiz') || 
         (q.includes('run') && (q.includes('local') || q.includes('offline') || q.includes('laptop') || q.includes('mac') || q.includes('workstation') || q.includes('gpu') || q.includes('spec') || q.includes('self-host'))) ||
@@ -577,7 +855,8 @@ print(response.choices[0].message.content)</code></pre>
             <li><strong>8-Bit (FP8):</strong> Requires <strong>~75GB VRAM</strong> (1x NVIDIA H100 80GB or 1x A100 80GB).</li>
             <li><strong>Full 16-Bit (BF16):</strong> Requires <strong>~145GB VRAM</strong> (2x A100/H100 80GB).</li>
           </ul>
-          💡 <em>Tip: For a single consumer GPU (8GB–16GB VRAM), use <strong>Qwen 2.5 Coder 32B (Q4 ~20GB)</strong> or <strong>Llama 3.1 8B (Q4 ~5.5GB)</strong>.</em>
+          💡 <em>Tip: For a single consumer GPU (8GB–16GB VRAM), use <strong>Qwen 2.5 Coder 32B (Q4 ~20GB)</strong> or <strong>Llama 3.1 8B (Q4 ~5.5GB)</strong>.</em><br><br>
+          ${renderHardwareSizerWidget(48)}
         `;
       }
       if (targetModel && (targetModel.name.includes('R1') || targetModel.name.includes('V3') || targetModel.name.includes('671B'))) {
@@ -588,18 +867,24 @@ print(response.choices[0].message.content)</code></pre>
             <li><strong>Full Deployment:</strong> Requires an 8x H100/A100 GPU cluster (~600GB VRAM).</li>
             <li><strong>Quantized Local Deployment (IQ1_S to Q4):</strong> Requires a Mac with <strong>128GB to 192GB Unified Memory</strong>.</li>
             <li><strong>Best Practical Setup:</strong> For 99% of developers, run DeepSeek R1 via managed API at <strong>$0.55 / $2.19 per M</strong> for instant speed with zero server capex.</li>
-          </ul>
+          </ul><br>
+          ${renderHardwareSizerWidget(64)}
         `;
       }
       if (targetModel && (targetModel.name.includes('7B') || targetModel.name.includes('8B') || targetModel.name.includes('14B'))) {
+        const vramNum = targetModel.name.includes('14B') ? 16 : 8;
         return `
           💻 <strong>Hardware Guide for Small Models (${targetModel.name}):</strong><br><br>
           <ul>
             <li><strong>7B / 8B in Q4:</strong> Fits in <strong>~5.5GB VRAM</strong> (runs smoothly on any RTX 3060/4060 or 16GB Apple Silicon Mac at >100 tokens/sec).</li>
             <li><strong>14B in Q4:</strong> Fits in <strong>~9.5GB–11GB VRAM</strong> (ideal for single 12GB–16GB RTX 4070/4080 GPUs).</li>
-          </ul>
+          </ul><br>
+          ${renderHardwareSizerWidget(vramNum)}
         `;
       }
+
+      const vramMatch = q.match(/(\d+)\s*(?:gb|g\b)/i);
+      const detectedVram = vramMatch ? parseInt(vramMatch[1], 10) : 16;
       return `
         🖥️ <strong>General VRAM Estimation Formula:</strong><br><br>
         <code>VRAM (GB) ≈ (Parameters in Billions × Bytes per Weight) × 1.25 (KV Cache overhead)</code><br><br>
@@ -607,7 +892,8 @@ print(response.choices[0].message.content)</code></pre>
         • <strong>14B model in Q4:</strong> ~9.5 GB VRAM<br>
         • <strong>32B model in Q4:</strong> ~20.5 GB VRAM<br>
         • <strong>70B model in Q4:</strong> ~40 GB VRAM<br>
-        • <strong>405B model in Q4:</strong> ~230 GB VRAM
+        • <strong>405B model in Q4:</strong> ~230 GB VRAM<br><br>
+        ${renderHardwareSizerWidget(detectedVram)}
       `;
     }
 
@@ -643,7 +929,8 @@ print(response.choices[0].message.content)</code></pre>
             <li><strong>Throughput Speed:</strong> ${m1.name} (<strong>${m1.speedTps ? m1.speedTps + ' t/s' : '—'}</strong>) vs. ${m2.name} (<strong>${m2.speedTps ? m2.speedTps + ' t/s' : '—'}</strong>)</li>
             <li><strong>API Pricing:</strong> ${m1.name} (${m1.pricing}) vs. ${m2.name} (${m2.pricing})</li>
           </ul>
-          💡 <em>Verdict: Choose <strong>${m1.name}</strong> for ${m1.bestForLabel || 'performance'}, or <strong>${m2.name}</strong> for ${m2.bestForLabel || 'value'}.</em>
+          💡 <em>Verdict: Choose <strong>${m1.name}</strong> for ${m1.bestForLabel || 'performance'}, or <strong>${m2.name}</strong> for ${m2.bestForLabel || 'value'}.</em><br><br>
+          ${renderSpecDeltaWidget(m1, m2)}
         `;
       }
     }
@@ -665,7 +952,8 @@ print(response.choices[0].message.content)</code></pre>
         • All Input tokens: <strong>$${inCost}</strong><br>
         • All Output tokens: <strong>$${outCost}</strong><br>
         • Typical Blended workflow (3:1 input-to-output ratio): <strong>~$${blendedCost}</strong><br><br>
-        ${target.license === 'open_weights' ? '💡 <em>This model is open-weights. You can also self-host it for $0 API token costs!</em>' : ''}
+        ${target.license === 'open_weights' ? '💡 <em>This model is open-weights. You can also self-host it for $0 API token costs!</em>' : ''}<br>
+        ${renderBudgetSimulatorWidget(20, numMillions)}
       `;
     }
 
@@ -929,7 +1217,8 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
       <div class="atlas-chat-pills" id="atlas-chat-pills">
         <button class="atlas-pill" data-q="Recommend a model for coding on a 16GB laptop">💻 16GB Laptop Coding</button>
         <button class="atlas-pill" data-q="Best free model for 300 page textbook summaries">📖 Textbook Summarizer</button>
-        <button class="atlas-pill" data-q="What hardware is needed to run Llama 3.3 70B locally?">🖥️ 70B VRAM Hardware</button>
+        <button class="atlas-pill" data-q="Open interactive VRAM hardware sizer">🎛️ VRAM Sizer Slider</button>
+        <button class="atlas-pill" data-q="Open interactive token budget simulator">💰 Budget Simulator</button>
         <button class="atlas-pill" data-q="Compare Claude 3.7 vs OpenAI o3-mini">⚖️ Claude 3.7 vs o3-mini</button>
         <button class="atlas-pill" data-q="Best API model for strict JSON with sub-400ms latency">⚡ Sub-400ms JSON API</button>
       </div>
@@ -978,6 +1267,10 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
       sessionMemory.runnerModel = null;
       sessionMemory.budgetModel = null;
       sessionMemory.activeTrack = null;
+      try {
+        localStorage.removeItem('modelatlas_quiz_context');
+        localStorage.removeItem('modelatlas_user_hardware');
+      } catch (e) {}
       document.getElementById('atlas-context-bar').style.display = 'none';
       appendBotMessage("🔄 Cleared context. What model or workload would you like to explore next?");
     });
@@ -1013,6 +1306,35 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
 
     // Build the RAG index
     buildRAGIndex();
+
+    // Restore persistent cross-page quiz context & hardware memory
+    try {
+      const savedQuiz = localStorage.getItem('modelatlas_quiz_context');
+      if (savedQuiz) {
+        const parsed = JSON.parse(savedQuiz);
+        if (parsed && parsed.primary && (Date.now() - (parsed.timestamp || 0) < 7 * 86400000)) {
+          window.ModelAtlasChat.setQuizContext(parsed);
+          const welcomeBubble = document.querySelector('#atlas-chat-msgs .atlas-msg-bubble');
+          if (welcomeBubble) {
+            welcomeBubble.innerHTML = `
+              👋 <strong>Welcome back!</strong><br><br>
+              I remembered your profile from the <strong>${escapeHtml(parsed.track || 'Finder')}</strong> track (Top Match: <strong>${escapeHtml(parsed.primary.name)}</strong>).<br><br>
+              Ask me anything about local deployment, hardware sizing, benchmark comparisons, or cost simulations!
+            `;
+          }
+        }
+      }
+    } catch (e) {}
+
+    try {
+      const savedHw = localStorage.getItem('modelatlas_user_hardware');
+      if (savedHw) {
+        const parsedHw = JSON.parse(savedHw);
+        if (parsedHw && parsedHw.vram) {
+          sessionMemory.userHardware = parsedHw;
+        }
+      }
+    } catch (e) {}
   }
 
   function toggleChat(open) {
@@ -1093,6 +1415,97 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
     },
     getMemory: function () {
       return sessionMemory;
+    },
+    updateHardwareWidget: function (newVram, widgetId) {
+      const vram = parseInt(newVram, 10) || 16;
+      const data = AGENT_TOOLS.calculateHardwareCompatibility(vram);
+      try {
+        localStorage.setItem('modelatlas_user_hardware', JSON.stringify({ vram, timestamp: Date.now() }));
+        sessionMemory.userHardware = { vram };
+      } catch (e) {}
+
+      const card = document.getElementById(widgetId);
+      if (!card) return;
+
+      const valEl = document.getElementById(widgetId + '-val');
+      if (valEl) valEl.textContent = vram + ' GB VRAM';
+
+      const slider = card.querySelector('.atlas-slider');
+      if (slider) slider.value = vram;
+
+      card.querySelectorAll('.atlas-preset-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === `${vram}GB`);
+      });
+
+      const outEl = document.getElementById(widgetId + '-output');
+      if (outEl) {
+        const modelRows = data.topModels.map(m => {
+          const tag = m.id.replace(/-instruct|-chat/g, '');
+          return `
+            <div class="atlas-hw-model-row">
+              <div class="atlas-hw-model-info">
+                <span class="atlas-hw-model-name">${escapeHtml(m.name)}</span>
+                <span class="atlas-hw-model-specs">Arena Elo ${m.benchmarks?.arenaElo || 'Top'} · Context ${m.contextWindow}</span>
+              </div>
+              <button type="button" class="atlas-action-btn" onclick="navigator.clipboard.writeText('ollama run ${tag}'); this.textContent='✓ Copied'; setTimeout(()=>this.textContent='ollama run', 1500)">ollama run</button>
+            </div>
+          `;
+        }).join('');
+
+        outEl.innerHTML = `
+          <div class="atlas-hw-fit-desc">${data.fitDesc}</div>
+          <div style="font-size:0.72rem;color:#94a3b8;margin-bottom:6px;font-weight:700">Top Recommended Local Models for ${vram}GB:</div>
+          ${modelRows}
+        `;
+      }
+    },
+    updateBudgetWidget: function (newBudget, newVolume, widgetId) {
+      const budget = parseFloat(newBudget) || 20;
+      const volume = parseFloat(newVolume) || 10;
+      const data = AGENT_TOOLS.simulateTokenBudget(budget, volume);
+
+      const card = document.getElementById(widgetId);
+      if (!card) return;
+
+      const bValEl = document.getElementById(widgetId + '-budget-val');
+      if (bValEl) bValEl.textContent = `$${budget} / mo`;
+
+      const vValEl = document.getElementById(widgetId + '-vol-val');
+      if (vValEl) vValEl.textContent = `${volume} Million Tokens`;
+
+      const rows = data.results.map(r => {
+        const statusBadge = r.fits 
+          ? `<span style="color:#10b981;font-weight:800">✅ $${r.totalMonthlyCost}/mo</span>`
+          : `<span style="color:#ef4444;font-weight:800">❌ $${r.totalMonthlyCost}/mo</span>`;
+        return `
+          <tr>
+            <td><strong>${escapeHtml(r.model.name)}</strong></td>
+            <td>${r.model.pricing}</td>
+            <td>${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const outEl = document.getElementById(widgetId + '-output');
+      if (outEl) {
+        outEl.innerHTML = `
+          <div style="font-size:0.72rem;color:#94a3b8;margin-bottom:6px;font-weight:700">Cost Projection for ${volume}M tokens/mo under $${budget} budget:</div>
+          <table class="atlas-delta-table">
+            <thead>
+              <tr><th>Model</th><th>Rate</th><th>Est. Total</th></tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      }
+    },
+    calculateHardware: function (vram) {
+      return AGENT_TOOLS.calculateHardwareCompatibility(vram);
+    },
+    simulateBudget: function (b, v) {
+      return AGENT_TOOLS.simulateTokenBudget(b, v);
     }
   };
 
