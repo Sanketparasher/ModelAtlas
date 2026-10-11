@@ -316,7 +316,7 @@
             <span class="option-label">Student & Academic Researcher</span>
             <span class="option-pill">Academic Track</span>
           </div>
-          <div class="option-desc">Research paper synthesis, dense PDF review, STEM math & formal proofs, CS tutoring, generous free tiers</div>
+          <div class="option-desc">Homework & assignments, textbook summarization, medical/engineering coursework research, exam prep & sample practice tests</div>
         </div>
         <div class="option-check"></div>
       </div>
@@ -725,39 +725,60 @@
       id: 'student',
       title: 'Student & Academic Researcher Track',
       badge: '🎒 Student Track',
-      stepLabels: ['Track', 'Workload', 'Budget Reality', 'Reasoning Depth'],
+      stepLabels: ['Track', 'Study Focus', 'Budget Reality', 'Tutoring Depth'],
       questions: [
         {
           id: 'academic_workload',
-          title: 'What is your core academic study focus?',
-          hint: 'Different models dominate mathematical theorem proving versus dense PDF research paper synthesis.',
+          title: 'What is your primary academic study focus?',
+          hint: 'Differentiates between homework tutoring, whole-textbook reading, medical/engineering research, and exam test prep.',
           options: [
+            {
+              val: 'homework_assignment',
+              icon: '📝',
+              label: 'Homework & Assignment Assistance',
+              desc: 'Step-by-step guidance on homework assignments, problem sets, verifying math/code answers, and explaining difficult concepts clearly.',
+              pill: 'Homework Helper'
+            },
+            {
+              val: 'book_summarization',
+              icon: '📖',
+              label: 'Textbook & Whole-Book Summarization',
+              desc: 'Ingesting 300+ page course textbooks, readers, and syllabi. Generating chapter outlines, study notes, key definitions, and syllabus summaries with 1M–2M context.',
+              pill: 'Book Summaries'
+            },
+            {
+              val: 'specialized_research',
+              icon: '🩺',
+              label: 'Medical, Engineering & Specialized Course Research',
+              desc: 'High-precision technical coursework in Medicine (anatomy, pharmacology, clinical cases), Engineering (mechanics, circuits, formulas), and Sciences with zero hallucination.',
+              pill: 'Med & Eng Research'
+            },
+            {
+              val: 'exam_prep',
+              icon: '🎯',
+              label: 'Exam Prep, Mock Tests & Sample Questions',
+              desc: 'Generating realistic practice exams, multiple-choice quizzes with detailed answer rationales, flashcards, and diagnostic active recall testing.',
+              pill: 'Exam Prep & Mocks'
+            },
             {
               val: 'stem_math_logic',
               icon: '📐',
-              label: 'STEM, Math Proofs & Algorithmic Problem Solving',
-              desc: 'Calculus, discrete math, physics, and competitive algorithmic logic requiring step-by-step chain of thought.',
-              pill: 'MATH-500'
-            },
-            {
-              val: 'paper_synthesis',
-              icon: '📚',
-              label: 'Research Paper Synthesis & Literature Review',
-              desc: 'Reading dense 30-page arXiv PDFs, comparing methodologies, identifying flaws, and generating citations.',
-              pill: 'Paper Review'
+              label: 'STEM, Math Proofs & Physics Logic',
+              desc: 'Calculus, differential equations, discrete math, and physics problems requiring deep step-by-step chain-of-thought mathematical reasoning.',
+              pill: 'MATH-500 & Proofs'
             },
             {
               val: 'cs_coding_help',
               icon: '💻',
               label: 'Computer Science Homework & Learning to Code',
-              desc: 'Explaining data structures, debugging code assignments, and tutoring programming fundamentals.',
+              desc: 'Explaining data structures, debugging code assignments, and tutoring programming fundamentals in Python, Java, C++, and Web.',
               pill: 'CS Tutoring'
             },
             {
               val: 'humanities_essay',
               icon: '✍️',
-              label: 'Essay Drafting, Thesis Structure & Tone Polish',
-              desc: 'Overcoming writer\'s block, refining academic arguments, and enhancing prose clarity without AI cliches.',
+              label: 'Essay Drafting, Thesis & Research Papers',
+              desc: 'Drafting research papers, refining thesis arguments, finding scholarly citations, and polishing academic prose tone.',
               pill: 'Essay Polish'
             }
           ]
@@ -1244,24 +1265,56 @@
     else if (p === 'student') {
       weights = { quality: 0.30, cost: 0.35, speed: 0.10, context: 0.15, privacy: 0.05, reliability: 0.05 };
 
-      if (ans.academic_workload === 'stem_math_logic') {
-        weights.quality += 0.25;
-      } else if (ans.academic_workload === 'paper_synthesis') {
-        weights.context += 0.25;
+      if (ans.academic_workload === 'book_summarization') {
+        weights.context += 0.35;
+        weights.cost += 0.10;
+      } else if (ans.academic_workload === 'specialized_research') {
+        weights.quality += 0.30;
+        weights.reliability += 0.20;
+        weights.cost -= 0.10;
+      } else if (ans.academic_workload === 'exam_prep') {
+        weights.quality += 0.20;
+        weights.speed += 0.15;
+      } else if (ans.academic_workload === 'homework_assignment') {
+        weights.quality += 0.15;
+        weights.cost += 0.20;
+      } else if (ans.academic_workload === 'stem_math_logic') {
+        weights.quality += 0.30;
+        weights.speed -= 0.10;
+      } else if (ans.academic_workload === 'cs_coding_help') {
+        weights.quality += 0.20;
+        weights.cost += 0.10;
       }
 
       score = computeWeightedSum(model, weights);
 
-      if (ans.academic_workload === 'stem_math_logic') {
+      if (ans.academic_workload === 'book_summarization') {
+        if ((model.contextTokens || 0) >= 1000000) score *= 1.45; // Gemini 2.5 Pro / Flash 1M-2M context
+        else if ((model.contextTokens || 0) >= 200000) score *= 1.20;
+        else if ((model.contextTokens || 0) < 128000) score *= 0.60;
+      } else if (ans.academic_workload === 'specialized_research') {
+        if (model.benchmarks && model.benchmarks.mmluPro >= 84) score *= 1.30;
+        if (model.benchmarks && model.benchmarks.arenaElo >= 1350) score *= 1.25;
+      } else if (ans.academic_workload === 'exam_prep') {
+        if (model.benchmarks && model.benchmarks.arenaElo >= 1300) score *= 1.25;
+        if (model.scores && model.scores.quality >= 90) score *= 1.15;
+      } else if (ans.academic_workload === 'homework_assignment') {
+        if (model.scores && model.scores.quality >= 88) score *= 1.20;
+      } else if (ans.academic_workload === 'stem_math_logic') {
         if (model.benchmarks && model.benchmarks.mmluPro >= 80) score *= 1.25;
         if (model.tags && model.tags.includes('reasoning')) score *= 1.35;
-      } else if (ans.academic_workload === 'paper_synthesis') {
-        if ((model.contextTokens || 0) >= 500000) score *= 1.35;
+      } else if (ans.academic_workload === 'cs_coding_help') {
+        if (model.benchmarks && model.benchmarks.arenaCoding >= 1300) score *= 1.30;
+        if (model.tags && model.tags.includes('coding')) score *= 1.20;
+      }
+
+      if (ans.explanation_style === 'pedagogical_deep' && model.tags && model.tags.includes('reasoning')) {
+        score *= 1.15;
       }
 
       if (ans.student_budget === 'strictly_free') {
         if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
-        else if (model.inputPrice <= 0.20) score *= 1.15; // accessible free web / micro tiers
+        else if (model.inputPrice <= 0.20) score *= 1.20; // Accessible free web / micro tiers
         else score *= 0.45;
       }
     }
@@ -1343,9 +1396,14 @@
       if (ans.enterprise_compliance === 'zdr_commercial') verdictLines.push(`Available with enterprise Zero Data Retention (ZDR) and HIPAA / SOC-2 Type II agreements.`);
       if (ans.enterprise_context === 'archive_2m') verdictLines.push(`Its massive ${primary.contextWindow} context window eliminates vector RAG chunking bottlenecks.`);
     } else if (ans.persona === 'student') {
-      verdictLines.push(`<strong>✅ ${primary.name} is your best academic research and learning partner</strong>.`);
+      verdictLines.push(`<strong>✅ ${primary.name} is your best academic study partner</strong>.`);
+      if (ans.academic_workload === 'homework_assignment') verdictLines.push(`It delivers patient, step-by-step problem-solving tutoring that walks you through assignments and problem sets without simply doing the work for you.`);
+      if (ans.academic_workload === 'book_summarization') verdictLines.push(`Its massive ${primary.contextWindow} context window natively digests 300+ page course textbooks in a single prompt for comprehensive chapter notes and study guides.`);
+      if (ans.academic_workload === 'specialized_research') verdictLines.push(`Its verified high domain knowledge on medical, engineering, and scientific benchmarks provides reliable, hallucination-free research and formula accuracy.`);
+      if (ans.academic_workload === 'exam_prep') verdictLines.push(`It excels at generating challenging multiple-choice practice exams, diagnostic flashcards, and step-by-step answer keys.`);
       if (ans.academic_workload === 'stem_math_logic') verdictLines.push(`It delivers state-of-the-art step-by-step mathematical reasoning on STEM proofs.`);
-      if (ans.academic_workload === 'paper_synthesis') verdictLines.push(`Its large context window easily digests dense multi-page academic PDFs.`);
+      if (ans.academic_workload === 'cs_coding_help') verdictLines.push(`It excels at diagnosing programming bugs, explaining algorithms, and tutoring code concepts clearly.`);
+      if (ans.academic_workload === 'humanities_essay') verdictLines.push(`Its nuanced language capabilities help structure and polish academic essays, theses, and literature reviews.`);
       if (ans.student_budget === 'strictly_free') verdictLines.push(`Accessible completely free through zero-dollar tiers without financial barrier.`);
     } else if (ans.persona === 'creator') {
       verdictLines.push(`<strong>✅ ${primary.name} is your premier creative writing partner</strong>.`);
@@ -1373,6 +1431,45 @@
         <div class="score-bar-val" style="color:${scoreColor}">${val}</div>
       </div>`;
     }).join('');
+
+    // Generate track-aware advisor pills
+    let advisorPillsHtml = '';
+    if (ans.persona === 'student') {
+      advisorPillsHtml = `
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Generate 5 sample exam questions with answer keys on my study topic using ${escapeAttr(primary.name)}')">🎯 Generate Exam Questions</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How do I summarize a 300-page book or textbook chapter using ${escapeAttr(primary.name)}?')">📖 Summarize Textbook</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How accurate is ${escapeAttr(primary.name)} on medical and engineering course research?')">🩺 Med & Eng Accuracy</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How can I use ${escapeAttr(primary.name)} completely free as a student without a credit card?')">🆓 Free Student Access</button>
+      `;
+    } else if (ans.persona === 'coder') {
+      advisorPillsHtml = `
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What hardware and VRAM do I need to run ${escapeAttr(primary.name)} locally?')">🖥️ VRAM & Hardware</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Show Python API code for ${escapeAttr(primary.name)}')">💻 Python Code</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} on SWE-bench')">⚖️ vs ${escapeAttr(runner.name)}</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How does ${escapeAttr(primary.name)} perform on multi-file repo refactoring?')">🏗️ Repo Refactoring</button>
+      `;
+    } else if (ans.persona === 'api') {
+      advisorPillsHtml = `
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Show strict JSON Schema code snippet for ${escapeAttr(primary.name)}')">📋 Strict JSON Schema</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How much will 10M tokens cost on ${escapeAttr(primary.name)}?')">💵 Token Pricing</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What is the measured TTFT latency and throughput for ${escapeAttr(primary.name)}?')">⚡ Latency & Speed</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How to configure tool calling with ${escapeAttr(primary.name)}')">🔧 Tool Calling</button>
+      `;
+    } else if (ans.persona === 'enterprise') {
+      advisorPillsHtml = `
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What are the Zero Data Retention and HIPAA compliance terms for ${escapeAttr(primary.name)}?')">🛡️ ZDR & Compliance</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How to deploy ${escapeAttr(primary.name)} on AWS Bedrock or Private VPC')">☁️ Private VPC</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} for enterprise security')">⚖️ Enterprise Audit</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Hardware requirements to air-gap ${escapeAttr(primary.name)} on-premise')">🏛️ Air-Gapped Setup</button>
+      `;
+    } else {
+      advisorPillsHtml = `
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How to prompt ${escapeAttr(primary.name)} for natural human voice without AI cliches?')">🌿 Anti-AI Clichés</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} for longform writing')">📖 Longform Prose</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Show cost comparison between ${escapeAttr(primary.name)} and alternatives')">💵 Cost Analysis</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How fast is ${escapeAttr(primary.name)} for creative brainstorming?')">⚡ Speed Check</button>
+      `;
+    }
 
     const html = `
       <div class="top-pick">
@@ -1424,12 +1521,9 @@
       <div class="finder-chat-banner">
         <div class="finder-chat-banner-left">
           <h3>💬 Have questions? Ask your ModelAtlas AI Advisor</h3>
-          <p>Get instant guidance on VRAM hardware specs, token cost projections, or integration code tailored to <strong>${escapeHtml(primary.name)}</strong>.</p>
+          <p>Get instant guidance tailored specifically to your <strong>${escapeHtml(branch.title)}</strong> workflow with <strong>${escapeHtml(primary.name)}</strong>.</p>
           <div class="finder-chat-pills-row">
-            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What hardware and VRAM do I need to run ${escapeAttr(primary.name)} locally?')">🖥️ VRAM & Hardware</button>
-            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Show Python API code for ${escapeAttr(primary.name)}')">💻 Python Code</button>
-            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} in detail')">⚖️ vs ${escapeAttr(runner.name)}</button>
-            <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How much will 10M tokens cost on ${escapeAttr(primary.name)}?')">💵 Token Pricing</button>
+            ${advisorPillsHtml}
           </div>
         </div>
         <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('I selected ${escapeAttr(primary.name)} on the ${branch.badge}. Help me plan my setup and trade-offs.')" style="white-space:nowrap;padding:0.75rem 1.4rem;">

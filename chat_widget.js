@@ -385,6 +385,71 @@ print(response.choices[0].message.content)</pre>
       `;
     }
 
+    // 8. Student: Exam Prep & Sample Questions
+    if (q.includes('exam') || q.includes('sample question') || q.includes('mock test') || q.includes('quiz') || q.includes('test prep')) {
+      const target = (context ? context.primary : null) || findModel(q) || models.find(m => m.id === 'claude-3-7-sonnet') || { name: 'Claude 3.7 Sonnet' };
+      return `
+        🎯 <strong>Exam Prep & Practice Test Generator with ${target.name}:</strong><br><br>
+        Models with high reasoning (Arena Elo 1350+, MMLU-Pro 84%+) excel at generating authentic exam questions because they understand syllabus standards.<br><br>
+        <strong>Recommended Exam Prompt Template:</strong><br>
+        <pre>Act as a university professor in [Subject, e.g., Molecular Biology / Fluid Mechanics].
+Generate 5 challenging exam questions (3 Multiple Choice with tricky distractors + 2 Conceptual Proofs).
+Provide an answer key with detailed step-by-step rationales explaining why incorrect options are wrong.</pre>
+        <strong>Top Models for Exam Creation:</strong>
+        <ul>
+          <li><strong>Claude 3.7 Sonnet:</strong> Best for conceptual essay questions, realistic medical clinical vignettes, and nuanced grading.</li>
+          <li><strong>DeepSeek R1 / OpenAI o3-mini:</strong> Best for STEM, physics derivations, and competitive calculus exams.</li>
+          <li><strong>Gemini 2.5 Flash:</strong> Super-fast generation of 50+ question multiple-choice flashcard decks in seconds.</li>
+        </ul>
+      `;
+    }
+
+    // 9. Student: Textbook & Long Book Summarization
+    if (q.includes('textbook') || q.includes('summarize book') || q.includes('300-page') || q.includes('whole book') || q.includes('chapter')) {
+      return `
+        📖 <strong>Textbook & Whole-Book Summarization Strategy:</strong><br><br>
+        To summarize entire 300+ page books or textbooks without hitting context limits or losing details in the middle:<br><br>
+        <ul>
+          <li><strong>#1 Pick — Gemini 2.5 Pro (2M Tokens):</strong> Fits an entire 1,500-page textbook (up to 1.5 million words) in a <em>single prompt</em>. You can ask: <em>"Cross-reference Chapter 4's metabolic pathways with the clinical symptoms described in Chapter 12."</em></li>
+          <li><strong>#2 Pick — Gemini 2.5 Flash (1M Tokens):</strong> Free in Google AI Studio and ultra-fast. Can summarize 20 syllabus chapters into high-yield study flashcards in under 5 seconds.</li>
+          <li><strong>#3 Pick — Claude 3.7 Sonnet (200K Tokens):</strong> Ideal for 50–100 page course packets, retaining the highest fidelity on subtle arguments and academic nuances.</li>
+        </ul>
+        💡 <em>Pro-Tip: Upload the PDF directly and prompt: "Create a chapter-by-chapter outline with key formulas, core theorems, and a glossary of bold terms."</em>
+      `;
+    }
+
+    // 10. Student: Medical, Engineering & Coursework Research
+    if (q.includes('medical') || q.includes('engineering') || q.includes('clinical') || q.includes('coursework') || q.includes('formula')) {
+      return `
+        🩺 <strong>Medical & Engineering Coursework Research:</strong><br><br>
+        Technical courses require high benchmark scores on domain-specific evaluations (MedQA, MMLU-Pro STEM, MATH-500) where hallucinations can be dangerous:<br><br>
+        <ul>
+          <li><strong>Medicine & Life Sciences (USMLE / Anatomy / Pharmacology):</strong>
+            <br>• <strong>Claude 3.7 Sonnet / GPT-4o:</strong> Highest accuracy on multi-step clinical diagnostic vignettes and differential diagnoses.
+            <br>• <strong>DeepSeek R1:</strong> Outstanding at biochemical reaction mechanisms and genetics proofs.
+          </li>
+          <li><strong>Engineering (Mechanical, Electrical, Chemical, Civil):</strong>
+            <br>• <strong>OpenAI o3-mini / DeepSeek R1:</strong> Chain-of-thought models that derive Navier-Stokes equations, circuit Kirchhoff laws, and thermodynamics integrals step-by-step.
+          </li>
+        </ul>
+        💡 <em>Always ask the model: "State all assumptions and check dimensional analysis (units) at each step of the calculation."</em>
+      `;
+    }
+
+    // 11. Student: Free Access & Homework Tutoring
+    if (q.includes('free student') || q.includes('homework') || q.includes('without a credit card') || q.includes('socratic') || q.includes('free access')) {
+      return `
+        🆓 <strong>How to Use Top AI Models 100% Free as a Student:</strong><br><br>
+        You do <strong>not</strong> need to pay $20/month. Here is how to access frontier intelligence at zero cost:<br><br>
+        <ol>
+          <li><strong>Google AI Studio (Gemini 2.5 Pro & Flash):</strong> Free access with your student Google account. Gives you a <strong>2 Million token context window</strong> for full textbooks completely free.</li>
+          <li><strong>DeepSeek Web (chat.deepseek.com):</strong> 100% free web chat with <strong>DeepSeek R1</strong> (world-class math reasoning) and <strong>DeepSeek V3</strong> with no credit card required.</li>
+          <li><strong>Local Ollama (Offline Laptop):</strong> Download <strong>Ollama</strong> (free) and run <strong>Qwen 2.5 Coder 7B</strong> or <strong>Llama 3.1 8B</strong> on your laptop with zero internet required.</li>
+        </ol>
+        💡 <em>Homework Tutoring Tip: Instruct the model: "Act as my Socratic tutor. Guide me to the solution with leading questions and hints. Never give me the final answer immediately."</em>
+      `;
+    }
+
     // General fallback
     return `
       💡 <strong>ModelAtlas Advisor Insight:</strong><br><br>
