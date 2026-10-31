@@ -66,6 +66,65 @@
 • Multi-File Repo Refactoring: Claude 3.7 Sonnet (#1 on SWE-bench Verified at 70.3%) with toggleable hybrid reasoning navigates complex dependency graphs.
 • Sub-150ms Inline Autocomplete: High throughput models: Qwen 2.5 Coder 7B/14B (>120 t/s), Gemini 2.0 Flash (145 t/s), Granite 8B.
 • Agentic Function Calling: Leaders on Berkeley Function Calling Leaderboard (BFCL): Claude 3.7 Sonnet, Claude 3.5 Sonnet, GPT-4o, Gemini 2.5 Pro.`
+    },
+    {
+      id: 'doc-prompt-caching',
+      title: 'Prompt Caching & Context Re-use Economics',
+      category: 'pricing',
+      keywords: ['prompt caching', 'cache', 'caching', 'context caching', 'anthropic cache', 'deepseek cache', 'repetitive', 'system prompt', 'discount'],
+      content: `Prompt Caching & Context Re-use Economics:
+• Anthropic Claude 3.7 & 3.5: Offers a 90% discount on cached input tokens ($0.30/M vs $3.00/M for Claude 3.7 Sonnet). Cache writes cost +25% on first turn, but subsequent reads within the 5-minute TTL save 90% of input costs.
+• DeepSeek V3 / R1: Native context caching with 90% read discount ($0.014 / $0.14 per 1M input cache hits).
+• Google Gemini 2.5: Context caching available on Gemini 1.5/2.5 for requests >32k tokens, reducing input costs by 75%.
+• Production Impact: Repetitive system prompts, tool schemas, code repository dumps, and long few-shot examples reduce total API expenditure by 70% to 90%.`
+    },
+    {
+      id: 'doc-creative-prompting',
+      title: 'Anti-Cliché Creative Writing & Natural Voice Guide',
+      category: 'creative',
+      keywords: ['cliche', 'clichés', 'delve', 'tapestry', 'beacon', 'testament', 'fast-paced', 'writing prompt', 'creative writing', 'voice', 'tone', 'human sound', 'cadence'],
+      content: `Anti-Cliché Writing & Human Voice Prompting:
+• Banned AI Clichés: Banned words and phrases include "delve", "tapestry", "beacon", "testament", "nestled", "unleash", "in today's fast-paced world", "pivotal role", "game-changer", "testament to".
+• Prompt Pattern for Authentic Voice: Instruct the model: "Write in an authentic, understated human voice. Vary sentence length (use rhythmic staccato mixed with complex compound sentences). Do not use corporate buzzwords or AI filler adjectives. Never start concluding paragraphs with 'In conclusion' or 'Ultimately'."
+• Gold Standard Models: Claude 3.7 Sonnet and Claude 3.5 Sonnet lead for natural prose rhythm, literary texture, and avoiding corporate buzzwords.`
+    },
+    {
+      id: 'doc-open-licenses',
+      title: 'Open-Source Commercial Licensing Guide (MIT vs Apache vs Llama)',
+      category: 'licensing',
+      keywords: ['license', 'licensing', 'mit', 'apache', 'llama license', 'commercial use', 'mau', 'terms', 'community license', 'deepseek license', 'qwen license'],
+      content: `Open-Source Commercial Licensing Breakdown:
+• MIT License (DeepSeek R1, DeepSeek V3, Mistral NeMo): Maximum commercial freedom. Allows private modification, commercial distribution, SaaS deployment, and integration into proprietary software with zero royalties or user caps.
+• Apache 2.0 (Qwen 2.5 series, Granite 3.0): Enterprise-grade open license. Explicit patent grant, free commercial use without revenue or monthly active user ceilings.
+• Meta Llama 3.3 Community License: Free for research and commercial use EXCEPT if monthly active users (MAU) exceed 700 million in the previous calendar month, which requires a custom commercial license from Meta. Prohibits using outputs to train other non-Llama models.
+• Corporate Risk Verdict: MIT and Apache 2.0 open-weights models carry zero MAU ceiling risk, whereas Meta Llama requires compliance sign-off for consumer-scale applications (>700M users).`
+    },
+    {
+      id: 'doc-kv-cache-sizing',
+      title: 'KV Cache VRAM Sizing & Long-Context Memory Overhead',
+      category: 'hardware',
+      keywords: ['kv cache', 'context overhead', '128k vram', 'context vram', 'attention cache', 'context memory', 'vllm cache', 'fp16 kv', 'fp8 kv'],
+      content: `KV Cache Memory Overhead & Context Sizing:
+• KV Cache Formula: KV Cache Size (GB) ≈ 2 × (Layers) × (KV Heads) × (Head Dim) × (Precision Bytes) × (Sequence Length) × (Batch Size).
+• Context Overhead Reality: Running a 70B model at 8k context requires ~1.5GB KV cache. But running at 128k context consumes ~24GB to 32GB JUST FOR THE KV CACHE in FP16!
+• Optimizations:
+  1. FP8 / INT4 KV Cache: Reduces KV memory footprint by 50% to 75% with negligible perplexity degradation in vLLM or llama.cpp.
+  2. Grouped-Query Attention (GQA): Llama 3.3 70B and Qwen 2.5 use 8 KV heads instead of 64, cutting memory by 8x compared to Multi-Head Attention.
+  3. Sizing Rule of Thumb: For 32k context on a 32B model, budget +4GB to +6GB VRAM beyond model weights. For 128k context on a 70B model, budget +20GB VRAM (or use FP8 KV cache to fit in +10GB).`
+    },
+    {
+      id: 'doc-non-technical-access',
+      title: 'Non-Technical Web & Mobile Access Guide',
+      category: 'general',
+      keywords: ['non-technical', 'website', 'no code', 'install python', 'simple website', 'web app', 'mobile app', 'how to use', 'chatgpt alternative', 'portal'],
+      content: `Non-Technical Web & Mobile Access:
+• Zero-Setup Browser Portals: You do NOT need to write code, install Python, or own an expensive GPU to use top models.
+• Direct 1-Click Websites:
+  1. Google AI Studio (aistudio.google.com): Free web interface with full Gemini 2.5 Pro (2M context) and Flash. No coding required.
+  2. DeepSeek Chat (chat.deepseek.com): Free web portal and mobile app for DeepSeek R1 and V3. Zero setup.
+  3. Claude.ai (Anthropic): Clean web chat interface for Claude 3.7 Sonnet with Projects and Artifacts.
+  4. ChatGPT (OpenAI): Free web & mobile app for GPT-4o and o3-mini.
+  5. LM Studio (lmstudio.ai): If you want private offline models on your laptop without coding, LM Studio provides a simple 1-click graphical desktop app (no terminal commands).`
     }
   ];
 
@@ -157,8 +216,13 @@
     const t = text.toLowerCase();
     let persona = prevMemory?.activeTrack || 'coder';
 
+    const isExplicitNonCoder = /(do not|don\'t|cannot|cant|no)\s+(know\s+how\s+to\s+code|code|program|developer)/i.test(t) ||
+                               /(non-technical|not a coder|not technical|beginner|no coding)/i.test(t);
+
     // Persona identification
-    if (/novel|fiction|writing|writer|blog|article|author|prose|clich|copywriting|creative/i.test(t)) {
+    if (isExplicitNonCoder) {
+      persona = /marketing|ad|writing|copy|blog|author|book/i.test(t) ? 'creator' : 'general';
+    } else if (/novel|fiction|writing|writer|blog|article|author|prose|clich|copywriting|creative/i.test(t)) {
       persona = 'creator';
     } else if (/student|homework|study|exam|test prep|mock test|quiz|textbook|medical|usmle|doctor|engineering|calculus|math|biology|college|university|school|thesis|essay/i.test(t)) {
       persona = 'student';
@@ -166,7 +230,7 @@
       persona = 'api';
     } else if (/enterprise|corporate|compliance|hipaa|soc-2|soc2|zdr|air-gap|airgapped|on[- ]?prem|sovereign|legal|contract|audit|finance/i.test(t)) {
       persona = 'enterprise';
-    } else if (/everyday|routine|assistant|chores|productivity|lifestyle|general purpose|chatgpt alternative|personal assistant/i.test(t)) {
+    } else if (/everyday|routine|assistant|chores|productivity|lifestyle|general purpose|chatgpt alternative|personal assistant|small business|email/i.test(t)) {
       persona = 'general';
     } else if (/code|coding|developer|python|react|refactor|software|git|bug|swe|cursor|terminal/i.test(t)) {
       persona = 'coder';
@@ -181,8 +245,9 @@
       else if (/script|test suite|unit test|single file/i.test(t)) ans.coding_scope = 'scripts_tests';
       else ans.coding_scope = 'repo_refactor';
 
-      if (/laptop|macbook|consumer|8gb|16gb|single gpu|rtx 3060|rtx 4060|offline|local/i.test(t)) ans.env_target = 'local_consumer';
-      else if (/workstation|mac studio|24gb|32gb|48gb|64gb|rtx 3090|rtx 4090|multi-gpu/i.test(t)) ans.env_target = 'local_workstation';
+      // Check workstation capacity BEFORE consumer laptop to avoid downgrading high-RAM setups
+      if (/workstation|mac studio|24gb|32gb|48gb|64gb|128gb|192gb|rtx 3090|rtx 4090|multi-gpu/i.test(t)) ans.env_target = 'local_workstation';
+      else if (/laptop|macbook|consumer|8gb|16gb|single gpu|rtx 3060|rtx 4060|offline|local/i.test(t)) ans.env_target = 'local_consumer';
       else ans.env_target = 'cloud_managed';
 
       if (/reasoning|think|deep|math|logic/i.test(t)) ans.reasoning_mode = 'extended_thinking';
@@ -244,6 +309,10 @@
 
       if (/deep|think|reason|deliberate/i.test(t)) ans.response_speed = 'deep_thought';
       else ans.response_speed = 'fast_chat';
+
+      if (/desktop|offline|local|lm studio|ollama|jan/i.test(t)) ans.platform_pref = 'desktop_app';
+      else if (/api|python|curl|developer|endpoint/i.test(t)) ans.platform_pref = 'cloud_api';
+      else ans.platform_pref = 'web_portal';
 
       if (/free|\$0|zero cost|without pay|cheap/i.test(t)) ans.general_budget = 'free_everyday';
       else ans.general_budget = 'premium_everyday';
@@ -448,6 +517,13 @@
       if (ans.general_use === 'all_rounder' && (model.id.includes('flash') || model.id === 'deepseek-v3' || model.name.includes('GPT-4o mini') || model.name.includes('Qwen 2.5 32B'))) score *= 1.25;
       if (ans.response_speed === 'deep_thought' && model.tags && model.tags.includes('reasoning')) score *= 1.25;
       if (ans.response_speed === 'fast_chat' && (model.speedTps || 0) >= 80) score *= 1.20;
+
+      if (ans.platform_pref === 'web_portal') {
+        if (model.provider === 'Google' || model.provider === 'OpenAI' || model.provider === 'DeepSeek' || model.provider === 'Anthropic') score *= 1.25;
+      } else if (ans.platform_pref === 'desktop_app') {
+        if (model.license === 'open_weights') score *= 1.35;
+        else score *= 0.30;
+      }
 
       if (ans.general_budget === 'free_everyday') {
         if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
@@ -823,9 +899,62 @@
     const q = query.toLowerCase();
     const models = window.MODELS_DATA || [];
 
-    // Helper: find model in database
+    // Helper: find model in database with canonical aliases and fuzzy cleanup
     function findModel(str) {
-      return models.find(m => str.includes(m.id) || str.includes(m.name.toLowerCase()));
+      if (!str) return null;
+      const s = str.toLowerCase();
+      
+      // 1. Direct ID match
+      let match = models.find(m => s.includes(m.id));
+      if (match) return match;
+
+      // 2. Canonical Aliases (normalized keywords)
+      const aliases = [
+        { pattern: /llama\s*3\.3(?:\s*70b)?/i, id: 'llama-3-3-70b' },
+        { pattern: /llama\s*3\.1(?:\s*70b)?/i, id: 'llama-3-1-70b-instruct' },
+        { pattern: /llama\s*3\.1(?:\s*8b)?/i, id: 'llama-3-1-8b-instruct' },
+        { pattern: /claude\s*3\.7(?:\s*sonnet)?/i, id: 'claude-3-7-sonnet' },
+        { pattern: /claude\s*3\.5\s*sonnet/i, id: 'claude-3-5-sonnet' },
+        { pattern: /claude\s*3\.5\s*haiku/i, id: 'claude-3-5-haiku' },
+        { pattern: /gpt-?4o\s*mini/i, id: 'openai-gpt-4o-mini' },
+        { pattern: /gpt-?4o(?!\s*mini)/i, id: 'openai-gpt-4o' },
+        { pattern: /o3-?mini/i, id: 'o3-mini' },
+        { pattern: /o1(?!\s*mini)/i, id: 'o1' },
+        { pattern: /deepseek\s*r1/i, id: 'deepseek-r1' },
+        { pattern: /deepseek\s*v3/i, id: 'deepseek-v3' },
+        { pattern: /qwen\s*2\.5\s*coder(?:\s*32b)?/i, id: 'qwen-2-5-coder-32b' },
+        { pattern: /qwq(?:\s*32b)?/i, id: 'qwq-32b-preview' },
+        { pattern: /gemini\s*2\.5\s*pro/i, id: 'gemini-2-5-pro' },
+        { pattern: /gemini\s*2\.5\s*flash/i, id: 'gemini-2-5-flash' },
+        { pattern: /gemini\s*2\.0\s*flash/i, id: 'gemini-2-0-flash' },
+        { pattern: /phi-?4/i, id: 'phi-4-14b' },
+        { pattern: /granite\s*3(?:\.0)?(?:\s*8b)?/i, id: 'ibm-granite-3-8b' }
+      ];
+
+      for (const a of aliases) {
+        if (a.pattern.test(s)) {
+          const m = models.find(x => x.id === a.id);
+          if (m) return m;
+        }
+      }
+
+      // 3. Normalized name match (strip (latest), instruct, chat, etc.)
+      for (const m of models) {
+        const cleanName = m.name.toLowerCase().replace(/\s*\([^)]*\)/g, '').replace(/\s*(instruct|chat)\b/g, '').trim();
+        if (cleanName.length >= 4 && s.includes(cleanName)) {
+          return m;
+        }
+      }
+
+      // 4. Fallback exact name match
+      const sortedModels = [...models].sort((a, b) => b.name.length - a.name.length);
+      for (const m of sortedModels) {
+        if (m.name.length >= 3 && s.includes(m.name.toLowerCase())) {
+          return m;
+        }
+      }
+
+      return null;
     }
 
     // ─── PATH 1: CONVERSATIONAL RECOMMENDATION REQUEST ───
@@ -862,6 +991,77 @@
           <li><strong>Pricing & Architecture:</strong> At <strong>${top.pricing}</strong>, it optimizes your budget and execution boundaries.</li>
         </ul>
         ${runner ? `<strong>Alternative to consider:</strong> <em>${runner.name}</em> (Elo ${runner.benchmarks?.arenaElo || 'Top'}) is a strong runner-up.` : ''}
+      `;
+    }
+
+    // ─── PATH 2.5: NON-TECHNICAL WEB & MOBILE ACCESS (Checked before code integration) ───
+    if (q.includes('how do i use') || q.includes('simple website') || q.includes('install python') || q.includes('no technical') || (q.includes('website') && q.includes('use')) || (q.includes('web') && q.includes('access'))) {
+      return `
+        🌐 <strong>Non-Technical Web & Mobile Access Guide:</strong><br><br>
+        You do <strong>not</strong> need to write code, install Python, or own a powerful computer to use top AI models. You can use them directly in your web browser or mobile app for $0:<br><br>
+        <ol>
+          <li><strong>Google AI Studio (aistudio.google.com):</strong> The easiest free portal. Log in with your standard Google account to use <strong>Gemini 2.5 Pro</strong> (up to 2M tokens context) and <strong>Gemini 2.5 Flash</strong> completely free with zero setup.</li>
+          <li><strong>DeepSeek Chat (chat.deepseek.com):</strong> 100% free web chat and mobile app for <strong>DeepSeek R1</strong> (reasoning) and <strong>DeepSeek V3</strong> with no credit card required.</li>
+          <li><strong>ChatGPT (chatgpt.com):</strong> Free web & mobile app providing access to <strong>GPT-4o</strong> and <strong>o3-mini</strong> for daily productivity.</li>
+          <li><strong>Claude.ai:</strong> Clean web chat interface for <strong>Claude 3.7 Sonnet</strong> and <strong>Claude 3.5 Sonnet</strong> for natural writing, projects, and formatting.</li>
+          <li><strong>LM Studio (lmstudio.ai):</strong> If you want private, 100% offline AI on your own computer without typing terminal commands, LM Studio provides a 1-click graphical installer.</li>
+        </ol>
+      `;
+    }
+
+    // ─── PATH 2.7: PROMPT CACHING ECONOMICS ───
+    if (q.includes('prompt caching') || q.includes('cache discount') || q.includes('context caching') || (q.includes('caching') && (q.includes('discount') || q.includes('cost') || q.includes('prompt') || q.includes('system')))) {
+      return `
+        ⚡ <strong>Prompt Caching & Context Re-use Economics:</strong><br><br>
+        Prompt caching allows developers to reuse massive system instructions, API documentation, or few-shot examples without paying full input rates on every request:<br><br>
+        <ul>
+          <li><strong>Anthropic Claude 3.7 & 3.5 Sonnet:</strong> Provides a <strong>90% discount</strong> on cached input tokens (drops from $3.00/M to <strong>$0.30/M</strong>). Initial cache write costs +25% on the first turn; all subsequent calls within the 5-minute TTL save 90%.</li>
+          <li><strong>DeepSeek V3 & R1:</strong> Offers native context caching with a <strong>90% read discount</strong> ($0.014 / $0.14 per 1M cached tokens).</li>
+          <li><strong>Google Gemini 2.5 & 1.5:</strong> Context caching discounts input tokens by <strong>75%</strong> for prompts longer than 32,000 tokens.</li>
+          <li><strong>Production Impact:</strong> For autonomous agents and multi-turn chat applications, caching repetitive schemas and tool definitions typically slashes total monthly API spend by <strong>70% to 85%</strong>.</li>
+        </ul>
+      `;
+    }
+
+    // ─── PATH 2.8: CREATIVE WRITING & ANTI-CLICHÉ PROMPTING ───
+    if (q.includes('cliche') || q.includes('clichés') || q.includes('delve') || q.includes('tapestry') || q.includes('natural human voice') || (q.includes('avoid') && (q.includes('corporate') || q.includes('buzzword') || q.includes('fluff')))) {
+      return `
+        ✍️ <strong>Anti-Cliché Writing & Natural Human Voice Guide:</strong><br><br>
+        Standard LLMs often overuse predictable buzzwords. Here is how to achieve authentic, human-sounding prose:<br><br>
+        <strong>1. Banned AI Vocabulary:</strong>
+        <pre>Do NOT use: "delve", "tapestry", "beacon", "testament", "nestled", "unleash", "in today's fast-paced world", "pivotal role", "game-changer", "foster", "vibrant", "revolutionize".</pre>
+        <strong>2. Recommended System Prompt Template:</strong>
+        <pre>Write in an authentic, understated human voice. Vary sentence length (use rhythmic staccato mixed with complex compound sentences). Do not use corporate buzzwords or AI filler adjectives. Never start concluding paragraphs with "In conclusion" or "Ultimately". Prioritize concrete sensory details over abstract praise.</pre>
+        <strong>3. Best Models for Voice Cadence:</strong>
+        <ul>
+          <li><strong>Claude 3.7 Sonnet:</strong> The industry gold standard for literary nuance, nuanced vocabulary, and human rhythm.</li>
+          <li><strong>Claude 3.5 Sonnet:</strong> Outstanding editorial control and natural conversational pacing.</li>
+          <li><strong>Llama 3.3 70B:</strong> Best open-weights model for creative writing when paired with temperature ~0.65.</li>
+        </ul>
+      `;
+    }
+
+    // ─── PATH 2.9: OPEN-SOURCE COMMERCIAL LICENSING ───
+    if ((q.includes('license') || q.includes('licensing')) && (q.includes('mit') || q.includes('llama') || q.includes('apache') || q.includes('commercial') || q.includes('enterprise'))) {
+      return `
+        📜 <strong>Open-Source Commercial Licensing Breakdown (MIT vs. Apache 2.0 vs. Meta Llama):</strong><br><br>
+        Choosing the right open-weights license is critical for enterprise legal compliance:<br><br>
+        <ul>
+          <li><strong>MIT License (DeepSeek R1, DeepSeek V3, Mistral NeMo):</strong>
+            <br>• <strong>Terms:</strong> Maximum freedom. Royalty-free commercial use, modification, closed-source distribution, and private internal deployment.
+            <br>• <strong>Ceiling:</strong> Zero user caps or revenue ceilings. Complete enterprise peace of mind.
+          </li>
+          <li><strong>Apache 2.0 License (Qwen 2.5 series, Granite 3.0):</strong>
+            <br>• <strong>Terms:</strong> Enterprise-standard open license with explicit patent protection and grant. Free commercial use and modification.
+            <br>• <strong>Ceiling:</strong> No user or monthly active user (MAU) restrictions.
+          </li>
+          <li><strong>Meta Llama 3.3 Community License:</strong>
+            <br>• <strong>Terms:</strong> Free for research and commercial use for 99% of businesses.
+            <br>• <strong>Enterprise Clause:</strong> If your product or service reaches <strong>>700 million Monthly Active Users (MAU)</strong> in the previous calendar month, you must request an explicit commercial license from Meta.
+            <br>• <strong>Training Restriction:</strong> Prohibits using Llama outputs to improve or train other non-Llama models.
+          </li>
+        </ul>
+        💡 <em>Enterprise Verdict: DeepSeek R1 (MIT) and Qwen 2.5 (Apache 2.0) carry zero MAU ceiling risk, whereas Meta Llama requires compliance sign-off for consumer internet scale.</em>
       `;
     }
 
@@ -910,6 +1110,28 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Hello ModelAtlas!"}]
 )
 print(response.choices[0].message.content)</code></pre>
+      `;
+    }
+
+    // ─── PATH 3.7: KV CACHE MEMORY OVERHEAD & CONTEXT SIZING ───
+    if (q.includes('kv cache') || (q.includes('cache') && q.includes('overhead')) || ((q.includes('128k') || q.includes('context')) && q.includes('vram'))) {
+      return `
+        🧠 <strong>KV Cache Memory Overhead &amp; Long-Context Sizing:</strong><br><br>
+        When running long-context models locally, the <strong>KV (Key-Value) Cache</strong> often consumes as much VRAM as the model weights themselves:<br><br>
+        <ul>
+          <li><strong>The KV Cache Formula:</strong><br>
+            <code>KV Cache (Bytes) = 2 × Layers × KV_Heads × Head_Dim × Bytes_per_Element × Context_Length × Batch_Size</code>
+          </li>
+          <li><strong>Memory Impact at 128k Context:</strong>
+            <br>• At <strong>8k context</strong>, a 70B model requires only ~1.5GB for KV cache.
+            <br>• At <strong>128k context</strong> in standard FP16, the KV cache requires <strong>~24GB to 32GB of VRAM</strong> solely for attention context!
+          </li>
+          <li><strong>Key Optimizations to Fit 128k Context:</strong>
+            <br>1. <strong>FP8 / INT4 KV Cache:</strong> Quantizing the KV cache (<code>--cache-type-k q4_0 --cache-type-v q4_0</code> in llama.cpp or <code>kv_cache_dtype="fp8"</code> in vLLM) cuts memory usage by <strong>50%–75%</strong> with near-zero perplexity loss.
+            <br>2. <strong>Grouped-Query Attention (GQA):</strong> Modern architectures like Llama 3.3 70B and Qwen 2.5 use 8 KV heads instead of 64, reducing KV cache size by <strong>8x</strong> out of the box.
+          </li>
+        </ul>
+        💡 <em>Practical Homelab Sizing: On a 64GB Mac Studio or dual RTX 3090 (48GB), run Qwen 2.5 Coder 32B (Q4 ~20GB) with FP8 KV cache to comfortably support full 32k–64k context windows.</em>
       `;
     }
 
@@ -1005,9 +1227,20 @@ print(response.choices[0].message.content)</code></pre>
 
     // ─── PATH 6: HEAD-TO-HEAD COMPARISON ───
     if (q.includes('compare') || q.includes(' vs ') || q.includes('versus') || q.includes('difference between')) {
-      const m1 = findModel(q) || sessionMemory.lastRecommendedModel;
-      const remaining = m1 ? q.replace(m1.id, '').replace(m1.name.toLowerCase(), '') : q;
-      const m2 = findModel(remaining) || sessionMemory.runnerModel;
+      let m1 = null;
+      let m2 = null;
+
+      const vsMatch = q.match(/(?:compare\s+)?([a-z0-9\.\-\s]+?)\s+(?:vs\.?|versus|and)\s+([a-z0-9\.\-\s]+)/i);
+      if (vsMatch) {
+        m1 = findModel(vsMatch[1]);
+        m2 = findModel(vsMatch[2]);
+      }
+
+      if (!m1) m1 = findModel(q) || sessionMemory.lastRecommendedModel;
+      if (!m2 && m1) {
+        const remaining = q.replace(m1.id, '').replace(m1.name.toLowerCase(), '');
+        m2 = findModel(remaining) || sessionMemory.runnerModel;
+      }
 
       if (m1 && m2 && m1.id !== m2.id) {
         const higherElo = (m1.benchmarks?.arenaElo || 0) >= (m2.benchmarks?.arenaElo || 0) ? m1 : m2;

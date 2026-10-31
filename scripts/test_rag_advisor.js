@@ -112,6 +112,36 @@ const testCases = [
     query: 'I am a broke solo founder needing a free model for marketing copy',
     expectCard: true,
     expectTerms: ['Creator', 'Fit']
+  },
+  {
+    category: 'Non-Technical Web Access Guidance',
+    query: 'How do I use this model? Do I need to install Python or is there a simple website?',
+    expectCard: false,
+    expectTerms: ['Google AI Studio', 'DeepSeek', 'ChatGPT', 'Claude.ai']
+  },
+  {
+    category: 'Prompt Caching Economics',
+    query: 'Does ModelAtlas support prompt caching discounts for repetitive system instructions?',
+    expectCard: false,
+    expectTerms: ['Prompt Caching', 'Anthropic', '90%', 'DeepSeek']
+  },
+  {
+    category: 'Anti-Cliché Creative Prompting',
+    query: 'How to prompt Claude to avoid AI clichés like delve and tapestry?',
+    expectCard: false,
+    expectTerms: ['delve', 'tapestry', 'human voice', 'Claude']
+  },
+  {
+    category: 'Open-Source Commercial Licensing',
+    query: 'What is the difference between MIT licensed models like DeepSeek R1 and Meta Llama community license for enterprise commercial use?',
+    expectCard: false,
+    expectTerms: ['MIT License', 'Meta Llama', '700 million', 'Apache 2.0']
+  },
+  {
+    category: 'KV Cache Memory Overhead',
+    query: 'How does KV cache overhead affect VRAM when running 128k context locally?',
+    expectCard: false,
+    expectTerms: ['KV Cache', '128k', 'VRAM', 'FP8']
   }
 ];
 

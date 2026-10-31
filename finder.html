@@ -286,7 +286,7 @@
       <button type="button" class="preset-btn" onclick="applyQuickPreset('general')">🌟 Everyday</button>
     </div>
 
-    <div class="step-num-pill">Step 1 of 5 · Core Track Selection</div>
+    <div class="step-num-pill">Step 1 · Choose your profile</div>
     <div class="step-question">Which profile best represents your primary role?</div>
     <div class="step-hint">Selecting your track dynamically unlocks deep, targeted technical questions designed specifically for your workflow.</div>
     
@@ -322,7 +322,7 @@
             <span class="option-label">Enterprise & IT Decision Maker</span>
             <span class="option-pill">Enterprise Track</span>
           </div>
-          <div class="option-desc">SOC-2 / HIPAA compliance, Zero Data Retention (ZDR), private cloud VPC endpoints, sovereign air-gapped on-premise</div>
+          <div class="option-desc">Your data-handling requirements, approved cloud environments, regulatory obligations, and whether models must run fully on your own hardware.</div>
         </div>
         <div class="option-check"></div>
       </div>
@@ -377,12 +377,12 @@
   <div id="results">
     <div class="results-header">
       <h2>🎯 Your Tailored Recommendation</h2>
-      <p id="resultsSubtitle">Based on your answers, here is the verified benchmark champion for your workload.</p>
+      <p id="resultsSubtitle">A directional match based on your answers and the benchmark data available in this catalog—not a guarantee of performance, price, or provider terms.</p>
     </div>
     <!-- Filled by JS -->
     <div id="resultsContent"></div>
     <div class="results-actions">
-      <a href="leaderboard.html" class="btn btn-secondary">View Full 384-Model Leaderboard</a>
+      <a href="leaderboard.html" class="btn btn-secondary">Browse the full model leaderboard</a>
       <a href="compare.html" class="btn btn-secondary">Compare Two Models Head-to-Head</a>
       <button class="btn btn-ghost" onclick="resetFinder()">↺ Start Over / Change Track</button>
     </div>
@@ -458,30 +458,30 @@
             {
               val: 'cloud_managed',
               icon: '🌐',
-              label: 'Cloud Managed API / Copilot Extension (No local GPU required)',
-              desc: 'Anthropic, OpenAI, or Google Cloud hosted endpoints. Maximum capability with zero hardware management.',
+              label: 'Managed cloud API',
+              desc: 'Use a provider-hosted endpoint without managing local inference hardware. Capabilities, regional availability, and hardware requirements vary by provider and plan.',
               pill: 'Cloud API'
             },
             {
               val: 'local_consumer',
               icon: '💻',
-              label: 'Local Laptop / Desktop (8GB – 16GB VRAM)',
-              desc: 'Run 100% offline via Ollama, llama.cpp, or LM Studio. Requires 7B–14B quantized models (GGUF/AWQ).',
-              pill: 'Local (8-16GB)'
+              label: 'Local consumer GPU (up to about 16GB VRAM)',
+              desc: 'An approximate hardware tier. Actual memory use depends on model size, quantization, context length, and runtime; verify requirements before downloading.',
+              pill: 'Consumer GPU'
             },
             {
               val: 'local_workstation',
               icon: '🖥️',
-              label: 'Local Workstation / Mac Studio (24GB – 64GB Unified RAM)',
-              desc: 'Run 32B–70B open models locally with high quantization quality (Q4/Q8) for total privacy and $0 cloud spend.',
-              pill: 'Local (24-64GB)'
+              label: 'Local workstation (larger GPU or unified memory)',
+              desc: 'An approximate hardware tier for larger open-weight models. Verify memory, quantization, runtime, license, and operating costs for the exact model.',
+              pill: 'Workstation'
             }
           ]
         },
         {
           id: 'reasoning_mode',
           title: 'Inference Speed vs Extended Thinking Depth',
-          hint: 'Test-time compute (extended thinking) produces deeper logical proofs but introduces a 10–30s deliberation delay.',
+          hint: 'Reasoning modes can trade response time and cost for additional computation. Actual latency depends on model, provider, and workload.',
           options: [
             {
               val: 'instant_stream',
@@ -493,7 +493,7 @@
             {
               val: 'extended_thinking',
               icon: '🧠',
-              label: 'Extended Thinking / Test-Time Compute (10s – 45s)',
+              label: 'Extended reasoning',
               desc: 'Deep multi-step reasoning models (e.g., Claude 3.7 Thinking, o3-mini, DeepSeek-R1) for intricate algorithmic bugs.',
               pill: 'Deep Logic'
             }
@@ -502,27 +502,27 @@
         {
           id: 'budget_level',
           title: 'Cost & Budget Preferences',
-          hint: 'Balances pricing per 1M tokens against frontier benchmark supremacy.',
+          hint: 'Balance listed token prices and capability. Prices and free-tier limits change; check the provider before committing.',
           options: [
             {
               val: 'zero_cost',
               icon: '🆓',
-              label: 'Free / Open Weights Only ($0 recurring cost)',
-              desc: 'Strictly zero API spend via open weights or generous free API tiers.',
-              pill: '$0.00'
+              label: 'Prefer no paid API usage',
+              desc: 'Look for a current free provider tier or self-hosted open weights. Free tiers may be limited; self-hosting still has hardware and operating costs.',
+              pill: 'Check $0 options'
             },
             {
               val: 'value_tier',
               icon: '💵',
               label: 'High-Efficiency Value Tier ($0.15 – $1.00 per 1M tokens)',
-              desc: 'Cost-conscious production development where output quality is 90% of frontier at 10% of the cost.',
+              desc: 'A lower listed per-token price may reduce usage costs; quality and total cost depend on your workload and provider.',
               pill: 'Cost-Efficient'
             },
             {
               val: 'frontier_tier',
               icon: '👑',
               label: 'Frontier Intelligence ($3.00 – $15.00 per 1M tokens)',
-              desc: 'Best possible coding capability on earth regardless of token pricing.',
+              desc: 'Prioritize frontier capability even when listed token prices are higher; verify current prices and evaluate with your own tasks.',
               pill: 'Max Capability'
             }
           ]
@@ -552,7 +552,7 @@
               val: 'multi_tool',
               icon: '🔧',
               label: 'Parallel Function & Tool Calling (10+ Tools)',
-              desc: 'Agent pipelines selecting and executing between dozens of tools with nested parameters and zero hallucinations.',
+              desc: 'Agent pipelines that select and execute tools with structured arguments; test tool selection, validation, and failure handling on your own workflows.',
               pill: 'Agentic Tools'
             },
             {
@@ -653,48 +653,55 @@
         {
           id: 'enterprise_compliance',
           title: 'Data Governance & Regulatory Boundaries',
-          hint: 'Filters models by legally enforceable data retention, HIPAA/SOC-2 policies, and air-gapped sovereign execution.',
+          hint: 'Choose a deployment preference. This catalog cannot verify a provider’s contract, certification, data residency, or security configuration; confirm those directly with your organization and provider.',
           options: [
             {
               val: 'zdr_commercial',
               icon: '🛡️',
-              label: 'Commercial Cloud API with Zero Data Retention (ZDR)',
-              desc: 'SOC-2 Type II, HIPAA BAA eligible cloud endpoint with contractually verified no-training clauses on enterprise prompts.',
+              label: 'Commercial cloud API (ask about retention and contracts)',
+              desc: 'Zero Data Retention (ZDR) means prompts are not retained under specified terms. SOC 2 is an audit report; HIPAA use may require an eligible service and a signed Business Associate Agreement (BAA). Verify current terms with the provider.',
               pill: 'SOC-2 / HIPAA'
             },
             {
               val: 'private_cloud_vpc',
               icon: '☁️',
-              label: 'Managed Private Cloud VPC (AWS Bedrock, Azure, Vertex AI)',
-              desc: 'Models deployed inside your corporate cloud perimeter with IAM, SSO, and internal network peering.',
+              label: 'Managed private cloud / VPC',
+              desc: 'Deployment through a cloud provider or platform your organization has approved. Availability, identity controls, data residency, and contract terms vary by model and region.',
               pill: 'Private VPC'
             },
             {
               val: 'air_gapped_onprem',
               icon: '🏛️',
               label: 'Fully Air-Gapped Sovereign On-Premises',
-              desc: 'Open weights executed strictly on company-owned hardware without external internet access or telemetry.',
+              desc: 'Run open weights on organization-controlled hardware. Network egress, telemetry, access control, and operational security still need to be configured and verified.',
               pill: 'Air-Gapped'
+            },
+            {
+              val: 'compliance_unsure',
+              icon: '❔',
+              label: 'I am not sure yet',
+              desc: 'Get your organization’s security, privacy, and legal requirements clarified before selecting a model or deployment.',
+              pill: 'Need guidance'
             }
           ]
         },
         {
           id: 'enterprise_workload',
           title: 'Primary Enterprise Workload Type',
-          hint: 'Matches the model against specific enterprise risk profiles and functional departments.',
+          hint: 'Use your primary workload to guide the catalog match. This does not certify a model for regulated or high-impact decisions.',
           options: [
             {
               val: 'legal_finance',
               icon: '⚖️',
               label: 'Legal, Financial Auditing & Regulatory Risk',
-              desc: 'Zero-hallucination analysis of contracts, tax filings, and compliance mandates with verifiable grounding.',
-              pill: 'Zero Hallucination'
+              desc: 'Reviewing contracts, financial records, and regulatory material where outputs must be checked against trusted sources.',
+              pill: 'Verify outputs'
             },
             {
               val: 'customer_ops',
               icon: '🎧',
               label: 'High-Volume Customer Support & Ticket Triage',
-              desc: 'Automating multi-channel email, chat, and support routing with high consistency and SLA uptime.',
+              desc: 'Automating multi-channel email, chat, and support routing; measure quality and uptime against your own support cases and service targets.',
               pill: 'Customer Ops'
             },
             {
@@ -709,7 +716,7 @@
         {
           id: 'enterprise_context',
           title: 'Document Archive Scope',
-          hint: 'Large context windows eliminate complex RAG chunking pipelines for multi-hundred page documents.',
+          hint: 'Use your estimated input size to compare with listed context windows. Long context does not guarantee accurate retrieval or remove all need for chunking.',
           options: [
             {
               val: 'standard_docs',
@@ -742,8 +749,8 @@
             {
               val: 'reserved_ptu',
               icon: '🤝',
-              label: 'Provisioned Throughput (PTU) with 99.99% Uptime SLA',
-              desc: 'Reserved inference hardware guaranteeing fixed tokens-per-second during peak traffic periods.',
+              label: 'Reserved capacity / contractual SLA',
+              desc: 'Consider reserved capacity only if the specific provider contract offers the throughput, uptime, region, and support terms you require.',
               pill: 'Reserved PTU'
             }
           ]
@@ -816,14 +823,14 @@
         {
           id: 'student_budget',
           title: 'What is your budget situation?',
-          hint: 'We guarantee you won\'t get stuck with unexpected subscriptions you can\'t afford.',
+          hint: 'Listed prices do not confirm free-tier access. Check current provider limits; self-hosting can still require hardware, electricity, and setup.',
           options: [
             {
               val: 'strictly_free',
               icon: '🆓',
-              label: '100% Free / Zero-Dollar Constraint',
-              desc: 'Must have a generous free web tier or be runnable on my personal laptop with no credit card required.',
-              pill: 'Free Tier ($0)'
+              label: 'I need to avoid paid usage',
+              desc: 'Prefer a verified $0 web tier or local open weights. Free tiers may have limits or change; running models yourself has hardware and operating costs.',
+              pill: 'Check $0 options'
             },
             {
               val: 'student_sub',
@@ -969,7 +976,7 @@
       id: 'general',
       title: 'Everyday Assistant & Life Productivity Track',
       badge: '🌟 Everyday Assistant Track',
-      stepLabels: ['Track', 'Primary Use', 'Response Style', 'Budget Preference'],
+      stepLabels: ['Track', 'Primary Use', 'Response Style', 'Budget Preference', 'Interface'],
       questions: [
         {
           id: 'general_use',
@@ -1023,14 +1030,14 @@
         {
           id: 'general_budget',
           title: 'Budget Preference',
-          hint: 'From generous 100% free web tiers to premium frontier capabilities.',
+          hint: 'Compare current free-tier availability and listed pricing; this catalog does not verify account eligibility or free-tier limits.',
           options: [
             {
               val: 'free_everyday',
               icon: '🆓',
-              label: '100% Free / No Subscription ($0)',
-              desc: 'Must be accessible via free web tiers (Google AI Studio, DeepSeek Web) or open-weights.',
-              pill: 'Free ($0)'
+              label: 'I prefer free or low-cost options',
+              desc: 'Compare current provider free tiers and listed prices. Open weights avoid a model license fee but are not necessarily free to host.',
+              pill: 'Check current pricing'
             },
             {
               val: 'premium_everyday',
@@ -1038,7 +1045,35 @@
               label: 'Premium Frontier ($20/mo or pay-per-token)',
               desc: 'Willing to use the best models available for top-tier writing and reasoning.',
               pill: 'Frontier'
+            },
+        {
+          id: 'platform_pref',
+          title: 'Preferred Interface & Platform',
+          hint: 'Direct web portals are easiest for non-technical users, while desktop apps provide private offline execution, and APIs are for developers.',
+          options: [
+            {
+              val: 'web_portal',
+              icon: '🌐',
+              label: 'Direct Web Chat & Mobile App (Zero Setup)',
+              desc: 'Instant browser access (Google AI Studio, DeepSeek Web, ChatGPT, Claude.ai) with zero installation or terminal commands required.',
+              pill: 'Web & Mobile'
+            },
+            {
+              val: 'desktop_app',
+              icon: '💻',
+              label: 'Local Desktop App (LM Studio / Jan / Ollama)',
+              desc: 'Run completely private and offline on your computer using a 1-click graphical installer.',
+              pill: 'Desktop App'
+            },
+            {
+              val: 'cloud_api',
+              icon: '🔌',
+              label: 'Developer API / Custom Frontend',
+              desc: 'Connect via API keys, Python scripts, or custom third-party frontends like LibreChat.',
+              pill: 'Developer API'
             }
+          ]
+        }
           ]
         }
       ]
@@ -1086,7 +1121,7 @@
       card.id = 'dynStep_' + stepNum;
 
       let optionsHtml = q.options.map(opt => `
-        <div class="option" data-dynstep="${stepNum}" data-qid="${q.id}" data-val="${opt.val}">
+        <div class="option${answers[q.id] === opt.val ? ' selected' : ''}" data-dynstep="${stepNum}" data-qid="${q.id}" data-val="${opt.val}">
           <div class="option-icon">${opt.icon}</div>
           <div class="option-text">
             <div class="option-label-row">
@@ -1107,7 +1142,7 @@
         <div class="options">${optionsHtml}</div>
         <div class="step-nav">
           <button class="btn btn-ghost" type="button" onclick="goDynamicStep(${stepNum - 1})">← Back</button>
-          <button class="btn ${isFinalStep ? 'btn-next' : 'btn-next'}" id="dynNextBtn_${stepNum}" type="button" disabled onclick="${isFinalStep ? 'computeDynamicResults()' : `goDynamicStep(${stepNum + 1})`}">
+          <button class="btn btn-next" id="dynNextBtn_${stepNum}" type="button" ${answers[q.id] ? '' : 'disabled'} onclick="${isFinalStep ? 'computeDynamicResults()' : `goDynamicStep(${stepNum + 1})`}">
             ${isFinalStep ? '🎯 Get Tailored Recommendation →' : 'Next →'}
           </button>
         </div>
@@ -1243,7 +1278,8 @@
       persona: 'general',
       general_use: 'all_rounder',
       response_speed: 'fast_chat',
-      general_budget: 'free_everyday'
+      general_budget: 'free_everyday',
+      platform_pref: 'web_portal'
     }
   };
 
@@ -1276,6 +1312,11 @@
 
     // Immediately compute results for fast instant feedback
     computeDynamicResults();
+  }
+
+  function getApproxParameterCountB(model) {
+    const match = (model.name || '').match(/\b(\d+(?:\.\d+)?)\s*B\b/i);
+    return match ? Number(match[1]) : null;
   }
 
   // ─── DYNAMIC SCORING ENGINE ──────────────────────────────────────────────
@@ -1333,12 +1374,14 @@
         if (model.tags && model.tags.includes('coding')) score *= 1.20;
       }
       if (ans.env_target === 'local_consumer') {
-        if (model.license !== 'open_weights') score *= 0.10; // strict penalty
-        else if (model.name.includes('7B') || model.name.includes('8B') || model.name.includes('14B')) score *= 1.40;
+        const parameterCountB = getApproxParameterCountB(model);
+        if (model.license !== 'open_weights' || parameterCountB === null || parameterCountB > 14) score = 0;
+        else score *= 1.40;
       } else if (ans.env_target === 'local_workstation') {
-        if (model.license !== 'open_weights') score *= 0.10;
+        const parameterCountB = getApproxParameterCountB(model);
+        if (model.license !== 'open_weights' || parameterCountB === null || parameterCountB < 14 || parameterCountB > 80) score = 0;
         else {
-          if (model.name.includes('32B') || model.name.includes('70B') || model.name.includes('72B')) score *= 1.40;
+          if (parameterCountB >= 32) score *= 1.40;
           if (model.id === 'qwq-32b-preview' || model.id === 'qwen-2-5-coder-32b' || model.id === 'llama-3-3-70b' || model.id === 'deepseek-r1') score *= 1.30;
         }
       }
@@ -1417,13 +1460,13 @@
       score = computeWeightedSum(model, weights);
 
       if (ans.enterprise_compliance === 'air_gapped_onprem') {
-        if (model.license !== 'open_weights') score *= 0.05; // total block
+        if (model.license !== 'open_weights') score = 0;
         else {
           score *= 1.45;
           if (model.id === 'deepseek-r1' || model.id === 'llama-3-3-70b' || model.id === 'qwen-2-5-72b') score *= 1.30;
         }
       } else if (ans.enterprise_compliance === 'zdr_commercial' || ans.enterprise_compliance === 'private_cloud_vpc') {
-        if (model.provider === 'Anthropic' || model.provider === 'Google' || model.provider === 'OpenAI') score *= 1.25;
+        if (model.privacyLevel !== 'cloud') score = 0;
       }
 
       if (ans.enterprise_workload === 'legal_finance') {
@@ -1511,8 +1554,7 @@
 
       if (ans.student_budget === 'strictly_free') {
         if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
-        else if (model.inputPrice <= 0.20) score *= 1.20; // Accessible free web / micro tiers
-        else score *= 0.45;
+        else score = 0;
       }
     }
 
@@ -1568,6 +1610,13 @@
       if (ans.response_speed === 'deep_thought' && model.tags && model.tags.includes('reasoning')) score *= 1.25;
       if (ans.response_speed === 'fast_chat' && (model.speedTps || 0) >= 80) score *= 1.20;
 
+      if (ans.platform_pref === 'web_portal') {
+        if (model.provider === 'Google' || model.provider === 'OpenAI' || model.provider === 'DeepSeek' || model.provider === 'Anthropic') score *= 1.25;
+      } else if (ans.platform_pref === 'desktop_app') {
+        if (model.license === 'open_weights') score *= 1.35;
+        else score *= 0.30;
+      }
+
       if (ans.general_budget === 'free_everyday') {
         if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
         else if (model.inputPrice <= 0.25) score *= 1.25;
@@ -1602,69 +1651,88 @@
 
     const primary = scored[0].model;
     const runner = scored[1].model;
-    const budgetPick = scored.slice(0, 8).sort((a, b) => ((b.model.scores && b.model.scores.cost) || 0) - ((a.model.scores && a.model.scores.cost) || 0))[0].model;
+    const nearTop = scored.slice(0, 8);
+    const distinctValueCandidates = nearTop.filter(candidate => candidate.model.id !== primary.id && candidate.model.id !== runner.id);
+    const budgetPick = (distinctValueCandidates.length ? distinctValueCandidates : nearTop)
+      .sort((a, b) => ((b.model.scores && b.model.scores.cost) || 0) - ((a.model.scores && a.model.scores.cost) || 0))[0].model;
 
-    renderDynamicResults(primary, runner, budgetPick, answers, scored[0].score);
+    renderDynamicResults(primary, runner, budgetPick, answers);
   }
 
-  function renderDynamicResults(primary, runner, budget, ans, rawScore) {
+  function renderDynamicResults(primary, runner, budget, ans) {
     document.getElementById('progressWrap').style.display = 'none';
     document.getElementById('finderHeader').style.display = 'none';
     document.getElementById('step1').style.display = 'none';
     document.querySelectorAll('#dynamicStepsContainer .step-card').forEach(c => c.style.display = 'none');
 
-    const normScore = Math.min(99, Math.round(rawScore));
     const branch = BRANCHES[ans.persona] || BRANCHES.coder;
 
     // Track-specific verdict generation
     let verdictLines = [];
     if (ans.persona === 'coder') {
-      verdictLines.push(`<strong>✅ ${primary.name} is your #1 coding champion</strong> for your software engineering track.`);
-      if (ans.coding_scope === 'repo_refactor') verdictLines.push(`Its top-tier SWE-bench Verified coding capability reliably navigates complex multi-file dependency trees.`);
-      if (ans.env_target === 'local_consumer' || ans.env_target === 'local_workstation') verdictLines.push(`It is available as open-weights and is properly sized to run directly on your hardware via Ollama or vLLM.`);
-      if (ans.reasoning_mode === 'extended_thinking') verdictLines.push(`Its deliberate reasoning engine eliminates hallucinations on complex algorithms.`);
+      verdictLines.push(`<strong>✅ ${primary.name} is the highest-scoring catalog match for your selected coding preferences</strong>.`);
+      if (ans.coding_scope === 'repo_refactor') verdictLines.push(`Use coding benchmarks as a signal, then validate it on representative multi-file tasks from your own repositories.`);
+      if ((ans.env_target === 'local_consumer' || ans.env_target === 'local_workstation') && primary.license === 'open_weights') verdictLines.push(`This model has open weights. Check its exact quantization, memory needs, license, and measured performance before installing it.`);
+      if (ans.reasoning_mode === 'extended_thinking') verdictLines.push(`Reasoning features may help with complex problems, but verify generated code and decisions with tests and review.`);
     } else if (ans.persona === 'api') {
       verdictLines.push(`<strong>✅ ${primary.name} is your optimal API backend model</strong>.`);
-      if (ans.api_interface === 'strict_json') verdictLines.push(`It supports 100% compliant strict JSON schema output, preventing deserialization errors in production.`);
-      if (ans.latency_sla === 'ultra_fast') verdictLines.push(`Its high throughput (${primary.speedTps ? primary.speedTps + ' t/s' : 'Fast'}) satisfies your real-time sub-400ms TTFT SLA.`);
-      if (ans.api_budget === 'scale_budget') verdictLines.push(`Its ultra-competitive pricing (${primary.pricing}) ensures sustainable unit economics at scale.`);
+      if (ans.api_interface === 'strict_json') verdictLines.push(`Validate structured-output support and schema adherence for your exact endpoint, including retries and malformed responses.`);
+      if (ans.latency_sla === 'ultra_fast') verdictLines.push(`Listed throughput (${primary.speedTps ? primary.speedTps + ' tokens/s' : 'not available'}) does not establish time-to-first-token. Benchmark the exact endpoint under your expected traffic.`);
+      if (ans.api_budget === 'scale_budget') verdictLines.push(`Listed pricing is ${primary.pricing || 'not available'}; calculate total cost using your input/output mix, caching, and current provider terms.`);
     } else if (ans.persona === 'enterprise') {
-      verdictLines.push(`<strong>✅ ${primary.name} meets your enterprise compliance and infrastructure standards</strong>.`);
-      if (ans.enterprise_compliance === 'air_gapped_onprem') verdictLines.push(`It is 100% open-weights, allowing sovereign, air-gapped on-premises deployment without third-party cloud data transmission.`);
-      if (ans.enterprise_compliance === 'zdr_commercial') verdictLines.push(`Available with enterprise Zero Data Retention (ZDR) and HIPAA / SOC-2 Type II agreements.`);
-      if (ans.enterprise_context === 'archive_2m') verdictLines.push(`Its massive ${primary.contextWindow} context window eliminates vector RAG chunking bottlenecks.`);
+      verdictLines.push(`<strong>✅ ${primary.name} is a catalog match for your selected workload and deployment preference</strong>; this result does not verify compliance or vendor terms.`);
+      if (ans.enterprise_compliance === 'air_gapped_onprem') verdictLines.push(`It has open weights that may support on-premises deployment. Validate license terms, hardware capacity, network isolation, telemetry, and operational controls before adoption.`);
+      if (ans.enterprise_compliance === 'zdr_commercial') verdictLines.push(`Confirm retention, data residency, SOC 2 evidence, and any required HIPAA Business Associate Agreement directly with the provider for the exact service and region.`);
+      if (ans.enterprise_compliance === 'private_cloud_vpc') verdictLines.push(`Confirm that this model is available through your approved cloud platform, region, and network configuration; availability and contractual terms vary.`);
+      if (ans.enterprise_compliance === 'compliance_unsure') verdictLines.push(`Ask your security, privacy, and legal teams to identify requirements such as data residency, retention, access controls, and applicable contracts before deployment.`);
+      if (ans.enterprise_context === 'archive_2m') verdictLines.push(`Its listed ${primary.contextWindow} context window may reduce chunking for inputs that fit. It does not remove the need to test retrieval quality, latency, and cost.`);
     } else if (ans.persona === 'student') {
-      verdictLines.push(`<strong>✅ ${primary.name} is your best academic study partner</strong>.`);
+      verdictLines.push(`<strong>✅ ${primary.name} is the highest-scoring catalog match for your selected study needs</strong>.`);
       if (ans.academic_workload === 'homework_assignment') verdictLines.push(`It delivers patient, step-by-step problem-solving tutoring that walks you through assignments and problem sets without simply doing the work for you.`);
-      if (ans.academic_workload === 'book_summarization') verdictLines.push(`Its massive ${primary.contextWindow} context window natively digests 300+ page course textbooks in a single prompt for comprehensive chapter notes and study guides.`);
-      if (ans.academic_workload === 'specialized_research') verdictLines.push(`Its verified high domain knowledge on medical, engineering, and scientific benchmarks provides reliable, hallucination-free research and formula accuracy.`);
+      if (ans.academic_workload === 'book_summarization') verdictLines.push(`Its listed ${primary.contextWindow} context window may fit longer excerpts; test your document size and verify summaries against the source text.`);
+      if (ans.academic_workload === 'specialized_research') verdictLines.push(`For specialized research, verify claims and formulas against authoritative sources; this catalog does not establish domain accuracy or replace professional advice.`);
       if (ans.academic_workload === 'exam_prep') verdictLines.push(`It excels at generating challenging multiple-choice practice exams, diagnostic flashcards, and step-by-step answer keys.`);
-      if (ans.academic_workload === 'stem_math_logic') verdictLines.push(`It delivers state-of-the-art step-by-step mathematical reasoning on STEM proofs.`);
+      if (ans.academic_workload === 'stem_math_logic') verdictLines.push(`It may help work through STEM problems step by step; independently check proofs, calculations, and assumptions.`);
       if (ans.academic_workload === 'cs_coding_help') verdictLines.push(`It excels at diagnosing programming bugs, explaining algorithms, and tutoring code concepts clearly.`);
       if (ans.academic_workload === 'humanities_essay') verdictLines.push(`Its nuanced language capabilities help structure and polish academic essays, theses, and literature reviews.`);
-      if (ans.student_budget === 'strictly_free') verdictLines.push(`Accessible completely free through zero-dollar tiers without financial barrier.`);
+      if (ans.student_budget === 'strictly_free') verdictLines.push(`Free-tier eligibility and limits are not verified in this catalog. Check the provider’s current terms; open weights can avoid a license fee but still require hardware or hosting.`);
+      verdictLines.push(`Use AI as a study aid: verify answers and citations, and follow your school’s rules for AI-assisted work.`);
     } else if (ans.persona === 'creator') {
-      verdictLines.push(`<strong>✅ ${primary.name} is your premier creative writing partner</strong>.`);
-      if (ans.voice_nuance === 'avoid_cliches') verdictLines.push(`Renowned for authentic human cadence, rich sentence structure, and freedom from repetitive AI buzzwords.`);
-      if (ans.creator_focus === 'longform_prose') verdictLines.push(`Maintains narrative coherence and stylistic voice across long-form chapters and editorial newsletters.`);
-      if (ans.creator_focus === 'marketing_copy') verdictLines.push(`Generates high-converting marketing hooks, punchy email campaigns, and engaging social copy.`);
-      if (ans.creator_focus === 'executive_briefs') verdictLines.push(`Distills complex reports and industry transcripts into crisp, executive-ready memos.`);
+      verdictLines.push(`<strong>✅ ${primary.name} is the highest-scoring catalog match for your selected creator needs</strong>.`);
+      if (ans.voice_nuance === 'avoid_cliches') verdictLines.push(`You prioritized natural-sounding prose; test a sample against your preferred voice because style fit is subjective.`);
+      if (ans.creator_focus === 'longform_prose') verdictLines.push(`Try it on a representative excerpt and check continuity across the context length you need.`);
+      if (ans.creator_focus === 'marketing_copy') verdictLines.push(`Can help draft marketing hooks, email campaigns, and social copy; test performance with your audience.`);
+      if (ans.creator_focus === 'executive_briefs') verdictLines.push(`Can help draft summaries of reports; check important facts and decisions against the source.`);
       if (ans.creator_focus === 'multimodal_art') verdictLines.push(`Offers multimodal vision understanding to critique designs and craft nuanced generative art prompts.`);
+      if (ans.creator_budget === 'free_accessible') verdictLines.push(`Free-tier access is not verified here. Check current provider limits and listed API prices; open weights can still require hardware or hosting costs.`);
+      verdictLines.push(`Writing style fit is subjective; this catalog does not include a direct writing-quality benchmark. Try the same sample prompt with your finalists.`);
     } else if (ans.persona === 'general') {
-      verdictLines.push(`<strong>✅ ${primary.name} is your ideal everyday AI assistant</strong>.`);
+      verdictLines.push(`<strong>✅ ${primary.name} is the highest-scoring catalog match for your selected everyday tasks</strong>.`);
       if (ans.general_use === 'all_rounder') verdictLines.push(`It offers balanced high intelligence, clear communication, and adaptable reasoning for daily tasks.`);
-      if (ans.general_use === 'research_web') verdictLines.push(`Its large context window allows you to synthesize lengthy articles, PDFs, and reports seamlessly.`);
-      if (ans.general_use === 'quick_chores') verdictLines.push(`Its rapid response speed ensures snappy answers for fast drafting, translations, and bullet lists.`);
-      if (ans.general_budget === 'free_everyday') verdictLines.push(`Freely accessible via zero-dollar web tiers without requiring a monthly subscription.`);
+      if (ans.general_use === 'research_web') verdictLines.push(`Its listed context window may help synthesize longer sources; verify citations and check that your input fits.`);
+      if (ans.general_use === 'quick_chores') verdictLines.push(`Listed speed is a rough comparison signal; test response time on your device or provider endpoint.`);
+      if (ans.general_budget === 'free_everyday') verdictLines.push(`Free web access is not verified here. Check current provider limits and pricing; open weights may require paid hardware or hosting.`);
+      if (ans.platform_pref === 'web_portal') verdictLines.push(`You can access this model directly via free web portals or mobile apps with zero software setup or coding.`);
+      else if (ans.platform_pref === 'desktop_app') verdictLines.push(`For private offline use, you can run this model via 1-click desktop applications like LM Studio or Jan without terminal commands.`);
     }
 
     let warning = '';
     if (ans.enterprise_compliance === 'air_gapped_onprem' || ans.env_target?.includes('local')) {
-      warning = `<strong>🛡️ Self-Hosted Privacy Confirmed:</strong> ${primary.name} is open weights. Run it locally via Ollama, vLLM, or private server with 0% data leakage.`;
+      warning = `<strong>🛡️ Self-hosting note:</strong> ${primary.name} has open weights. Parameter-count-based hardware matching is approximate, not a VRAM estimate. Check quantization, context memory, runtime needs, license, telemetry, and network controls before use.`;
     }
 
-    const runnerReason = runner.desc || `${runner.name} is a strong runner-up with Arena Elo ${runner.benchmarks.arenaElo} and ${runner.bestForLabel}.`;
-    const budgetIsUnique = budget.id !== primary.id;
+    const runnerReason = budget.id === runner.id
+      ? `Also has the strongest cost-efficiency score among the closest-scoring candidates. Compare its listed price with your expected usage.`
+      : `Also scored highly against the preferences you selected. Compare its trade-offs and current provider terms before choosing.`;
+    const budgetIsUnique = budget.id !== primary.id && budget.id !== runner.id;
+    const primaryIsValuePick = budget.id === primary.id;
+    const selectedPreferences = branch.questions.map(question => {
+      const option = question.options.find(candidate => candidate.val === ans[question.id]);
+      return option ? { question: question.title, answer: option.label } : null;
+    }).filter(Boolean);
+    const preferenceSummaryHtml = selectedPreferences.map(item =>
+      `<li><strong>${escapeHtml(item.question)}</strong> ${escapeHtml(item.answer)}</li>`
+    ).join('');
 
     const dimColors = { quality: '#a78bfa', cost: '#22c55e', speed: '#f59e0b', context: '#06b6d4', privacy: '#f472b6', reliability: '#818cf8' };
     const dimLabels = { quality: 'Quality', cost: 'Cost eff.', speed: 'Speed', context: 'Context', privacy: 'Privacy', reliability: 'Reliability' };
@@ -1686,7 +1754,7 @@
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Generate 5 sample exam questions with answer keys on my study topic using ${escapeAttr(primary.name)}')">🎯 Generate Exam Questions</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How do I summarize a 300-page book or textbook chapter using ${escapeAttr(primary.name)}?')">📖 Summarize Textbook</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How accurate is ${escapeAttr(primary.name)} on medical and engineering course research?')">🩺 Med & Eng Accuracy</button>
-        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How can I use ${escapeAttr(primary.name)} completely free as a student without a credit card?')">🆓 Free Student Access</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What current free access options and limits are available for ${escapeAttr(primary.name)}? Please distinguish provider free tiers from self-hosting costs.')">🆓 Check Free Access</button>
       `;
     } else if (ans.persona === 'coder') {
       advisorPillsHtml = `
@@ -1704,15 +1772,15 @@
       `;
     } else if (ans.persona === 'enterprise') {
       advisorPillsHtml = `
-        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What are the Zero Data Retention and HIPAA compliance terms for ${escapeAttr(primary.name)}?')">🛡️ ZDR & Compliance</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What official provider documentation should I verify for retention, data residency, SOC 2 evidence, and any required HIPAA BAA for ${escapeAttr(primary.name)}?')">🛡️ Verify Compliance</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How to deploy ${escapeAttr(primary.name)} on AWS Bedrock or Private VPC')">☁️ Private VPC</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} for enterprise security')">⚖️ Enterprise Audit</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Hardware requirements to air-gap ${escapeAttr(primary.name)} on-premise')">🏛️ Air-Gapped Setup</button>
       `;
     } else if (ans.persona === 'general') {
       advisorPillsHtml = `
-        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How can I use ${escapeAttr(primary.name)} for daily productivity for free?')">🌟 Daily Productivity</button>
-        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ChatGPT Plus')">⚖️ vs ChatGPT Plus</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How do I use ${escapeAttr(primary.name)} on the web without coding?')">🌐 Web Chat Access</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What is the best alternative to ChatGPT plus that does not cost 20 dollars?')">💡 Free ChatGPT Alternative</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What are the best prompts for ${escapeAttr(primary.name)} for drafting emails and notes?')">📝 Email & Notes</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How does ${escapeAttr(primary.name)} compare to ${escapeAttr(runner.name)}?')">⚖️ vs ${escapeAttr(runner.name)}</button>
       `;
@@ -1727,24 +1795,28 @@
 
     const html = `
       <div class="top-pick">
-        <div class="top-pick-badge">🏆 Top Recommendation · ${branch.badge}</div>
+        <div class="top-pick-badge">🏆 Best-scoring catalog match · ${branch.badge}</div>
         <div class="top-pick-model-row">
           <div>
             <div class="top-pick-name">${primary.name}</div>
-            <div class="top-pick-provider" style="color:${primary.providerColor || '#4ade80'}">${primary.provider} · <span style="color:var(--text-dim)">LMSYS Arena Elo ${primary.benchmarks.arenaElo}</span></div>
+            <div class="top-pick-provider" style="color:${primary.providerColor || '#4ade80'}">${primary.provider} · <span style="color:var(--text-dim)">LMSYS Arena Elo ${Number.isFinite(primary.benchmarks.arenaElo) ? primary.benchmarks.arenaElo : 'unavailable'}</span></div>
           </div>
           <div class="top-pick-score">
-            <div class="top-pick-score-val">${normScore}</div>
-            <div class="top-pick-score-label">match score</div>
+            <div class="top-pick-score-val">#1</div>
+            <div class="top-pick-score-label">catalog ranking · heuristic</div>
           </div>
         </div>
-        <div class="top-pick-desc">${primary.desc}</div>
         <div class="verdict-box">${verdictLines.join(' ')}</div>
+        <div class="verdict-box">
+          <strong>Preferences used for this match</strong>
+          <ul style="margin:0.5rem 0 0 1.25rem">${preferenceSummaryHtml}</ul>
+          <button type="button" class="finder-chat-pill" onclick="reviewAnswers()">Review or change these preferences</button>
+        </div>
         ${warning ? `<div class="warning-box">${warning}</div>` : ''}
         <div class="score-bars">${barsHtml}</div>
         <div class="pick-meta">
           <div class="pick-meta-item"><span>📏</span>${primary.contextWindow} tokens</div>
-          <div class="pick-meta-item"><span>💵</span>${primary.pricing}</div>
+          <div class="pick-meta-item"><span>💵</span>${primary.license === 'open_weights' ? 'Hosted API: ' : 'Listed price: '}${primary.pricing || 'check provider'}</div>
           <div class="pick-meta-item"><span>⚡</span>${primary.speedTps ? primary.speedTps + ' t/s' : 'High Speed'}</div>
           <div class="pick-meta-item"><span>🛡️</span>${primary.license === 'open_weights' ? 'Open Weights' : 'API Service'}</div>
         </div>
@@ -1752,23 +1824,23 @@
 
       <div class="alt-cards">
         <div class="alt-card">
-          <div class="alt-card-badge badge-runner">Runner-up</div>
+          <div class="alt-card-badge badge-runner">${budget.id === runner.id ? 'Runner-up · Value pick' : 'Runner-up'}</div>
           <div class="alt-card-name">${runner.name}</div>
-          <div style="font-size:0.78rem;color:${runner.providerColor || '#7a8a9a'};margin-bottom:0.5rem;">${runner.provider} · Arena Elo ${runner.benchmarks.arenaElo}</div>
+          <div style="font-size:0.78rem;color:${runner.providerColor || '#7a8a9a'};margin-bottom:0.5rem;">${runner.provider} · Arena Elo ${Number.isFinite(runner.benchmarks.arenaElo) ? runner.benchmarks.arenaElo : 'unavailable'}</div>
           <div class="alt-card-reason">${runnerReason}</div>
-          <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${runner.contextWindow} · ${runner.pricing}</div>
+          <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${runner.contextWindow || 'unavailable'} · ${runner.pricing || 'check provider pricing'}</div>
         </div>
         ${budgetIsUnique ? `<div class="alt-card">
-          <div class="alt-card-badge badge-budget">Budget pick</div>
+          <div class="alt-card-badge badge-budget">Value pick</div>
           <div class="alt-card-name">${budget.name}</div>
           <div style="font-size:0.78rem;color:${budget.providerColor || '#7a8a9a'};margin-bottom:0.5rem;">${budget.provider}</div>
-          <div class="alt-card-reason">Best cost-efficiency in class. Cost score: ${(budget.scores && budget.scores.cost) || 90}/100. ${budget.pricing}.</div>
-          <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${budget.contextWindow} · ${budget.pricing}</div>
-        </div>` : `<div class="alt-card">
+          <div class="alt-card-reason">Catalog cost-efficiency score: ${(budget.scores && budget.scores.cost) || 90}/100. Listed hosted price: ${budget.pricing || 'not available'}. Free-tier eligibility and self-hosting costs are not verified here.</div>
+          <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-dim);">Context: ${budget.contextWindow || 'unavailable'} · ${budget.pricing || 'check provider pricing'}</div>
+        </div>` : primaryIsValuePick ? `<div class="alt-card">
           <div class="alt-card-badge badge-budget">Best Value</div>
-          <div class="alt-card-name">${primary.name} is also the budget pick</div>
-          <div class="alt-card-reason">Your top recommendation already gives you the best price-to-performance ratio for your use case. No need to compromise.</div>
-        </div>`}
+          <div class="alt-card-name">${primary.name} is also the value pick</div>
+          <div class="alt-card-reason">Among the closest-scoring candidates, this model has the strongest catalog cost-efficiency score. Compare listed prices with your expected usage before choosing.</div>
+        </div>` : ''}
       </div>
 
       <!-- Contextual AI Advisor Banner -->
@@ -1835,6 +1907,19 @@
     document.getElementById('dynamicStepsContainer').innerHTML = '';
     updateProgressBar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function reviewAnswers() {
+    document.getElementById('progressWrap').style.display = '';
+    document.getElementById('finderHeader').style.display = '';
+    document.getElementById('results').classList.remove('active');
+    renderDynamicSteps(currentPersona);
+    document.querySelectorAll('#step1 .option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.val === currentPersona);
+    });
+    document.getElementById('step1').style.display = '';
+    document.getElementById('next1').disabled = false;
+    goDynamicStep(1);
   }
 
   // Initial load

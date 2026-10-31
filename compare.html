@@ -183,7 +183,7 @@
 <div class="page-header">
   <div class="page-tag">Head-to-Head Benchmarks</div>
   <h1>Compare Any Two AI Models</h1>
-  <p>Select any two models from our 26-model database to analyze empirical benchmarks, throughput speed, context capacity, and pricing.</p>
+  <p>Select any two of <span id="compareModelCount">the models</span> to compare available benchmarks, speed, context capacity, and listed pricing. Some models have incomplete benchmark data.</p>
 </div>
 
 <div class="compare-wrap">
@@ -223,6 +223,7 @@
 <script src="models.js"></script>
 <script>
   const models = window.MODELS_DATA || [];
+  document.getElementById('compareModelCount').textContent = `${models.length} models`;
 
   const dims = [
     { key: 'quality', label: 'Output Quality', color: '#a78bfa' },
@@ -248,8 +249,9 @@
 
     provModels.forEach(m => {
       const openTag = m.license === 'open_weights' ? ' [Open]' : '';
-      const optA = `<option value="${m.id}">${m.name}${openTag} (Elo ${m.benchmarks.arenaElo})</option>`;
-      const optB = `<option value="${m.id}">${m.name}${openTag} (Elo ${m.benchmarks.arenaElo})</option>`;
+      const arenaLabel = Number.isFinite(m.benchmarks.arenaElo) ? `Elo ${m.benchmarks.arenaElo}` : 'Arena Elo unavailable';
+      const optA = `<option value="${m.id}">${m.name}${openTag} (${arenaLabel})</option>`;
+      const optB = `<option value="${m.id}">${m.name}${openTag} (${arenaLabel})</option>`;
       grpA.innerHTML += optA;
       grpB.innerHTML += optB;
     });
@@ -260,8 +262,8 @@
 
   // Read URL params
   const params = new URLSearchParams(window.location.search);
-  const paramA = params.get('a');
-  const paramB = params.get('b');
+  const paramA = params.get('a') || params.get('m1');
+  const paramB = params.get('b') || params.get('m2');
 
   if (paramA && models.find(m => m.id === paramA)) {
     selA.value = paramA;
@@ -290,11 +292,11 @@
     }
 
     // Compute overall score
-    const aTotal = a.benchmarks.arenaElo || 0;
-    const bTotal = b.benchmarks.arenaElo || 0;
-    const aWins = aTotal >= bTotal;
-    const winner = aWins ? a : b;
-    const loser = aWins ? b : a;
+    const aTotal = Number.isFinite(a.benchmarks.arenaElo) ? a.benchmarks.arenaElo : null;
+    const bTotal = Number.isFinite(b.benchmarks.arenaElo) ? b.benchmarks.arenaElo : null;
+    const aWins = aTotal !== null && bTotal !== null && aTotal > bTotal;
+    const eloLeader = aTotal === null || bTotal === null ? null : aWins ? a : b;
+    const eloOther = aTotal === null || bTotal === null ? null : aWins ? b : a;
 
     // Dimension wins
     const dimWins = { a: 0, b: 0, tie: 0 };
@@ -315,7 +317,7 @@
           <div class="dim-row-top">
             <span class="dim-label">${d.label}</span>
             <div style="display:flex;align-items:center;gap:6px;">
-              ${isWin ? `<span class="dim-winner-tag">Winner</span>` : ''}
+              ${isWin ? `<span class="dim-winner-tag">Higher score</span>` : ''}
               <span class="dim-val ${valClass}">${mv}</span>
             </div>
           </div>
@@ -325,14 +327,15 @@
         </div>`;
       }).join('');
 
-      return `<div class="compare-card ${isWinner ? 'winner-card' : ''}">
-        ${isWinner ? `<div class="winner-badge">🏆 Higher Arena Elo</div>` : ''}
+      const hasElo = Number.isFinite(m.benchmarks.arenaElo);
+      return `<div class="compare-card ${isWinner && hasElo ? 'winner-card' : ''}">
+        ${isWinner && hasElo ? `<div class="winner-badge">Higher Arena Elo</div>` : ''}
         <div class="model-header">
           <div class="model-provider-pill" style="background:${m.providerColor}22;color:${m.providerColor}">${m.provider}</div>
           <div class="model-big-name">${m.name}</div>
           
           <div class="benchmark-badges-row">
-            <div class="bench-tag">Arena Elo: <strong>${m.benchmarks.arenaElo}</strong></div>
+            <div class="bench-tag">Arena Elo: <strong>${hasElo ? m.benchmarks.arenaElo : 'Unavailable'}</strong></div>
             <div class="bench-tag">Coding Elo: <strong>${m.benchmarks.arenaCoding || '—'}</strong></div>
             <div class="bench-tag">MMLU-Pro: <strong>${m.benchmarks.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</strong></div>
             <div class="bench-tag">Speed: <strong>${m.speedTps ? m.speedTps + ' t/s' : '—'}</strong></div>
@@ -345,41 +348,48 @@
           ${dimHtml}
         </div>
         <table class="meta-table">
-          <tr><td>Context Window</td><td>${m.contextWindow} tokens</td></tr>
-          <tr><td>API Pricing</td><td>${m.pricing}</td></tr>
+          <tr><td>Context Window</td><td>${m.contextWindow || 'Unavailable'}</td></tr>
+          <tr><td>Listed Pricing</td><td>${m.pricing || 'Unavailable; check provider'}</td></tr>
           <tr><td>Deployment Type</td><td>${m.license === 'open_weights' ? 'Open Weights (Self-Hostable)' : 'Proprietary Cloud API'}</td></tr>
         </table>
       </div>`;
     }
 
     // Verdict paragraph
-    const winDims = dims.filter(d => winner.scores[d.key] > loser.scores[d.key]).map(d => d.label);
-    const loseDims = dims.filter(d => loser.scores[d.key] > winner.scores[d.key]).map(d => d.label);
+    const winDims = dims.filter(d => a.scores[d.key] > b.scores[d.key]).map(d => d.label);
+    const loseDims = dims.filter(d => b.scores[d.key] > a.scores[d.key]).map(d => d.label);
     
     let specialNote = '';
     if (a.license === 'open_weights' && b.license !== 'open_weights') {
-      specialNote = `<strong>Key Advantage:</strong> ${a.name} is open weights and can be hosted locally or on private cloud servers, ensuring 100% data privacy.`;
+      specialNote = `<strong>Deployment trade-off:</strong> ${a.name} has open weights and may be run on infrastructure you control. Privacy depends on your hosting, network, telemetry, and security configuration; self-hosting also has hardware and operating costs.`;
     } else if (b.license === 'open_weights' && a.license !== 'open_weights') {
-      specialNote = `<strong>Key Advantage:</strong> ${b.name} is open weights and can be hosted locally or on private cloud servers, ensuring 100% data privacy.`;
+      specialNote = `<strong>Deployment trade-off:</strong> ${b.name} has open weights and may be run on infrastructure you control. Privacy depends on your hosting, network, telemetry, and security configuration; self-hosting also has hardware and operating costs.`;
     } else if (a.contextTokens >= 1000000 && b.contextTokens < 1000000) {
-      specialNote = `<strong>Key Advantage:</strong> ${a.name} provides a massive ${a.contextWindow} context window for ingesting entire codebases or hundreds of PDF pages at once.`;
+      specialNote = `<strong>Context advantage:</strong> ${a.name} has a ${a.contextWindow} context window, which may reduce document chunking for inputs that fit. Output quality, latency, and cost still depend on the task and prompt.`;
     } else if (b.contextTokens >= 1000000 && a.contextTokens < 1000000) {
-      specialNote = `<strong>Key Advantage:</strong> ${b.name} provides a massive ${b.contextWindow} context window for ingesting entire codebases or hundreds of PDF pages at once.`;
+      specialNote = `<strong>Context advantage:</strong> ${b.name} has a ${b.contextWindow} context window, which may reduce document chunking for inputs that fit. Output quality, latency, and cost still depend on the task and prompt.`;
     }
 
+    const eloSummary = aTotal === null || bTotal === null
+      ? 'Arena Elo is unavailable for one or both models, so this comparison does not infer an Arena leader.'
+      : aTotal === bTotal
+        ? `Both models have the same Chatbot Arena Elo (${aTotal}). Arena preference is one signal, not a universal recommendation.`
+        : `<strong>${eloLeader.name}</strong> has the higher Chatbot Arena Elo (${eloLeader.benchmarks.arenaElo} vs ${eloOther.benchmarks.arenaElo}). Arena preference is one signal, not a universal recommendation.`;
     const verdictHtml = `
-      <strong>${winner.name}</strong> has a higher Chatbot Arena Elo rating (<strong>${winner.benchmarks.arenaElo}</strong> vs <strong>${loser.benchmarks.arenaElo}</strong>), winning ${dimWins[aWins ? 'a' : 'b']} of the 6 core metrics (${winDims.join(', ')}).
-      ${loseDims.length ? `<br><br>However, <strong>${loser.name}</strong> holds the advantage on <strong>${loseDims.join(', ')}</strong>.` : ''}
+      ${eloSummary}
+      <br><br>${dimWins.a ? `<strong>${a.name}</strong> has higher scores on ${dimWins.a} displayed dimensions${winDims.length ? ` (${winDims.join(', ')})` : ''}.` : `<strong>${a.name}</strong> does not lead any of the displayed dimensions.`}
+      ${dimWins.b ? `<strong>${b.name}</strong> has higher scores on ${dimWins.b} displayed dimensions${loseDims.length ? ` (${loseDims.join(', ')})` : ''}.` : `<strong>${b.name}</strong> does not lead any of the displayed dimensions.`}
+      <br><br>Choose based on your task, budget, latency needs, and deployment requirements. Listed prices and provider terms can change; verify them before adoption.
       ${specialNote ? `<br><br>${specialNote}` : ''}`;
 
     const output = `
       <div class="compare-grid">
         ${modelCard(a, aWins, 'a')}
-        ${modelCard(b, !aWins, 'b')}
+        ${modelCard(b, aTotal !== null && bTotal !== null && bTotal > aTotal, 'b')}
       </div>
 
       <div class="verdict-section">
-        <div class="verdict-title">⚖️ Verdict: Which should you choose?</div>
+        <div class="verdict-title">⚖️ How to read this comparison</div>
         <div class="verdict-body">${verdictHtml}</div>
       </div>
 
@@ -395,12 +405,12 @@
           </thead>
           <tbody>
             <tr>
-              <td class="dim-score-a" style="${a.benchmarks.arenaElo >= b.benchmarks.arenaElo ? 'color:#4ade80' : 'color:var(--text-muted)'}">
-                ${a.benchmarks.arenaElo} ${a.benchmarks.arenaElo > b.benchmarks.arenaElo ? '✓' : ''}
+              <td class="dim-score-a" style="${aTotal !== null && bTotal !== null && aTotal > bTotal ? 'color:#4ade80' : aTotal !== null && aTotal === bTotal ? 'color:var(--amber)' : 'color:var(--text-muted)'}">
+                ${aTotal ?? '—'} ${aTotal !== null && bTotal !== null && aTotal > bTotal ? '✓' : aTotal !== null && aTotal === bTotal ? '≈' : ''}
               </td>
               <td class="dim-name" style="color:var(--amber)">LMSYS Arena Elo</td>
-              <td class="dim-score-b" style="${b.benchmarks.arenaElo >= a.benchmarks.arenaElo ? 'color:#4ade80' : 'color:var(--text-muted)'}">
-                ${b.benchmarks.arenaElo > a.benchmarks.arenaElo ? '✓' : ''} ${b.benchmarks.arenaElo}
+              <td class="dim-score-b" style="${bTotal !== null && aTotal !== null && bTotal > aTotal ? 'color:#4ade80' : bTotal !== null && aTotal === bTotal ? 'color:var(--amber)' : 'color:var(--text-muted)'}">
+                ${bTotal !== null && aTotal !== null && bTotal > aTotal ? '✓' : bTotal !== null && aTotal === bTotal ? '≈' : ''} ${bTotal ?? '—'}
               </td>
             </tr>
             <tr>
@@ -440,7 +450,7 @@
             <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Can I self-host ${escapeAttr(a.name)} or ${escapeAttr(b.name)} locally?')">🖥️ Self-hosting Check</button>
           </div>
         </div>
-        <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(a.name)} vs ${escapeAttr(b.name)} in detail and recommend the winner')">
+        <button type="button" class="btn btn-primary" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(a.name)} vs ${escapeAttr(b.name)} for my use case. Explain trade-offs based on my priorities instead of naming a universal winner.')">
           Ask Advisor &rarr;
         </button>
       </div>`;

@@ -4381,7 +4381,7 @@
   },
   {
     "id": "gemini-pro",
-    "name": "Pro",
+    "name": "Gemini 1.0 Pro",
     "provider": "Google",
     "providerColor": "#4285f4",
     "license": "proprietary",
@@ -4455,7 +4455,7 @@
   },
   {
     "id": "bard-jan-24-gemini-pro",
-    "name": "(2024-01-24)",
+    "name": "Bard / Gemini Pro (2024-01-24)",
     "provider": "Google",
     "providerColor": "#4285f4",
     "license": "proprietary",
@@ -5306,7 +5306,7 @@
   },
   {
     "id": "claude-3-opus-20240229",
-    "name": "Opus",
+    "name": "Claude 3 Opus",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -5491,7 +5491,7 @@
   },
   {
     "id": "command-r",
-    "name": "(04-2024)",
+    "name": "Cohere Command R (04-2024)",
     "provider": "Cohere",
     "providerColor": "#39594d",
     "license": "proprietary",
@@ -5528,7 +5528,7 @@
   },
   {
     "id": "command-r-plus",
-    "name": "(04-2024)",
+    "name": "Cohere Command R+ (04-2024)",
     "provider": "Cohere",
     "providerColor": "#39594d",
     "license": "proprietary",
@@ -6268,7 +6268,7 @@
   },
   {
     "id": "gemini-advanced-0514",
-    "name": "(2024-05-14)",
+    "name": "Gemini Advanced (2024-05-14)",
     "provider": "Google",
     "providerColor": "#4285f4",
     "license": "proprietary",
@@ -6712,7 +6712,7 @@
   },
   {
     "id": "claude-3-5-sonnet-20240620",
-    "name": "(20240620)",
+    "name": "Claude 3.5 Sonnet (2024-06-20)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -7563,7 +7563,7 @@
   },
   {
     "id": "chatgpt-4o-latest",
-    "name": "(2024-08-08)",
+    "name": "ChatGPT-4o Latest (2024-08-08)",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -7600,7 +7600,7 @@
   },
   {
     "id": "chatgpt-4o-latest-20240808",
-    "name": "(2024-08-08)",
+    "name": "ChatGPT-4o (2024-08-08)",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -7748,7 +7748,7 @@
   },
   {
     "id": "minicpm-v-2_6",
-    "name": "2_6",
+    "name": "MiniCPM-V 2.6",
     "provider": "OpenBMB",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -8044,7 +8044,7 @@
   },
   {
     "id": "command-r-plus-08-2024",
-    "name": "(08-2024)",
+    "name": "Cohere Command R+ (08-2024)",
     "provider": "Cohere",
     "providerColor": "#39594d",
     "license": "proprietary",
@@ -8081,7 +8081,7 @@
   },
   {
     "id": "command-r-08-2024",
-    "name": "(08-2024)",
+    "name": "Cohere Command R (08-2024)",
     "provider": "Cohere",
     "providerColor": "#39594d",
     "license": "proprietary",
@@ -8377,7 +8377,7 @@
   },
   {
     "id": "chatgpt-4o-latest-20240903",
-    "name": "(2024-09-03)",
+    "name": "ChatGPT-4o (2024-09-03)",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -9080,7 +9080,7 @@
   },
   {
     "id": "claude-3-5-sonnet-20241022",
-    "name": "(20241022)",
+    "name": "Claude 3.5 Sonnet (2024-10-22)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -9376,7 +9376,7 @@
   },
   {
     "id": "chatgpt-4o-latest-20241120",
-    "name": "(2024-11-20)",
+    "name": "ChatGPT-4o (2024-11-20)",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -9820,7 +9820,7 @@
   },
   {
     "id": "claude-3-5-haiku-20241022",
-    "name": "(20241022)",
+    "name": "Claude 3.5 Haiku (2024-10-22)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -9894,7 +9894,7 @@
   },
   {
     "id": "amazon-nova-pro-v1-0",
-    "name": "1.0",
+    "name": "Amazon Nova Pro 1.0",
     "provider": "Amazon",
     "providerColor": "#ff9900",
     "license": "proprietary",
@@ -9931,7 +9931,7 @@
   },
   {
     "id": "amazon-nova-lite-v1-0",
-    "name": "1.0",
+    "name": "Amazon Nova Lite 1.0",
     "provider": "Amazon",
     "providerColor": "#ff9900",
     "license": "proprietary",
@@ -9968,7 +9968,7 @@
   },
   {
     "id": "amazon-nova-micro-v1-0",
-    "name": "1.0",
+    "name": "Amazon Nova Micro 1.0",
     "provider": "Amazon",
     "providerColor": "#ff9900",
     "license": "proprietary",
@@ -10560,7 +10560,7 @@
   },
   {
     "id": "step-1o-vision-32k-highres",
-    "name": "(highres)",
+    "name": "Step-1o Vision 32K (Highres)",
     "provider": "StepFun",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -10856,7 +10856,7 @@
   },
   {
     "id": "chatgpt-4o-latest-20250129",
-    "name": "(2025-01-29)",
+    "name": "ChatGPT-4o (2025-01-29)",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -11411,7 +11411,7 @@
   },
   {
     "id": "command-a-03-2025",
-    "name": "(03-2025)",
+    "name": "Cohere Command A (03-2025)",
     "provider": "Cohere",
     "providerColor": "#39594d",
     "license": "proprietary",
@@ -11485,7 +11485,7 @@
   },
   {
     "id": "claude-3-7-sonnet-20250219-thinking-32k",
-    "name": "(thinking-32k)",
+    "name": "Claude 3.7 Sonnet (Thinking 32K)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -11559,7 +11559,7 @@
   },
   {
     "id": "chatgpt-4o-latest-20250326",
-    "name": "(2025-03-26)",
+    "name": "ChatGPT-4o (2025-03-26)",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -12299,7 +12299,7 @@
   },
   {
     "id": "mistral-medium-2505",
-    "name": "3",
+    "name": "Mistral Medium (2505)",
     "provider": "Mistral",
     "providerColor": "#f97316",
     "license": "proprietary",
@@ -12558,7 +12558,7 @@
   },
   {
     "id": "claude-opus-4-20250514",
-    "name": "(20250514)",
+    "name": "Claude 4 Opus (Projected)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -12595,7 +12595,7 @@
   },
   {
     "id": "claude-sonnet-4-20250514",
-    "name": "(20250514)",
+    "name": "Claude 4 Sonnet (Projected)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -13039,7 +13039,7 @@
   },
   {
     "id": "recraft-v3",
-    "name": "V3",
+    "name": "Recraft V3",
     "provider": "Recraft",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -13113,7 +13113,7 @@
   },
   {
     "id": "ideogram-v2",
-    "name": "2.0",
+    "name": "Ideogram v2.0",
     "provider": "Ideogram",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -13187,7 +13187,7 @@
   },
   {
     "id": "flux-1-dev-fp8",
-    "name": "(fp8)",
+    "name": "FLUX.1 Dev (FP8)",
     "provider": "Labs",
     "providerColor": "#64748b",
     "license": "open_weights",
@@ -13224,7 +13224,7 @@
   },
   {
     "id": "dall-e-3",
-    "name": "3",
+    "name": "DALL-E 3",
     "provider": "OpenAI",
     "providerColor": "#10a37f",
     "license": "proprietary",
@@ -13594,7 +13594,7 @@
   },
   {
     "id": "ideogram-v3-quality",
-    "name": "(quality)",
+    "name": "Ideogram v3 (Quality)",
     "provider": "Ideogram",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -13705,7 +13705,7 @@
   },
   {
     "id": "seedream-3",
-    "name": "3.0",
+    "name": "ByteDance SeaDream 3.0",
     "provider": "Bytedance",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -13779,7 +13779,7 @@
   },
   {
     "id": "claude-opus-4-20250514-thinking-16k",
-    "name": "(thinking-16k)",
+    "name": "Claude 4 Opus (Thinking 16K)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -13816,7 +13816,7 @@
   },
   {
     "id": "claude-sonnet-4-20250514-thinking-32k",
-    "name": "(thinking-32k)",
+    "name": "Claude 4 Sonnet (Thinking 32K)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",

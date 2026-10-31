@@ -482,23 +482,29 @@
     // Sort
     const col = currentSort.col;
     const dir = currentSort.dir;
+    const compareNumbers = (aValue, bValue) => {
+      const aKnown = Number.isFinite(aValue);
+      const bKnown = Number.isFinite(bValue);
+      if (aKnown !== bKnown) return aKnown ? -1 : 1;
+      return ((aKnown ? aValue : 0) - (bKnown ? bValue : 0)) * dir;
+    };
     data.sort((a, b) => {
       if (col === 'name') {
         return a.name.localeCompare(b.name) * dir;
       } else if (col === 'arenaElo') {
-        return ((a.benchmarks.arenaElo || 0) - (b.benchmarks.arenaElo || 0)) * dir;
+        return compareNumbers(a.benchmarks.arenaElo, b.benchmarks.arenaElo);
       } else if (col === 'arenaCoding') {
-        return ((a.benchmarks.arenaCoding || 0) - (b.benchmarks.arenaCoding || 0)) * dir;
+        return compareNumbers(a.benchmarks.arenaCoding, b.benchmarks.arenaCoding);
       } else if (col === 'mmluPro') {
-        return ((a.benchmarks.mmluPro || 0) - (b.benchmarks.mmluPro || 0)) * dir;
+        return compareNumbers(a.benchmarks.mmluPro, b.benchmarks.mmluPro);
       } else if (col === 'speedTps') {
-        return ((a.speedTps || 0) - (b.speedTps || 0)) * dir;
+        return compareNumbers(a.speedTps, b.speedTps);
       } else if (col === 'contextTokens') {
-        return ((a.contextTokens || 0) - (b.contextTokens || 0)) * dir;
+        return compareNumbers(a.contextTokens, b.contextTokens);
       } else if (col === 'quality') {
-        return (((a.scores && a.scores.quality) || 0) - ((b.scores && b.scores.quality) || 0)) * dir;
+        return compareNumbers(a.scores && a.scores.quality, b.scores && b.scores.quality);
       }
-      return ((a.benchmarks.arenaElo || 0) - (b.benchmarks.arenaElo || 0)) * dir;
+      return compareNumbers(a.benchmarks.arenaElo, b.benchmarks.arenaElo);
     });
 
     return data;
@@ -556,7 +562,7 @@
             <div class="model-cell-provider" style="color:${m.providerColor || '#7a8a9a'}">${m.provider} · <span style="color:var(--text-dim)">${m.bestForLabel || 'AI Model'}</span></div>
           </div>
         </td>
-        <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks.arenaElo}</span></td>
+        <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks.arenaElo ?? '—'}</span></td>
         <td><strong style="color:var(--text)">${m.benchmarks.arenaCoding || '—'}</strong></td>
         <td>${m.benchmarks.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
         <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
@@ -566,12 +572,18 @@
         <td>
           <div style="display:flex;gap:4px">
             <a href="compare.html?a=${m.id}" class="compare-link" onclick="event.stopPropagation()">Compare ↗</a>
-            <button type="button" class="compare-link" style="color:var(--amber);border-color:rgba(245,158,11,0.3)" onclick="event.stopPropagation();window.ModelAtlasChat && window.ModelAtlasChat.open('Tell me about ${m.name.replace(/'/g, &quot;\\'&quot;)}: benchmarks, specs, and trade-offs')">Ask 💬</button>
+            <button type="button" class="compare-link ask-model-btn" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">Ask 💬</button>
           </div>
         </td>
       `;
       tr.addEventListener('click', () => {
         window.location.href = `compare.html?a=${m.id}`;
+      });
+      tr.querySelector('.ask-model-btn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (window.ModelAtlasChat) {
+          window.ModelAtlasChat.open(`Tell me about ${m.name}: benchmarks, specs, and trade-offs`);
+        }
       });
       body.appendChild(tr);
     });
