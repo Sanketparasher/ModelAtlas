@@ -150,7 +150,7 @@
     if (/which models (have|support|are)|list models|what models (have|support|are)/i.test(t)) {
       return false;
     }
-    return /(recommend|suggest|which.*model.*should|what.*model.*should|should i use|best.*model|help me pick|i need an? (ai|model)|we need an? (ai|model)|find me.*(ai|model)|looking for.*(ai|model)|want to run.*(ai|model)|want an? (ai|model)|what to use|good.*model.*for|model to use|pick a model|need a.*model|need an.*model|run.*model)/i.test(t);
+    return /(recommend|suggest|which.*(?:model|ai).*should|what.*(?:model|ai).*should|should i use|best.*(?:model|ai)|help me pick|need(?:s|ed|ing)?.*(?:ai|model)|want(?:s|ed|ing)?.*(?:ai|model)|find me.*(?:ai|model)|looking for.*(?:ai|model)|what to use|good.*(?:model|ai).*for|model to use|pick a model|run.*(?:model|ai)|alternative to (?:chatgpt|claude|openai|gemini)|cheaper than|what.*(?:ai|model) is best|which.*(?:ai|model) is best)/i.test(t);
   }
 
   function extractConstraintsFromChat(text, prevMemory) {
@@ -164,8 +164,10 @@
       persona = 'student';
     } else if (/api|json|schema|saas|backend|latency|throughput|ttft|tool calling|function calling/i.test(t)) {
       persona = 'api';
-    } else if (/enterprise|corporate|compliance|hipaa|soc-2|soc2|zdr|air-gap|airgapped|on-prem|sovereign|legal|contract|audit|finance/i.test(t)) {
+    } else if (/enterprise|corporate|compliance|hipaa|soc-2|soc2|zdr|air-gap|airgapped|on[- ]?prem|sovereign|legal|contract|audit|finance/i.test(t)) {
       persona = 'enterprise';
+    } else if (/everyday|routine|assistant|chores|productivity|lifestyle|general purpose|chatgpt alternative|personal assistant/i.test(t)) {
+      persona = 'general';
     } else if (/code|coding|developer|python|react|refactor|software|git|bug|swe|cursor|terminal/i.test(t)) {
       persona = 'coder';
     }
@@ -176,6 +178,7 @@
     if (persona === 'coder') {
       if (/inline|autocomplete|tab|fim|typing/i.test(t)) ans.coding_scope = 'inline_fim';
       else if (/agent|autonomous|terminal|bash/i.test(t)) ans.coding_scope = 'agentic_loop';
+      else if (/script|test suite|unit test|single file/i.test(t)) ans.coding_scope = 'scripts_tests';
       else ans.coding_scope = 'repo_refactor';
 
       if (/laptop|macbook|consumer|8gb|16gb|single gpu|rtx 3060|rtx 4060|offline|local/i.test(t)) ans.env_target = 'local_consumer';
@@ -193,9 +196,10 @@
       else if (/medical|engineering|usmle|doctor|clinical|thermo/i.test(t)) ans.academic_workload = 'specialized_research';
       else if (/exam|quiz|mock|sample question|test prep/i.test(t)) ans.academic_workload = 'exam_prep';
       else if (/math|calculus|proof|logic|physics/i.test(t)) ans.academic_workload = 'stem_math_logic';
+      else if (/essay|thesis|paper|humanities/i.test(t)) ans.academic_workload = 'humanities_essay';
       else ans.academic_workload = 'homework_assignment';
 
-      if (/free|\$0|no money|without.*pay|without.*credit/i.test(t)) ans.student_budget = 'strictly_free';
+      if (/free|\$0|no money|without.*pay|without.*credit|broke/i.test(t)) ans.student_budget = 'strictly_free';
       else ans.student_budget = 'student_sub';
       ans.explanation_style = 'pedagogical_deep';
     } else if (persona === 'api') {
@@ -212,21 +216,37 @@
       if (/free|cheap|scale|volume|sub-\$0.50/i.test(t)) ans.api_budget = 'scale_budget';
       else ans.api_budget = 'premium_api';
     } else if (persona === 'enterprise') {
-      if (/air-gap|on-prem|sovereign/i.test(t)) ans.enterprise_compliance = 'air_gapped_onprem';
+      if (/air-gap|on[- ]?prem|sovereign/i.test(t)) ans.enterprise_compliance = 'air_gapped_onprem';
       else ans.enterprise_compliance = 'zdr_commercial';
 
       if (/customer|support|ticket/i.test(t)) ans.enterprise_workload = 'customer_ops';
+      else if (/internal|rag|wiki|confluence|knowledge base/i.test(t)) ans.enterprise_workload = 'internal_rag';
       else ans.enterprise_workload = 'legal_finance';
 
       if (/2m|archive|large doc/i.test(t)) ans.enterprise_context = 'archive_2m';
       else ans.enterprise_context = 'standard_docs';
+
+      if (/reserved|ptu|dedicated|guaranteed/i.test(t)) ans.contracting_tier = 'reserved_ptu';
+      else ans.contracting_tier = 'flexible_usage';
     } else if (persona === 'creator') {
       if (/marketing|ad|hook/i.test(t)) ans.creator_focus = 'marketing_copy';
+      else if (/brief|memo|executive|market research/i.test(t)) ans.creator_focus = 'executive_briefs';
+      else if (/visual|art|image|aesthetic/i.test(t)) ans.creator_focus = 'multimodal_art';
       else ans.creator_focus = 'longform_prose';
 
       ans.voice_nuance = 'avoid_cliches';
       ans.deliberation_depth = 'deep_polish';
-      ans.creator_budget = /free|\$0/i.test(t) ? 'free_accessible' : 'premium_pro';
+      ans.creator_budget = /free|\$0|broke|zero cost|budget|cheap|low-cost/i.test(t) ? 'free_accessible' : 'premium_pro';
+    } else if (persona === 'general') {
+      if (/research|summary|summaries|article|pdf|read/i.test(t)) ans.general_use = 'research_web';
+      else if (/quick|fast|chore|bullet|brainstorm/i.test(t)) ans.general_use = 'quick_chores';
+      else ans.general_use = 'all_rounder';
+
+      if (/deep|think|reason|deliberate/i.test(t)) ans.response_speed = 'deep_thought';
+      else ans.response_speed = 'fast_chat';
+
+      if (/free|\$0|zero cost|without pay|cheap/i.test(t)) ans.general_budget = 'free_everyday';
+      else ans.general_budget = 'premium_everyday';
     }
 
     return ans;
@@ -254,6 +274,8 @@
       weights = { quality: 0.35, cost: 0.10, speed: 0.20, context: 0.15, privacy: 0.10, reliability: 0.10 };
       if (ans.coding_scope === 'inline_fim') { weights.speed += 0.25; weights.cost += 0.10; weights.quality -= 0.10; }
       else if (ans.coding_scope === 'repo_refactor' || ans.coding_scope === 'agentic_loop') { weights.quality += 0.25; weights.context += 0.15; }
+      else if (ans.coding_scope === 'scripts_tests') { weights.quality += 0.15; weights.speed += 0.10; weights.cost += 0.10; }
+
       if (ans.reasoning_mode === 'extended_thinking') { weights.quality += 0.25; weights.speed -= 0.15; }
       if (ans.budget_level === 'zero_cost') weights.cost += 0.35;
       else if (ans.budget_level === 'frontier_tier') { weights.quality += 0.30; weights.cost = 0.02; }
@@ -269,6 +291,8 @@
         else if (model.benchmarks && model.benchmarks.sweBench >= 38) score *= 1.25;
         if (model.benchmarks && model.benchmarks.arenaCoding >= 1350) score *= 1.25;
         else if (model.benchmarks && model.benchmarks.arenaCoding >= 1300) score *= 1.15;
+      } else if (ans.coding_scope === 'scripts_tests') {
+        if (model.benchmarks && model.benchmarks.arenaCoding >= 1280) score *= 1.20;
       }
       if (ans.coding_scope === 'inline_fim') {
         if ((model.speedTps || 0) >= 100) score *= 1.25;
@@ -299,6 +323,9 @@
       } else if (ans.api_interface === 'multi_tool') {
         if (model.name.includes('Claude 3.7') || model.name.includes('Claude 3.5') || model.name.includes('GPT-4o') || model.name.includes('Gemini 2.5 Pro')) score *= 1.35;
         if (model.benchmarks && model.benchmarks.sweBench >= 45) score *= 1.20;
+      } else if (ans.api_interface === 'chat_stream') {
+        if ((model.speedTps || 0) >= 80) score *= 1.25;
+        if (model.scores && model.scores.reliability >= 85) score *= 1.15;
       }
       if (ans.latency_sla === 'ultra_fast') {
         if ((model.speedTps || 0) >= 110) score *= 1.35;
@@ -335,9 +362,19 @@
         if (model.benchmarks && model.benchmarks.arenaElo >= 1350) score *= 1.20;
         if (model.name.match(/\b(7B|8B|3B|1B|6B|OpenChat)\b/i)) score *= 0.60;
         if (model.name.match(/\b(70B|72B|405B|R1|8x22B)\b/i) || model.id === 'deepseek-r1') score *= 1.25;
+      } else if (ans.enterprise_workload === 'customer_ops') {
+        if ((model.speedTps || 0) >= 80 && model.inputPrice <= 0.5) score *= 1.30;
+      } else if (ans.enterprise_workload === 'internal_rag') {
+        if ((model.contextTokens || 0) >= 128000) score *= 1.25;
+        if (model.scores && model.scores.context >= 85) score *= 1.20;
       }
       if (ans.enterprise_context === 'archive_2m') {
         if ((model.contextTokens || 0) >= 1000000) score *= 1.40;
+      }
+      if (ans.contracting_tier === 'reserved_ptu') {
+        if (model.provider === 'Microsoft' || model.provider === 'OpenAI' || model.provider === 'Amazon' || model.provider === 'Google') score *= 1.20;
+      } else if (ans.contracting_tier === 'flexible_usage') {
+        if (model.inputPrice <= 1.0) score *= 1.15;
       }
     } else if (p === 'student') {
       weights = { quality: 0.30, cost: 0.35, speed: 0.10, context: 0.15, privacy: 0.05, reliability: 0.05 };
@@ -346,6 +383,7 @@
       else if (ans.academic_workload === 'exam_prep') { weights.quality += 0.20; weights.speed += 0.15; }
       else if (ans.academic_workload === 'homework_assignment') { weights.quality += 0.15; weights.cost += 0.20; }
       else if (ans.academic_workload === 'stem_math_logic') { weights.quality += 0.30; weights.speed -= 0.10; }
+      else if (ans.academic_workload === 'humanities_essay') { weights.quality += 0.25; weights.context += 0.15; }
 
       score = computeWeightedSum(model, weights);
       if (ans.academic_workload === 'book_summarization') {
@@ -361,6 +399,9 @@
       } else if (ans.academic_workload === 'stem_math_logic') {
         if (model.benchmarks && model.benchmarks.mmluPro >= 80) score *= 1.25;
         if (model.tags && model.tags.includes('reasoning')) score *= 1.35;
+      } else if (ans.academic_workload === 'humanities_essay') {
+        if (model.provider === 'Anthropic') score *= 1.30;
+        if (model.benchmarks && model.benchmarks.arenaElo >= 1320) score *= 1.20;
       }
       if (ans.student_budget === 'strictly_free') {
         if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
@@ -374,6 +415,50 @@
         if (model.provider === 'Anthropic') score *= 1.35;
         else if (model.benchmarks?.arenaElo >= 1350) score *= 1.20;
       }
+      if (ans.creator_focus === 'marketing_copy') {
+        if (model.provider === 'OpenAI' || model.provider === 'Anthropic') score *= 1.20;
+      } else if (ans.creator_focus === 'executive_briefs') {
+        if (model.scores && model.scores.quality >= 90) score *= 1.25;
+        if ((model.contextTokens || 0) >= 128000) score *= 1.20;
+      } else if (ans.creator_focus === 'multimodal_art') {
+        if (model.tags && (model.tags.includes('multimodal') || model.tags.includes('vision'))) score *= 1.35;
+        if (model.provider === 'Anthropic' || model.provider === 'Google' || model.provider === 'OpenAI') score *= 1.20;
+      }
+      if (ans.deliberation_depth === 'fast_brainstorm' && (model.speedTps || 0) >= 80) {
+        score *= 1.20;
+      }
+      if (ans.creator_budget === 'free_accessible') {
+        if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.40;
+        else if (model.inputPrice <= 0.25) score *= 1.30;
+        else if (model.inputPrice > 1.0) score *= 0.40;
+      }
+    } else if (p === 'general') {
+      weights = { quality: 0.30, cost: 0.25, speed: 0.20, context: 0.15, privacy: 0.05, reliability: 0.05 };
+      if (ans.general_use === 'research_web') {
+        weights.context += 0.25;
+        weights.quality += 0.15;
+      } else if (ans.general_use === 'quick_chores') {
+        weights.speed += 0.25;
+        weights.cost += 0.15;
+      }
+      score = computeWeightedSum(model, weights);
+
+      if (ans.general_use === 'research_web' && (model.contextTokens || 0) >= 500000) score *= 1.35;
+      if (ans.general_use === 'quick_chores' && (model.speedTps || 0) >= 90) score *= 1.25;
+      if (ans.general_use === 'all_rounder' && (model.id.includes('flash') || model.id === 'deepseek-v3' || model.name.includes('GPT-4o mini') || model.name.includes('Qwen 2.5 32B'))) score *= 1.25;
+      if (ans.response_speed === 'deep_thought' && model.tags && model.tags.includes('reasoning')) score *= 1.25;
+      if (ans.response_speed === 'fast_chat' && (model.speedTps || 0) >= 80) score *= 1.20;
+
+      if (ans.general_budget === 'free_everyday') {
+        if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
+        else if (model.inputPrice <= 0.25) score *= 1.25;
+        else score *= 0.45;
+      }
+    }
+
+    // Discount obsolete legacy models from 2023/early 2024 with outdated benchmark scores
+    if (model.name && /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM)\b/i.test(model.name)) {
+      score *= 0.65;
     }
 
     return score;
@@ -642,7 +727,8 @@
       student: '🎒 Student',
       api: '🔌 API Builder',
       enterprise: '🏢 Enterprise',
-      creator: '✍️ Creator'
+      creator: '✍️ Creator',
+      general: '🌟 Everyday Assistant'
     };
     const trackBadge = trackBadgeMap[ans.persona] || '🎯 AI Pick';
 
@@ -660,6 +746,12 @@
       verdict = `<strong>${primary.name}</strong> delivers high reliability (${primary.speedTps ? primary.speedTps + ' t/s' : 'Fast'}) and competitive pricing (${primary.pricing}) for backend production.`;
     } else if (ans.persona === 'enterprise') {
       verdict = `<strong>${primary.name}</strong> satisfies your regulatory and governance boundaries with sovereign on-prem or ZDR compliance.`;
+    } else if (ans.persona === 'creator') {
+      if (ans.creator_focus === 'marketing_copy') verdict = `<strong>${primary.name}</strong> creates persuasive, conversion-focused copy and punchy hooks.`;
+      else if (ans.creator_focus === 'executive_briefs') verdict = `<strong>${primary.name}</strong> excels at distilling dense business data into crisp executive summaries.`;
+      else verdict = `<strong>${primary.name}</strong> delivers nuanced, human-sounding longform prose free from repetitive AI tropes.`;
+    } else if (ans.persona === 'general') {
+      verdict = `<strong>${primary.name}</strong> is your ideal everyday assistant for clear answers, web research, drafting, and personal productivity.`;
     }
 
     const safePrimary = escapeHtml(primary.name);
@@ -936,24 +1028,39 @@ print(response.choices[0].message.content)</code></pre>
     }
 
     // ─── PATH 7: TOKEN COST CALCULATIONS ───
-    if (q.includes('cost') || q.includes('price') || q.includes('pricing') || q.includes('how much') || q.includes('tokens')) {
+    if (q.includes('cost') || q.includes('price') || q.includes('pricing') || q.includes('how much') || q.includes('tokens') || q.includes('requests')) {
       const target = findModel(q) || sessionMemory.lastRecommendedModel || models[0];
-      const millionMatch = q.match(/(\d+)\s*(million|m\b)/i);
-      const numMillions = millionMatch ? parseInt(millionMatch[1], 10) : 1;
+
+      // Check request volume format: e.g. "50,000 requests per day with 2,000 tokens per request"
+      const reqMatch = q.match(/(\d[\d,]*)\s*(?:requests|reqs|calls)\s*(?:per\s*day|\/day)?(?:\s*with|\s*at)?\s*(\d[\d,]*)\s*tokens/i);
+      let numMillions = 1;
+      let volumeTitle = '1M Tokens';
+
+      if (reqMatch) {
+        const reqCount = parseInt(reqMatch[1].replace(/,/g, ''), 10);
+        const tokensPerReq = parseInt(reqMatch[2].replace(/,/g, ''), 10);
+        const monthlyTokens = reqCount * tokensPerReq * 30;
+        numMillions = +(monthlyTokens / 1000000).toFixed(1);
+        volumeTitle = `${numMillions}M Tokens/month (${reqMatch[1]} reqs/day × ${reqMatch[2]} tokens/req × 30 days)`;
+      } else {
+        const millionMatch = q.match(/(\d+)\s*(million|m\b)/i);
+        numMillions = millionMatch ? parseInt(millionMatch[1], 10) : 1;
+        volumeTitle = `${numMillions} million tokens`;
+      }
 
       const inCost = ((target.inputPrice || 0.15) * numMillions).toFixed(2);
       const outCost = ((target.outputPrice || 0.60) * numMillions).toFixed(2);
       const blendedCost = (((target.inputPrice || 0.15) * 0.75 + (target.outputPrice || 0.60) * 0.25) * numMillions).toFixed(2);
 
       return `
-        💵 <strong>Cost Estimation for ${target.name} (${numMillions}M Tokens):</strong><br><br>
+        💵 <strong>Cost Estimation for ${target.name} (${volumeTitle}):</strong><br><br>
         Standard pricing: <code>$${target.inputPrice || 0} input / $${target.outputPrice || 0} output per 1M tokens</code><br><br>
-        For <strong>${numMillions} million tokens</strong>:<br>
+        For <strong>${volumeTitle}</strong>:<br>
         • All Input tokens: <strong>$${inCost}</strong><br>
         • All Output tokens: <strong>$${outCost}</strong><br>
         • Typical Blended workflow (3:1 input-to-output ratio): <strong>~$${blendedCost}</strong><br><br>
         ${target.license === 'open_weights' ? '💡 <em>This model is open-weights. You can also self-host it for $0 API token costs!</em>' : ''}<br>
-        ${renderBudgetSimulatorWidget(20, numMillions)}
+        ${renderBudgetSimulatorWidget(20, Math.min(50, Math.max(1, Math.round(numMillions))))}
       `;
     }
 

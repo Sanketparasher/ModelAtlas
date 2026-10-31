@@ -57,9 +57,19 @@
 
     /* PROGRESS */
     .progress-wrap { margin-bottom: 2.25rem; }
-    .progress-labels { display: flex; justify-content: space-between; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 4px; }
+    .progress-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 8px; }
+    .progress-labels { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .progress-label { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); transition: color 0.2s; }
     .progress-label.active-step { color: var(--amber-light); }
+    .auto-advance-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; user-select: none;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      padding: 0.2rem 0.6rem; border-radius: 99px; transition: all 0.2s;
+    }
+    .auto-advance-toggle:hover { color: var(--text); border-color: rgba(245,158,11,0.4); }
+    .auto-advance-toggle input { accent-color: var(--amber); cursor: pointer; margin: 0; }
     .progress-bar-bg { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--cyan)); border-radius: 99px; transition: width 0.35s ease; }
 
@@ -252,7 +262,13 @@
 
   <!-- PROGRESS -->
   <div class="progress-wrap" id="progressWrap">
-    <div class="progress-labels" id="progressLabels"></div>
+    <div class="progress-header-row">
+      <div class="progress-labels" id="progressLabels"></div>
+      <label class="auto-advance-toggle" title="Automatically advance to the next step when an option is selected">
+        <input type="checkbox" id="autoAdvanceToggle" checked onchange="toggleAutoAdvance(this.checked)">
+        <span>⚡ Auto-advance</span>
+      </label>
+    </div>
     <div class="progress-bar-bg">
       <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
     </div>
@@ -267,6 +283,7 @@
       <button type="button" class="preset-btn" onclick="applyQuickPreset('enterprise')">🏢 Enterprise</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('student')">🎒 Student</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('creator')">✍️ Creator</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('general')">🌟 Everyday</button>
     </div>
 
     <div class="step-num-pill">Step 1 of 5 · Core Track Selection</div>
@@ -330,6 +347,18 @@
             <span class="option-pill">Creator Track</span>
           </div>
           <div class="option-desc">Long-form editorial prose, marketing copy, executive briefs, natural human voice avoiding AI clichés</div>
+        </div>
+        <div class="option-check"></div>
+      </div>
+
+      <div class="option" data-step="1" data-val="general">
+        <div class="option-icon">🌟</div>
+        <div class="option-text">
+          <div class="option-label-row">
+            <span class="option-label">Everyday Assistant & Life Productivity</span>
+            <span class="option-pill">General Track</span>
+          </div>
+          <div class="option-desc">Email drafting, personal planning, web research, meeting notes, brainstorming, and day-to-day smart companion</div>
         </div>
         <div class="option-check"></div>
       </div>
@@ -750,9 +779,9 @@
             {
               val: 'specialized_research',
               icon: '🩺',
-              label: 'Medical, Engineering & Specialized Course Research',
-              desc: 'High-precision technical coursework in Medicine (anatomy, pharmacology, clinical cases), Engineering (mechanics, circuits, formulas), and Sciences with zero hallucination.',
-              pill: 'Med & Eng Research'
+              label: 'Pre-Med, Medical, Law & Engineering Coursework',
+              desc: 'Zero-hallucination precision for coursework in Medicine (clinical cases, pharmacology), Engineering formulas, Law, and Sciences.',
+              pill: 'Pre-Med & Eng Research'
             },
             {
               val: 'exam_prep',
@@ -813,8 +842,8 @@
             {
               val: 'pedagogical_deep',
               icon: '🧑‍🏫',
-              label: 'Pedagogical Socratic Depth (Show every step & explain why)',
-              desc: 'Breaks down complex concepts into first principles so you actually learn the material for your exams.',
+              label: 'Socratic Step-by-Step Guidance (Explain the "Why")',
+              desc: 'Breaks down complex problems into first principles so you understand the logic before arriving at the answer.',
               pill: 'Step-by-Step'
             },
             {
@@ -920,8 +949,8 @@
             {
               val: 'free_accessible',
               icon: '🆓',
-              label: 'Free or Low-Cost Tiers',
-              desc: 'Accessible tools with minimal to zero monthly overhead.',
+              label: 'Free or Micro-Budget Tiers (< $1/mo)',
+              desc: 'Accessible tools with zero to minimal token costs for independent creators.',
               pill: 'Budget-Friendly'
             },
             {
@@ -930,6 +959,85 @@
               label: 'Premier Quality ($20/month subscription or API)',
               desc: 'Willing to invest in the single best writing and reasoning partner on the market.',
               pill: 'Frontier Quality'
+            }
+          ]
+        }
+      ]
+    },
+
+    general: {
+      id: 'general',
+      title: 'Everyday Assistant & Life Productivity Track',
+      badge: '🌟 Everyday Assistant Track',
+      stepLabels: ['Track', 'Primary Use', 'Response Style', 'Budget Preference'],
+      questions: [
+        {
+          id: 'general_use',
+          title: 'What is your primary everyday task?',
+          hint: 'Guides whether the model prioritizes deep reasoning, quick conversational flow, or large document synthesis.',
+          options: [
+            {
+              val: 'all_rounder',
+              icon: '🧠',
+              label: 'Smart All-Rounder (Q&A, Advice, Drafting)',
+              desc: 'High conversational intelligence across everyday questions, email writing, and life advice.',
+              pill: 'Frontier Smart'
+            },
+            {
+              val: 'research_web',
+              icon: '🔍',
+              label: 'Deep Web Research & Long Summaries',
+              desc: 'Digesting news, long articles, PDFs, and synthesizing complex topics clearly.',
+              pill: 'Large Context'
+            },
+            {
+              val: 'quick_chores',
+              icon: '⚡',
+              label: 'Quick Chores & Brainstorming',
+              desc: 'Rapid idea generation, bullet lists, translations, and fast drafting on the go.',
+              pill: 'Ultra Fast'
+            }
+          ]
+        },
+        {
+          id: 'response_speed',
+          title: 'Preferred response speed & depth',
+          hint: 'Choose between instantaneous conversational replies or deliberate multi-step reasoning.',
+          options: [
+            {
+              val: 'fast_chat',
+              icon: '⚡',
+              label: 'Fast Conversational Streaming (< 2s)',
+              desc: 'Snappy interactive dialogue with zero noticeable lag.',
+              pill: 'Snappy'
+            },
+            {
+              val: 'deep_thought',
+              icon: '🤔',
+              label: 'Deliberate Extended Thinking (10s – 30s)',
+              desc: 'Thoroughly evaluates complex questions and cross-checks logic before replying.',
+              pill: 'Deliberate'
+            }
+          ]
+        },
+        {
+          id: 'general_budget',
+          title: 'Budget Preference',
+          hint: 'From generous 100% free web tiers to premium frontier capabilities.',
+          options: [
+            {
+              val: 'free_everyday',
+              icon: '🆓',
+              label: '100% Free / No Subscription ($0)',
+              desc: 'Must be accessible via free web tiers (Google AI Studio, DeepSeek Web) or open-weights.',
+              pill: 'Free ($0)'
+            },
+            {
+              val: 'premium_everyday',
+              icon: '👑',
+              label: 'Premium Frontier ($20/mo or pay-per-token)',
+              desc: 'Willing to use the best models available for top-tier writing and reasoning.',
+              pill: 'Frontier'
             }
           ]
         }
@@ -1023,23 +1131,30 @@
         const nextBtn = document.getElementById('dynNextBtn_' + stepNum);
         if (nextBtn) nextBtn.disabled = false;
 
-        // Auto-advance to next question or results with brief visual confirmation
-        const isFinalStep = stepNum === branch.questions.length + 1;
-        isAutoAdvancing = true;
-        setTimeout(() => {
-          isAutoAdvancing = false;
-          if (isFinalStep) {
-            computeDynamicResults();
-          } else {
-            goDynamicStep(stepNum + 1);
-          }
-        }, 220);
+        // Auto-advance if enabled, with smooth 350ms delay for visual feedback
+        if (autoAdvanceEnabled) {
+          const isFinalStep = stepNum === branch.questions.length + 1;
+          isAutoAdvancing = true;
+          setTimeout(() => {
+            isAutoAdvancing = false;
+            if (isFinalStep) {
+              computeDynamicResults();
+            } else {
+              goDynamicStep(stepNum + 1);
+            }
+          }, 350);
+        }
       });
     });
   }
 
   // ─── STEP NAVIGATION ─────────────────────────────────────────────────────
   let isAutoAdvancing = false;
+  let autoAdvanceEnabled = true;
+
+  function toggleAutoAdvance(enabled) {
+    autoAdvanceEnabled = !!enabled;
+  }
 
   function goDynamicStep(targetIndex) {
     isAutoAdvancing = false; // Reset lock when user clicks Back or navigates
@@ -1078,11 +1193,13 @@
       updateProgressBar();
 
       // Auto-advance directly into the chosen track's questions
-      isAutoAdvancing = true;
-      setTimeout(() => {
-        isAutoAdvancing = false;
-        confirmPersonaAndProceed();
-      }, 220);
+      if (autoAdvanceEnabled) {
+        isAutoAdvancing = true;
+        setTimeout(() => {
+          isAutoAdvancing = false;
+          confirmPersonaAndProceed();
+        }, 350);
+      }
     });
   });
 
@@ -1121,6 +1238,12 @@
       voice_nuance: 'avoid_cliches',
       deliberation_depth: 'deep_polish',
       creator_budget: 'premium_pro'
+    },
+    general: {
+      persona: 'general',
+      general_use: 'all_rounder',
+      response_speed: 'fast_chat',
+      general_budget: 'free_everyday'
     }
   };
 
@@ -1174,6 +1297,10 @@
       } else if (ans.coding_scope === 'repo_refactor' || ans.coding_scope === 'agentic_loop') {
         weights.quality += 0.25;
         weights.context += 0.15;
+      } else if (ans.coding_scope === 'scripts_tests') {
+        weights.quality += 0.15;
+        weights.speed += 0.10;
+        weights.cost += 0.10;
       }
 
       if (ans.reasoning_mode === 'extended_thinking') {
@@ -1197,6 +1324,9 @@
         else if (model.benchmarks && model.benchmarks.sweBench >= 38) score *= 1.25;
         if (model.benchmarks && model.benchmarks.arenaCoding >= 1350) score *= 1.25;
         else if (model.benchmarks && model.benchmarks.arenaCoding >= 1300) score *= 1.15;
+      } else if (ans.coding_scope === 'scripts_tests') {
+        if (model.benchmarks && model.benchmarks.arenaCoding >= 1280) score *= 1.20;
+        if (model.tags && model.tags.includes('coding')) score *= 1.15;
       }
       if (ans.coding_scope === 'inline_fim') {
         if ((model.speedTps || 0) >= 100) score *= 1.25;
@@ -1249,6 +1379,9 @@
           score *= 1.35;
         }
         if (model.benchmarks && model.benchmarks.sweBench >= 45) score *= 1.20;
+      } else if (ans.api_interface === 'chat_stream') {
+        if ((model.speedTps || 0) >= 80) score *= 1.25;
+        if (model.scores && model.scores.reliability >= 85) score *= 1.15;
       }
 
       if (ans.latency_sla === 'ultra_fast') {
@@ -1301,10 +1434,19 @@
         if (model.name.match(/\b(70B|72B|405B|R1|8x22B)\b/i) || model.id === 'deepseek-r1') score *= 1.25;
       } else if (ans.enterprise_workload === 'customer_ops') {
         if ((model.speedTps || 0) >= 80 && model.inputPrice <= 0.5) score *= 1.30;
+      } else if (ans.enterprise_workload === 'internal_rag') {
+        if ((model.contextTokens || 0) >= 128000) score *= 1.25;
+        if (model.scores && model.scores.context >= 85) score *= 1.20;
       }
 
       if (ans.enterprise_context === 'archive_2m') {
         if ((model.contextTokens || 0) >= 1000000) score *= 1.40;
+      }
+
+      if (ans.contracting_tier === 'reserved_ptu') {
+        if (model.provider === 'Microsoft' || model.provider === 'OpenAI' || model.provider === 'Amazon' || model.provider === 'Google') score *= 1.20;
+      } else if (ans.contracting_tier === 'flexible_usage') {
+        if (model.inputPrice <= 1.0) score *= 1.15;
       }
     }
 
@@ -1333,6 +1475,9 @@
       } else if (ans.academic_workload === 'cs_coding_help') {
         weights.quality += 0.20;
         weights.cost += 0.10;
+      } else if (ans.academic_workload === 'humanities_essay') {
+        weights.quality += 0.25;
+        weights.context += 0.15;
       }
 
       score = computeWeightedSum(model, weights);
@@ -1355,6 +1500,9 @@
       } else if (ans.academic_workload === 'cs_coding_help') {
         if (model.benchmarks && model.benchmarks.arenaCoding >= 1300) score *= 1.30;
         if (model.tags && model.tags.includes('coding')) score *= 1.20;
+      } else if (ans.academic_workload === 'humanities_essay') {
+        if (model.provider === 'Anthropic') score *= 1.30;
+        if (model.benchmarks && model.benchmarks.arenaElo >= 1320) score *= 1.20;
       }
 
       if (ans.explanation_style === 'pedagogical_deep' && model.tags && model.tags.includes('reasoning')) {
@@ -1382,13 +1530,54 @@
       }
       if (ans.creator_focus === 'marketing_copy') {
         if (model.provider === 'OpenAI' || model.provider === 'Anthropic') score *= 1.20;
+      } else if (ans.creator_focus === 'executive_briefs') {
+        if (model.scores && model.scores.quality >= 90) score *= 1.25;
+        if ((model.contextTokens || 0) >= 128000) score *= 1.20;
+      } else if (ans.creator_focus === 'multimodal_art') {
+        if (model.tags && (model.tags.includes('multimodal') || model.tags.includes('vision'))) score *= 1.35;
+        if (model.provider === 'Anthropic' || model.provider === 'Google' || model.provider === 'OpenAI') score *= 1.20;
       }
+
       if (ans.deliberation_depth === 'fast_brainstorm' && (model.speedTps || 0) >= 80) {
         score *= 1.20;
       }
-      if (ans.creator_budget === 'free_accessible' && (model.inputPrice === 0 || model.inputPrice <= 0.20)) {
-        score *= 1.30;
+      if (ans.creator_budget === 'free_accessible') {
+        if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.40;
+        else if (model.inputPrice <= 0.25) score *= 1.30;
+        else if (model.inputPrice > 1.0) score *= 0.40; // Penalize costly frontier models for broke creators
       }
+    }
+
+    // ────────────────────────────
+    // 6. EVERYDAY ASSISTANT & GENERAL PRODUCTIVITY TRACK
+    // ────────────────────────────
+    else if (p === 'general') {
+      weights = { quality: 0.30, cost: 0.25, speed: 0.20, context: 0.15, privacy: 0.05, reliability: 0.05 };
+      if (ans.general_use === 'research_web') {
+        weights.context += 0.25;
+        weights.quality += 0.15;
+      } else if (ans.general_use === 'quick_chores') {
+        weights.speed += 0.25;
+        weights.cost += 0.15;
+      }
+      score = computeWeightedSum(model, weights);
+
+      if (ans.general_use === 'research_web' && (model.contextTokens || 0) >= 500000) score *= 1.35;
+      if (ans.general_use === 'quick_chores' && (model.speedTps || 0) >= 90) score *= 1.25;
+      if (ans.general_use === 'all_rounder' && (model.id.includes('flash') || model.id === 'deepseek-v3' || model.name.includes('GPT-4o mini') || model.name.includes('Qwen 2.5 32B'))) score *= 1.25;
+      if (ans.response_speed === 'deep_thought' && model.tags && model.tags.includes('reasoning')) score *= 1.25;
+      if (ans.response_speed === 'fast_chat' && (model.speedTps || 0) >= 80) score *= 1.20;
+
+      if (ans.general_budget === 'free_everyday') {
+        if (model.inputPrice === 0 || model.license === 'open_weights') score *= 1.35;
+        else if (model.inputPrice <= 0.25) score *= 1.25;
+        else score *= 0.45;
+      }
+    }
+
+    // Discount obsolete legacy models from 2023/early 2024 with outdated benchmark scores
+    if (model.name && /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM)\b/i.test(model.name)) {
+      score *= 0.65;
     }
 
     return score;
@@ -1458,6 +1647,15 @@
       verdictLines.push(`<strong>✅ ${primary.name} is your premier creative writing partner</strong>.`);
       if (ans.voice_nuance === 'avoid_cliches') verdictLines.push(`Renowned for authentic human cadence, rich sentence structure, and freedom from repetitive AI buzzwords.`);
       if (ans.creator_focus === 'longform_prose') verdictLines.push(`Maintains narrative coherence and stylistic voice across long-form chapters and editorial newsletters.`);
+      if (ans.creator_focus === 'marketing_copy') verdictLines.push(`Generates high-converting marketing hooks, punchy email campaigns, and engaging social copy.`);
+      if (ans.creator_focus === 'executive_briefs') verdictLines.push(`Distills complex reports and industry transcripts into crisp, executive-ready memos.`);
+      if (ans.creator_focus === 'multimodal_art') verdictLines.push(`Offers multimodal vision understanding to critique designs and craft nuanced generative art prompts.`);
+    } else if (ans.persona === 'general') {
+      verdictLines.push(`<strong>✅ ${primary.name} is your ideal everyday AI assistant</strong>.`);
+      if (ans.general_use === 'all_rounder') verdictLines.push(`It offers balanced high intelligence, clear communication, and adaptable reasoning for daily tasks.`);
+      if (ans.general_use === 'research_web') verdictLines.push(`Its large context window allows you to synthesize lengthy articles, PDFs, and reports seamlessly.`);
+      if (ans.general_use === 'quick_chores') verdictLines.push(`Its rapid response speed ensures snappy answers for fast drafting, translations, and bullet lists.`);
+      if (ans.general_budget === 'free_everyday') verdictLines.push(`Freely accessible via zero-dollar web tiers without requiring a monthly subscription.`);
     }
 
     let warning = '';
@@ -1510,6 +1708,13 @@
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How to deploy ${escapeAttr(primary.name)} on AWS Bedrock or Private VPC')">☁️ Private VPC</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ${escapeAttr(runner.name)} for enterprise security')">⚖️ Enterprise Audit</button>
         <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Hardware requirements to air-gap ${escapeAttr(primary.name)} on-premise')">🏛️ Air-Gapped Setup</button>
+      `;
+    } else if (ans.persona === 'general') {
+      advisorPillsHtml = `
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How can I use ${escapeAttr(primary.name)} for daily productivity for free?')">🌟 Daily Productivity</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('Compare ${escapeAttr(primary.name)} vs ChatGPT Plus')">⚖️ vs ChatGPT Plus</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('What are the best prompts for ${escapeAttr(primary.name)} for drafting emails and notes?')">📝 Email & Notes</button>
+        <button type="button" class="finder-chat-pill" onclick="window.ModelAtlasChat && window.ModelAtlasChat.open('How does ${escapeAttr(primary.name)} compare to ${escapeAttr(runner.name)}?')">⚖️ vs ${escapeAttr(runner.name)}</button>
       `;
     } else {
       advisorPillsHtml = `

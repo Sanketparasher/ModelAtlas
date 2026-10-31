@@ -77,6 +77,30 @@ const scenarios = [
     title: 'Long-Form Book Author (Longform Prose, Anti-AI Clichés, Deep Polish, Premium Pro)',
     expectedBest: 'Claude 3.7 Sonnet / Claude 3.5 Sonnet (Prose Gold Standard)',
     ans: { persona: 'creator', creator_focus: 'longform_prose', voice_nuance: 'avoid_cliches', deliberation_depth: 'deep_polish', creator_budget: 'premium_pro' }
+  },
+  {
+    id: 11,
+    title: 'Everyday Assistant (All-Rounder, Fast Chat, 100% Free Tier)',
+    expectedBest: 'Gemini 2.5 Flash / Gemini 2.0 Flash / DeepSeek V3',
+    ans: { persona: 'general', general_use: 'all_rounder', response_speed: 'fast_chat', general_budget: 'free_everyday' }
+  },
+  {
+    id: 12,
+    title: 'Broke Solopreneur / Free Marketer (Marketing Copy, Free Accessible Budget)',
+    expectedBest: 'GPT-4o mini / Gemini 2.5 Flash / Claude Haiku (NOT expensive $15 Claude 3.7)',
+    ans: { persona: 'creator', creator_focus: 'marketing_copy', voice_nuance: 'avoid_cliches', deliberation_depth: 'fast_brainstorm', creator_budget: 'free_accessible' }
+  },
+  {
+    id: 13,
+    title: 'Pre-Med Research Student (Specialized Coursework, Zero-Dollar Free, Deep)',
+    expectedBest: 'DeepSeek R1 / Llama 3.1 405B (NOT obsolete OpenChat-3.5)',
+    ans: { persona: 'student', academic_workload: 'specialized_research', student_budget: 'strictly_free', explanation_style: 'pedagogical_deep' }
+  },
+  {
+    id: 14,
+    title: 'Enterprise Internal Knowledge Base (Internal Wiki RAG, Flexible, Standard Docs)',
+    expectedBest: 'Claude 3.7 / Gemini 2.5 Pro / GPT-4o',
+    ans: { persona: 'enterprise', enterprise_compliance: 'zdr_commercial', enterprise_workload: 'internal_rag', enterprise_context: 'standard_docs', contracting_tier: 'flexible_usage' }
   }
 ];
 

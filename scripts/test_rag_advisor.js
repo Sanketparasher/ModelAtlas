@@ -88,6 +88,30 @@ const testCases = [
     query: 'How much does 10 million tokens cost on Gemini 2.5 Flash?',
     expectCard: false,
     expectTerms: ['10 million tokens', 'Gemini 2.5 Flash', '$']
+  },
+  {
+    category: 'Request Volume Calculation',
+    query: 'If I send 50,000 requests per day with 2,000 tokens per request, how much will it cost on Gemini 2.5 Flash?',
+    expectCard: false,
+    expectTerms: ['Gemini 2.5 Flash', 'Tokens/month', '$']
+  },
+  {
+    category: 'Everyday Assistant Intent',
+    query: 'What is the best alternative to ChatGPT plus that does not cost 20 dollars?',
+    expectCard: true,
+    expectTerms: ['Recommendation', 'Fit']
+  },
+  {
+    category: 'Enterprise On-Premise Spaced Intent',
+    query: 'We want an on premise model to keep our patient data private',
+    expectCard: true,
+    expectTerms: ['Enterprise', 'Open Weights']
+  },
+  {
+    category: 'Free Creator Intent',
+    query: 'I am a broke solo founder needing a free model for marketing copy',
+    expectCard: true,
+    expectTerms: ['Creator', 'Fit']
   }
 ];
 
