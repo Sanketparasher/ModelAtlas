@@ -49,17 +49,22 @@ FEATURES.forEach(f => {
 const models = require('../models.js');
 
 function isObsoleteLegacy(m) {
-  return m.name && /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|Qwen2-|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM|Zephyr|GPT-[34].*-(0314|0613|0301)|Claude-[12]|Claude-Instant)\b/i.test(m.name);
+  const text = ((m.name || '') + ' ' + (m.id || '')).trim();
+  return /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|Qwen2(?![-.]?5)|Qwen-[0-9]+[bB]|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM|Zephyr|Tulu|OpenAssistant|Mistral-Medium|Mixtral-8x7B|Mistral-7B|GPT-[34].*-(0314|0613|0301)|Claude-[12]|Claude-Instant)\b/i.test(text);
 }
 
 function getEffectiveElo(m) {
-  let elo = m.benchmarks?.arenaElo || 1200;
+  const raw = m.benchmarks?.arenaElo;
+  if (raw == null) return 0;
+  let elo = raw;
   if (isObsoleteLegacy(m)) elo -= 250;
   return elo;
 }
 
 function getEffectiveCoding(m) {
-  let coding = m.benchmarks?.arenaCoding || 1200;
+  const raw = m.benchmarks?.arenaCoding;
+  if (raw == null) return 0;
+  let coding = raw;
   if (isObsoleteLegacy(m)) coding -= 250;
   return coding;
 }
@@ -85,7 +90,7 @@ const CATEGORIES = {
   },
   tool_use: {
     title: 'Best models for tool use',
-    filter: (m) => !isObsoleteLegacy(m),
+    filter: (m) => !isObsoleteLegacy(m) && m.benchmarks?.arenaElo != null,
     sort: (a, b) => {
       const provScore = m => ['Anthropic', 'OpenAI', 'Google'].includes(m.provider) ? 40 : (m.license === 'open_weights' ? 15 : 0);
       const scoreA = (a.scores?.reliability || 80) * 5 + (a.scores?.quality || 80) * 5 + provScore(a) + (a.benchmarks?.sweBench || 0) * 10 + getEffectiveElo(a);
@@ -136,6 +141,19 @@ for (const [key, def] of Object.entries(CATEGORIES)) {
   const top3 = filtered.slice(0, 3).map(m => m.name);
   console.log(`[${def.title}] (${filtered.length} models) -> Top 3: ${top3.join(' | ')}`);
   if (filtered.length < 3) allPassed = false;
+}
+
+console.log('\n=== VERIFYING FULL CATALOG SORT (P1-A) ===');
+const fullCatalogSorted = [...models].sort((a, b) => getEffectiveElo(b) - getEffectiveElo(a));
+const top5Catalog = fullCatalogSorted.slice(0, 5).map(m => m.name);
+console.log('Full catalog top 5:', top5Catalog.join(' | '));
+const hasClaude37InTop5 = top5Catalog.some(n => n.includes('Claude 3.7'));
+const hasO3MiniInTop5 = top5Catalog.some(n => n.includes('o3-mini'));
+if (hasClaude37InTop5 && hasO3MiniInTop5) {
+  console.log('✅ P1-A Verified: Claude 3.7 Sonnet & o3-mini are in full catalog top 5!');
+} else {
+  console.error('❌ P1-A Failed: Frontier champions not in full catalog top 5!');
+  allPassed = false;
 }
 
 if (allPassed) {

@@ -656,6 +656,10 @@
             <option value="all">All</option>
           </select>
         </div>
+        <label class="archived-toggle-label" style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text-muted);cursor:pointer;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border)">
+          <input type="checkbox" id="showArchivedToggle" style="accent-color:var(--amber);cursor:pointer;" />
+          <span>Show Archived / No Elo</span>
+        </label>
         <button class="btn-tool btn-tool-amber" id="openImportBtn">📥 Import</button>
         <button class="btn-tool" id="exportCsvBtn">📤 Export CSV</button>
         <button class="btn-tool" id="exportJsonBtn">📤 Export JSON</button>
@@ -668,6 +672,7 @@
       <div class="legend">
         <div class="legend-item"><div class="score-chip chip-green" style="padding:1px 6px">1300+</div> Elite Tier</div>
         <div class="legend-item"><div class="score-chip chip-amber" style="padding:1px 6px">1200+</div> High Capability</div>
+        <div class="legend-item"><span class="license-badge" style="background:rgba(100,100,100,0.18);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);padding:1px 6px">Archived</span> Historical / No Elo</div>
         <div class="legend-item"><div class="score-chip chip-muted" style="padding:1px 6px">&lt;1200</div> Standard</div>
       </div>
     </div>
@@ -759,17 +764,22 @@
 
   // Helper functions
   function isObsoleteLegacy(m) {
-    return m.name && /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|Qwen2-|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM|Zephyr|GPT-[34].*-(0314|0613|0301)|Claude-[12]|Claude-Instant)\b/i.test(m.name);
+    const text = ((m.name || '') + ' ' + (m.id || '')).trim();
+    return /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|Qwen2(?![-.]?5)|Qwen-[0-9]+[bB]|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM|Zephyr|Tulu|OpenAssistant|Mistral-Medium|Mixtral-8x7B|Mistral-7B|GPT-[34].*-(0314|0613|0301)|Claude-[12]|Claude-Instant)\b/i.test(text);
   }
 
   function getEffectiveElo(m) {
-    let elo = m.benchmarks?.arenaElo || 1200;
+    const raw = m.benchmarks?.arenaElo;
+    if (raw == null) return 0;
+    let elo = raw;
     if (isObsoleteLegacy(m)) elo -= 250;
     return elo;
   }
 
   function getEffectiveCoding(m) {
-    let coding = m.benchmarks?.arenaCoding || 1200;
+    const raw = m.benchmarks?.arenaCoding;
+    if (raw == null) return 0;
+    let coding = raw;
     if (isObsoleteLegacy(m)) coding -= 250;
     return coding;
   }
@@ -854,7 +864,7 @@
       badge: 'Autonomous Function Calling & Agentic JSON Schemas',
       desc: 'Calibrated for Berkeley Function Calling Leaderboard (BFCL) reliability: strict JSON adherence, multi-step tool chaining, and parallel tool execution.',
       primaryMetric: 'BFCL Tool Reliability & JSON',
-      filter: (m) => !isObsoleteLegacy(m),
+      filter: (m) => !isObsoleteLegacy(m) && (showArchived || (m.benchmarks?.arenaElo != null)),
       sort: (a, b) => {
         const provScore = m => ['Anthropic', 'OpenAI', 'Google'].includes(m.provider) ? 40 : (m.license === 'open_weights' ? 15 : 0);
         const scoreA = (a.scores?.reliability || 80) * 5 + (a.scores?.quality || 80) * 5 + provScore(a) + (a.benchmarks?.sweBench || 0) * 10 + getEffectiveElo(a);
@@ -949,8 +959,8 @@
       badge: 'Complete Empirical Benchmark Database',
       desc: 'Explore the complete unified benchmark database across all evaluated LLMs with customizable sorting, filtering, and export.',
       primaryMetric: 'Arena Elo & Benchmarks',
-      filter: (m) => true,
-      sort: (a, b) => (b.benchmarks?.arenaElo || 0) - (a.benchmarks?.arenaElo || 0),
+      filter: (m) => showArchived ? true : (m.benchmarks?.arenaElo != null && !isObsoleteLegacy(m)),
+      sort: (a, b) => getEffectiveElo(b) - getEffectiveElo(a),
       getHighlight: (m) => m.bestForLabel || 'AI Model'
     }
   };
@@ -964,6 +974,7 @@
   let searchQuery = '';
   let currentPage = 1;
   let pageSize = 25;
+  let showArchived = false;
 
   // Initialize URL params
   function parseUrlParams() {
@@ -1364,9 +1375,16 @@
       const rankEmoji = overallRank === 1 ? '🥇' : overallRank === 2 ? '🥈' : overallRank === 3 ? '🥉' : `#${overallRank}`;
       const eloColor = getEloColor(m.benchmarks?.arenaElo);
 
+      const isArchived = !m.benchmarks?.arenaElo;
+      const isLegacy = isObsoleteLegacy(m);
+
       const licenseTag = m.license === 'open_weights'
         ? `<span class="license-badge badge-open">Open</span>`
         : `<span class="license-badge badge-prop">API</span>`;
+
+      const archivedBadge = isArchived
+        ? `<span class="license-badge" style="background:rgba(100,100,100,0.18);color:#94a3b8;border:1px solid rgba(148,163,184,0.3)">Archived</span>`
+        : (isLegacy ? `<span class="license-badge" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)">Legacy 2023</span>` : '');
 
       const ollamaTag = getOllamaTag(m);
 
@@ -1380,6 +1398,7 @@
             <div class="model-name-row">
               <span class="model-cell-name">${m.name}</span>
               ${licenseTag}
+              ${archivedBadge}
             </div>
             <div class="model-cell-provider" style="color:${m.providerColor || '#7a8a9a'}">${m.provider} · <span style="color:var(--text-dim)">${m.bestForLabel || 'AI Model'}</span></div>
           </div>
@@ -1397,7 +1416,7 @@
         `;
       } else if (currentCategory === 'reasoning') {
         rowHtml += `
-          <td><strong style="color:var(--amber-light)">${m.benchmarks?.math ? m.benchmarks.math + '%' : (m.id.includes('r1') ? '97.3%' : '—')}</strong></td>
+          <td><strong style="color:var(--amber-light)">${m.benchmarks?.math ? m.benchmarks.math + '%' : '—'}</strong></td>
           <td>${m.benchmarks?.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
           <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
           <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
@@ -1649,6 +1668,18 @@
     if (window.ModelAtlasChat) {
       window.ModelAtlasChat.open(`Tell me about ${modelName}: benchmarks, architecture, and deployment options`);
     }
+  }
+
+  // Show Archived toggle
+  const showArchivedEl = document.getElementById('showArchivedToggle');
+  if (showArchivedEl) {
+    showArchivedEl.checked = showArchived;
+    showArchivedEl.addEventListener('change', (e) => {
+      showArchived = e.target.checked;
+      currentPage = 1;
+      renderCategoryHero();
+      renderTable();
+    });
   }
 
   // Lab select

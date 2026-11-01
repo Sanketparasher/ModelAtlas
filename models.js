@@ -689,7 +689,9 @@
       "arenaCoding": 1380,
       "mmluPro": 84.8,
       "sweBench": 70.3
-    },
+    ,
+      "math": 96.4,
+      "gpqa": 84.8},
     "scores": {
       "quality": 98,
       "cost": 72,
@@ -730,7 +732,9 @@
       "arenaCoding": 1385,
       "mmluPro": 83.2,
       "sweBench": 61.2
-    },
+    ,
+      "math": 97.9,
+      "gpqa": 79.7},
     "scores": {
       "quality": 96,
       "cost": 86,
@@ -771,7 +775,8 @@
       "mmluPro": 84,
       "sweBench": 49.2,
       "math": 97.3
-    },
+    ,
+      "gpqa": 71.5},
     "scores": {
       "quality": 97,
       "cost": 96,
@@ -850,7 +855,8 @@
       "mmluPro": 83.3,
       "sweBench": 48.9,
       "math": 96.4
-    },
+    ,
+      "gpqa": 77.3},
     "scores": {
       "quality": 97,
       "cost": 50,
@@ -888,7 +894,9 @@
       "arenaCoding": 1345,
       "mmluPro": 82.5,
       "sweBench": 52.4
-    },
+    ,
+      "math": 97,
+      "gpqa": 86.4},
     "scores": {
       "quality": 95,
       "cost": 72,
@@ -1040,7 +1048,9 @@
       "arenaCoding": 1360,
       "mmluPro": 79.2,
       "sweBench": 52.8
-    },
+    ,
+      "math": 78.3,
+      "gpqa": 65},
     "scores": {
       "quality": 94,
       "cost": 74,
@@ -1303,7 +1313,8 @@
       "arenaCoding": 1310,
       "mmluPro": 75.8,
       "sweBench": 43.5
-    },
+    ,
+      "math": 73.8},
     "scores": {
       "quality": 93,
       "cost": 78,
@@ -1379,7 +1390,8 @@
       "arenaCoding": 1325,
       "mmluPro": 75.9,
       "sweBench": 46.8
-    },
+    ,
+      "math": 90.2},
     "scores": {
       "quality": 93,
       "cost": 98,
@@ -1646,7 +1658,8 @@
       "arenaCoding": 1300,
       "mmluPro": 76.5,
       "sweBench": 41.5
-    },
+    ,
+      "math": 89.2},
     "scores": {
       "quality": 90,
       "cost": 96,
@@ -1913,7 +1926,8 @@
       "arenaCoding": 1285,
       "mmluPro": 71,
       "sweBench": 39.8
-    },
+    ,
+      "math": 77},
     "scores": {
       "quality": 90,
       "cost": 96,
@@ -1990,7 +2004,8 @@
       "arenaCoding": 1280,
       "mmluPro": 74,
       "sweBench": 38.5
-    },
+    ,
+      "math": 76},
     "scores": {
       "quality": 89,
       "cost": 97,
@@ -2067,7 +2082,8 @@
       "arenaCoding": 1300,
       "mmluPro": 73,
       "sweBench": 38
-    },
+    ,
+      "math": 74.2},
     "scores": {
       "quality": 90,
       "cost": 78,
@@ -2143,7 +2159,8 @@
       "arenaCoding": 1280,
       "mmluPro": 72.8,
       "sweBench": 38.2
-    },
+    ,
+      "math": 76.6},
     "scores": {
       "quality": 89,
       "cost": 76,
@@ -2333,7 +2350,8 @@
       "arenaCoding": 1250,
       "mmluPro": 65.4,
       "sweBench": 28.5
-    },
+    ,
+      "math": 70.2},
     "scores": {
       "quality": 85,
       "cost": 96,
@@ -2371,7 +2389,8 @@
       "arenaCoding": 1255,
       "mmluPro": 68.4,
       "sweBench": 36
-    },
+    ,
+      "math": 68},
     "scores": {
       "quality": 88,
       "cost": 96,
@@ -2559,7 +2578,8 @@
       "arenaCoding": 1265,
       "mmluPro": 64.8,
       "sweBench": 40.6
-    },
+    ,
+      "math": 69.4},
     "scores": {
       "quality": 86,
       "cost": 88,
@@ -3383,7 +3403,8 @@
       "arenaCoding": 1205,
       "mmluPro": 61.2,
       "sweBench": 22
-    },
+    ,
+      "math": 58.8},
     "scores": {
       "quality": 84,
       "cost": 98,
@@ -3722,7 +3743,8 @@
       "arenaCoding": 1170,
       "mmluPro": 50.2,
       "sweBench": 18.5
-    },
+    ,
+      "math": 47.6},
     "scores": {
       "quality": 78,
       "cost": 99,
@@ -3797,7 +3819,8 @@
       "arenaCoding": 1160,
       "mmluPro": 53,
       "sweBench": 16.5
-    },
+    ,
+      "math": 44.3},
     "scores": {
       "quality": 79,
       "cost": 99,
@@ -5269,7 +5292,7 @@
   },
   {
     "id": "claude-3-sonnet-20240229",
-    "name": "Sonnet",
+    "name": "Claude 3 Sonnet",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -5417,7 +5440,7 @@
   },
   {
     "id": "claude-3-haiku-20240307",
-    "name": "Haiku",
+    "name": "Claude 3 Haiku",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -6009,7 +6032,7 @@
   },
   {
     "id": "snowflake-arctic-instruct",
-    "name": "Instruct",
+    "name": "Snowflake Arctic Instruct",
     "provider": "Snowflake",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -6128,7 +6151,8 @@
       "arenaElo": null,
       "arenaCoding": null,
       "mmluPro": 88.7
-    },
+    ,
+      "math": 74.6},
     "scores": {
       "quality": null,
       "cost": 75,
@@ -10967,7 +10991,7 @@
   },
   {
     "id": "early-grok-3",
-    "name": "Grok-3)",
+    "name": "Grok 3 (Early Preview)",
     "provider": "xAI",
     "providerColor": "#1da1f2",
     "license": "proprietary",
@@ -11041,7 +11065,7 @@
   },
   {
     "id": "claude-3-7-sonnet-20250219",
-    "name": "Sonnet",
+    "name": "Claude 3.7 Sonnet (Feb 2025)",
     "provider": "Anthropic",
     "providerColor": "#d4a574",
     "license": "proprietary",
@@ -13002,7 +13026,7 @@
   },
   {
     "id": "flux-1-1-pro",
-    "name": "[pro]",
+    "name": "FLUX 1.1 Pro",
     "provider": "Labs",
     "providerColor": "#64748b",
     "license": "proprietary",
@@ -13150,7 +13174,7 @@
   },
   {
     "id": "stable-diffusion-v35-large",
-    "name": "Large",
+    "name": "Stable Diffusion 3.5 Large",
     "provider": "AI",
     "providerColor": "#64748b",
     "license": "open_weights",
