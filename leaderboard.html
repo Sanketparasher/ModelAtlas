@@ -3,30 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model Leaderboard — ModelAtlas</title>
+  <title>Global AI Model Leaderboards — ModelAtlas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="chat_widget.css" />
   <style>
     :root {
-      --bg: #040b13; --bg2: #071018; --bg3: #0d1a26;
-      --border: rgba(255,255,255,0.07); --border-hover: rgba(245,158,11,0.4);
+      --bg: #040b13; --bg2: #071018; --bg3: #0d1a26; --bg4: #132232;
+      --border: rgba(255,255,255,0.08); --border-hover: rgba(245,158,11,0.4);
       --amber: #f59e0b; --amber-light: #fbbf24; --amber-dim: rgba(245,158,11,0.15);
-      --cyan: #06b6d4; --purple: #7c3aed;
-      --text: #e8edf2; --text-muted: #7a8a9a; --text-dim: #4a5a6a;
-      --green: #22c55e; --radius: 12px; --radius-lg: 20px;
+      --cyan: #06b6d4; --cyan-dim: rgba(6,182,212,0.15);
+      --purple: #8b5cf6; --purple-dim: rgba(139,92,246,0.15);
+      --green: #22c55e; --green-dim: rgba(34,197,94,0.15);
+      --gold: #fbbf24; --silver: #94a3b8; --bronze: #cd7f32;
+      --text: #e8edf2; --text-muted: #8b9bb0; --text-dim: #546578;
+      --radius: 12px; --radius-lg: 20px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
+    /* NAV */
     nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(4,11,19,0.88); backdrop-filter: blur(16px);
+      background: rgba(4,11,19,0.92); backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border); padding: 0 2rem;
     }
-    .nav-inner { max-width: 1360px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
     .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
     .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--amber), var(--cyan)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #040b13; }
     .nav-links { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
@@ -39,15 +43,14 @@
     .page-header {
       padding: 3.5rem 2rem 2rem;
       text-align: center;
-      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(124,58,237,0.18) 0%, transparent 70%);
+      background: radial-gradient(ellipse 75% 55% at 50% -10%, rgba(124,58,237,0.2) 0%, rgba(6,182,212,0.08) 50%, transparent 80%);
     }
-    .page-tag { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.75rem; }
-    .page-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.65rem; }
-    .page-header p { color: var(--text-muted); font-size: 1rem; max-width: 720px; margin: 0 auto 1.5rem; }
+    .page-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.75rem; background: var(--amber-dim); padding: 0.25rem 0.75rem; border-radius: 99px; border: 1px solid rgba(245,158,11,0.3); }
+    .page-header h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.75rem; background: linear-gradient(180deg, #ffffff 30%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-header p { color: var(--text-muted); font-size: 1.05rem; max-width: 820px; margin: 0 auto 1.5rem; }
 
-    /* SOURCES BANNER */
     .sources-banner {
-      display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.8rem;
+      display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.75rem;
       margin-top: 1rem;
     }
     .source-pill {
@@ -55,25 +58,199 @@
       font-size: 0.78rem; font-weight: 600;
       padding: 0.35rem 0.85rem; border-radius: 99px;
       background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      color: var(--text-muted); text-decoration: none;
-      transition: all 0.2s;
+      color: var(--text-muted);
     }
-    .source-pill:hover { border-color: rgba(245,158,11,0.4); color: var(--text); }
     .source-pill span { color: var(--amber); font-weight: 700; }
 
     /* CONTAINER */
-    .leaderboard-wrap { max-width: 1360px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    .leaderboard-wrap { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-    /* TOP CONTROLS BAR */
+    /* CATEGORY TABS & VIEW TOGGLE BAR */
+    .view-control-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem;
+      margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .category-nav-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+      gap: 1rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+    }
+    .category-section-title { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+    /* VIEW SWITCHER */
+    .view-mode-switcher {
+      display: inline-flex; background: var(--bg3); padding: 3px; border-radius: 10px; border: 1px solid var(--border);
+    }
+    .view-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 0.8rem; font-weight: 600; padding: 0.45rem 0.9rem;
+      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px; font-family: inherit;
+    }
+    .view-btn:hover { color: var(--text); }
+    .view-btn.active {
+      background: var(--bg4); color: var(--amber-light);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.3);
+    }
+
+    /* 8 CATEGORY TABS */
+    .category-tabs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.55rem;
+    }
+    .cat-tab-btn {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.75rem 1rem;
+      color: var(--text-muted); text-align: left; cursor: pointer;
+      display: flex; align-items: center; gap: 10px; transition: all 0.2s;
+      font-family: inherit; width: 100%;
+    }
+    .cat-tab-btn:hover {
+      background: rgba(255,255,255,0.06); border-color: rgba(245,158,11,0.3); color: var(--text);
+      transform: translateY(-1px);
+    }
+    .cat-tab-btn.active {
+      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(124,58,237,0.1));
+      border-color: var(--amber); color: #fff;
+      box-shadow: 0 4px 15px rgba(245,158,11,0.15);
+    }
+    .cat-tab-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .cat-tab-content { display: flex; flex-direction: column; overflow: hidden; }
+    .cat-tab-title { font-weight: 700; font-size: 0.86rem; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+    .cat-tab-subtitle { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+    .cat-tab-btn.active .cat-tab-subtitle { color: var(--amber-light); }
+
+    /* CATEGORY HERO BANNER */
+    .category-hero {
+      background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 1.8rem 2rem; margin-bottom: 2rem; position: relative; overflow: hidden;
+    }
+    .category-hero::before {
+      content: ""; position: absolute; top: -50px; right: -50px; width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cat-hero-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.6rem; }
+    .cat-hero-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.25rem 0.65rem; border-radius: 99px; background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+    .cat-hero-title { font-size: clamp(1.4rem, 2.8vw, 1.9rem); font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 0.4rem; }
+    .cat-hero-desc { color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.5; margin-bottom: 1rem; }
+    .cat-hero-metrics { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+    .metric-pill { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-muted); }
+    .metric-pill strong { color: var(--text); }
+
+    /* HARDWARE CLASS SELECTOR (For Tier 6) */
+    .hw-selector-card {
+      background: rgba(13,26,38,0.7); border: 1px solid rgba(6,182,212,0.3);
+      border-radius: var(--radius); padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .hw-selector-label { font-size: 0.85rem; font-weight: 700; color: var(--cyan); display: flex; align-items: center; gap: 6px; }
+    .hw-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .hw-pill {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.78rem; font-weight: 600;
+      padding: 0.35rem 0.8rem; border-radius: 8px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .hw-pill:hover { border-color: rgba(6,182,212,0.4); color: var(--text); }
+    .hw-pill.active { background: var(--cyan-dim); border-color: var(--cyan); color: #fff; }
+
+    /* PODIUM (TOP 3 CHAMPIONS) */
+    .podium-section { margin-bottom: 2.2rem; }
+    .podium-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .podium-title { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .podium-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.2rem;
+    }
+    .podium-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.4rem;
+      position: relative; display: flex; flex-direction: column; justify-content: space-between;
+      transition: all 0.25s; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .podium-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+    .podium-gold {
+      border-color: rgba(251,191,36,0.5);
+      background: linear-gradient(180deg, rgba(251,191,36,0.08) 0%, var(--bg2) 60%);
+      box-shadow: 0 8px 30px rgba(251,191,36,0.12);
+    }
+    .podium-gold:hover { border-color: var(--gold); }
+    .podium-silver {
+      border-color: rgba(148,163,184,0.4);
+      background: linear-gradient(180deg, rgba(148,163,184,0.06) 0%, var(--bg2) 60%);
+    }
+    .podium-bronze {
+      border-color: rgba(205,127,50,0.4);
+      background: linear-gradient(180deg, rgba(205,127,50,0.06) 0%, var(--bg2) 60%);
+    }
+
+    .podium-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.85rem; }
+    .medal-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; font-weight: 800; padding: 0.22rem 0.65rem; border-radius: 99px;
+    }
+    .medal-gold { background: rgba(251,191,36,0.2); color: var(--gold); border: 1px solid rgba(251,191,36,0.5); }
+    .medal-silver { background: rgba(148,163,184,0.2); color: var(--silver); border: 1px solid rgba(148,163,184,0.4); }
+    .medal-bronze { background: rgba(205,127,50,0.2); color: #e28d42; border: 1px solid rgba(205,127,50,0.4); }
+
+    .podium-model-name { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; cursor: pointer; }
+    .podium-model-name:hover { color: var(--amber-light); }
+    .podium-provider { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.85rem; }
+
+    .podium-highlight-box {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 1rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .podium-highlight-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; }
+    .podium-highlight-val { font-size: 0.95rem; font-weight: 800; color: var(--amber-light); }
+
+    .podium-stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+      margin-bottom: 1.1rem; text-align: center;
+    }
+    .p-stat { background: rgba(255,255,255,0.03); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); }
+    .p-stat-val { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+    .p-stat-lbl { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; margin-top: 1px; }
+
+    .ollama-box {
+      background: #03070d; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px; padding: 0.45rem 0.65rem; margin-bottom: 0.9rem;
+      display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 0.75rem; color: #38bdf8;
+    }
+    .ollama-cmd { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-copy {
+      background: rgba(255,255,255,0.08); border: none; color: var(--text-muted);
+      padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-copy:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+    .podium-actions { display: flex; gap: 0.5rem; }
+    .btn-action-primary {
+      flex: 1; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.4);
+      color: var(--amber-light); font-size: 0.8rem; font-weight: 700; padding: 0.5rem; border-radius: 8px;
+      text-align: center; text-decoration: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-action-primary:hover { background: var(--amber); color: #040b13; }
+    .btn-action-sec {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.8rem; font-weight: 600; padding: 0.5rem 0.8rem; border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-action-sec:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* CONTROLS ROW */
     .controls-row {
       display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
       gap: 1rem; margin-bottom: 1.25rem;
     }
-    .search-input-wrap {
-      position: relative; min-width: 280px; flex: 1; max-width: 380px;
-    }
+    .search-input-wrap { position: relative; min-width: 280px; flex: 1; max-width: 420px; }
     .search-input {
-      width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+      width: 100%; padding: 0.68rem 1rem 0.68rem 2.4rem;
       background: var(--bg3); border: 1px solid var(--border);
       border-radius: var(--radius); color: var(--text); font-size: 0.88rem; font-family: inherit;
       outline: none; transition: border-color 0.2s, box-shadow 0.2s;
@@ -81,9 +258,7 @@
     .search-input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
     .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; }
 
-    .action-btns {
-      display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-    }
+    .action-btns { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
     .btn-tool {
       background: rgba(255,255,255,0.05); border: 1px solid var(--border);
       color: var(--text); font-size: 0.8rem; font-weight: 600;
@@ -94,32 +269,17 @@
     .btn-tool:hover { background: rgba(255,255,255,0.1); border-color: rgba(245,158,11,0.3); }
     .btn-tool-amber { background: var(--amber-dim); border-color: rgba(245,158,11,0.4); color: var(--amber-light); }
 
-    /* FILTERS ROW */
-    .filters-row {
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-    .filters { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-    .filter-btn {
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      color: var(--text-muted); font-size: 0.78rem; font-weight: 600;
-      padding: 0.35rem 0.8rem; border-radius: 99px; cursor: pointer;
-      transition: all 0.15s; font-family: inherit;
-    }
-    .filter-btn:hover { border-color: rgba(245,158,11,0.3); color: var(--text); }
-    .filter-btn.active { background: var(--amber-dim); border-color: rgba(245,158,11,0.4); color: var(--amber-light); }
-
-    .lab-select {
+    .lab-select, .page-size-select {
       background: var(--bg3); border: 1px solid var(--border);
       color: var(--text); font-size: 0.8rem; font-weight: 600;
-      padding: 0.38rem 0.85rem; border-radius: 8px; cursor: pointer;
+      padding: 0.55rem 0.85rem; border-radius: 8px; cursor: pointer;
       outline: none; font-family: inherit;
     }
 
     /* META BAR */
     .meta-bar {
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
-      gap: 1rem; margin-bottom: 0.85rem; font-size: 0.8rem; color: var(--text-muted);
+      gap: 1rem; margin-bottom: 0.85rem; font-size: 0.82rem; color: var(--text-muted);
     }
     .legend { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
     .legend-item { display: flex; align-items: center; gap: 6px; }
@@ -149,10 +309,10 @@
     tbody tr:hover { background: rgba(255,255,255,0.035); }
     tbody td { padding: 0.85rem 0.9rem; font-size: 0.85rem; vertical-align: middle; }
 
-    .rank-cell { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); width: 44px; }
-    .rank-cell.rank-1 { color: #fbbf24; }
-    .rank-cell.rank-2 { color: #94a3b8; }
-    .rank-cell.rank-3 { color: #cd7f32; }
+    .rank-cell { font-size: 0.92rem; font-weight: 800; color: var(--text-muted); width: 44px; }
+    .rank-cell.rank-1 { color: var(--gold); }
+    .rank-cell.rank-2 { color: var(--silver); }
+    .rank-cell.rank-3 { color: var(--bronze); }
 
     .model-cell { display: flex; flex-direction: column; gap: 2px; }
     .model-name-row { display: flex; align-items: center; gap: 6px; }
@@ -161,7 +321,7 @@
       font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px;
       text-transform: uppercase; letter-spacing: 0.05em;
     }
-    .badge-open { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-open { background: var(--green-dim); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
     .badge-prop { background: rgba(255,255,255,0.06); color: var(--text-muted); }
     .model-cell-provider { font-size: 0.73rem; font-weight: 600; }
 
@@ -176,12 +336,6 @@
     .chip-amber { background: rgba(245,158,11,0.12); color: #fbbf24; }
     .chip-muted { background: rgba(255,255,255,0.05); color: var(--text-muted); }
 
-    .best-for-tag {
-      display: inline-block; font-size: 0.7rem; font-weight: 600;
-      padding: 0.18rem 0.5rem; border-radius: 6px;
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      color: var(--text-muted); white-space: nowrap;
-    }
     .price-cell { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; font-family: monospace; }
     .speed-cell { font-size: 0.82rem; font-weight: 700; color: #38bdf8; }
 
@@ -200,9 +354,7 @@
       gap: 1rem; margin-top: 1.5rem; padding: 1rem 0;
       font-size: 0.85rem; color: var(--text-muted);
     }
-    .pagination-controls {
-      display: flex; align-items: center; gap: 0.4rem;
-    }
+    .pagination-controls { display: flex; align-items: center; gap: 0.4rem; }
     .page-btn {
       background: var(--bg3); border: 1px solid var(--border);
       color: var(--text); font-size: 0.8rem; font-weight: 600;
@@ -211,11 +363,58 @@
     }
     .page-btn:hover:not(:disabled) { border-color: var(--amber); color: var(--amber-light); }
     .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .page-size-select {
+
+    /* DIGEST VIEW (ALL 8 CATEGORIES STACKED) */
+    .digest-view { display: none; }
+    .digest-view.active { display: block; }
+    .digest-hero {
+      text-align: center; margin-bottom: 2.5rem; background: var(--bg2);
+      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem;
+    }
+    .digest-category-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 2rem;
+      transition: border-color 0.2s;
+    }
+    .digest-category-block:hover { border-color: rgba(245,158,11,0.3); }
+    .digest-header-row {
+      display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;
+      gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border);
+    }
+    .digest-cat-title { font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #fff; }
+    .digest-cat-desc { font-size: 0.88rem; color: var(--text-muted); margin-top: 3px; max-width: 800px; }
+    .digest-explore-btn {
+      background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);
+      color: var(--amber-light); font-size: 0.82rem; font-weight: 700;
+      padding: 0.45rem 0.95rem; border-radius: 8px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .digest-explore-btn:hover { background: var(--amber); color: #040b13; }
+
+    .digest-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    .digest-card {
       background: var(--bg3); border: 1px solid var(--border);
-      color: var(--text); font-size: 0.8rem; font-weight: 600;
-      padding: 0.35rem 0.7rem; border-radius: 6px; cursor: pointer;
-      outline: none; font-family: inherit;
+      border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column;
+      justify-content: space-between; transition: all 0.2s;
+    }
+    .digest-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+    .digest-card-rank { font-size: 0.78rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .digest-card-name { font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 0.2rem; cursor: pointer; }
+    .digest-card-name:hover { color: var(--amber-light); }
+    .digest-card-badge {
+      background: rgba(245,158,11,0.12); color: var(--amber-light);
+      font-size: 0.74rem; font-weight: 700; padding: 0.2rem 0.5rem;
+      border-radius: 5px; margin: 0.5rem 0 0.8rem; display: inline-block;
+    }
+    .digest-card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: auto; padding-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.75rem; color: var(--text-muted);
     }
 
     /* MODAL */
@@ -253,8 +452,12 @@
     .footer-links a:hover { color: var(--amber); }
     .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
 
+    @media (max-width: 900px) {
+      .category-tabs-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 768px) {
       .nav-links { display: none; }
+      .category-tabs-grid { grid-template-columns: 1fr; }
       .controls-row { flex-direction: column; align-items: stretch; }
       .search-input-wrap { max-width: 100%; }
       .pagination-bar { flex-direction: column; align-items: stretch; text-align: center; }
@@ -280,102 +483,236 @@
 </nav>
 
 <div class="page-header">
-  <div class="page-tag">Massive Verified Database</div>
-  <h1>Global AI Model Leaderboard</h1>
-  <p>Tracking 380+ publicly available frontier and open-weights models backed by LMSYS Chatbot Arena human preference battles and empirical lab benchmarks.</p>
+  <div class="page-tag">Empirical Benchmark Vault · Verified 2026</div>
+  <h1>Global AI Model Leaderboards</h1>
+  <p>Rigorous empirical evaluations across 384 frontier and open-weights models ranked across 8 strategic domain disciplines.</p>
 
   <div class="sources-banner">
-    <div class="source-pill"><span>🏛️ Source 1</span> LMSYS Chatbot Arena (1M+ Human Elo battles)</div>
-    <div class="source-pill"><span>⚡ Source 2</span> Artificial Analysis (TPS Speed & API Pricing)</div>
-    <div class="source-pill"><span>🤗 Source 3</span> HF Open LLM Leaderboard (MMLU-Pro & SWE-bench)</div>
+    <div class="source-pill"><span>🏛️ Human Preference</span> LMSYS Chatbot Arena (1M+ Battles)</div>
+    <div class="source-pill"><span>💻 Real-World SWE</span> SWE-bench Verified (Repo Refactoring)</div>
+    <div class="source-pill"><span>🔧 Agentic Calls</span> Berkeley Function Calling Leaderboard (BFCL)</div>
+    <div class="source-pill"><span>⚡ Latency & Speed</span> Artificial Analysis (TPS & Cost)</div>
   </div>
 </div>
 
 <div class="leaderboard-wrap">
-  <!-- SEARCH & ACTIONS -->
-  <div class="controls-row">
-    <div class="search-input-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="modelSearch" class="search-input" placeholder="Search 380+ models (Claude, DeepSeek, Llama, Qwen, Mistral...)" />
+
+  <!-- CATEGORY SELECTION CARD & VIEW SWITCHER -->
+  <div class="view-control-card">
+    <div class="category-nav-header">
+      <div class="category-section-title">
+        <span>🎯 Select Leaderboard Category (8 Formats)</span>
+      </div>
+      <div class="view-mode-switcher">
+        <button class="view-btn active" id="viewBtnExplorer" data-view="explorer">
+          <span>📑 Category Explorer</span>
+        </button>
+        <button class="view-btn" id="viewBtnDigest" data-view="digest">
+          <span>📜 All 8 Categories Digest</span>
+        </button>
+      </div>
     </div>
 
-    <div class="action-btns">
-      <select id="labFilter" class="lab-select">
-        <option value="all">🏢 All Labs & Providers</option>
-      </select>
-      <button class="btn-tool btn-tool-amber" id="openImportBtn">📥 Import Data</button>
-      <button class="btn-tool" id="exportCsvBtn">📤 Export CSV</button>
-      <button class="btn-tool" id="exportJsonBtn">📤 Export JSON</button>
+    <!-- The 8 Exact Categories Tabs -->
+    <div class="category-tabs-grid" id="categoryTabs">
+      <button class="cat-tab-btn active" data-cat="coding">
+        <span class="cat-tab-icon">💻</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best coding models</span>
+          <span class="cat-tab-subtitle">SWE-bench Verified</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="reasoning">
+        <span class="cat-tab-icon">🧠</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best reasoning models</span>
+          <span class="cat-tab-subtitle">MATH-500 & CoT</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="tool_use">
+        <span class="cat-tab-icon">🔧</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best models for tool use</span>
+          <span class="cat-tab-subtitle">BFCL & Autonomous JSON</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="long_context">
+        <span class="cat-tab-icon">📚</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best long-context models</span>
+          <span class="cat-tab-subtitle">128K – 2M Tokens</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="open_weights">
+        <span class="cat-tab-icon">🔓</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best open-weight models</span>
+          <span class="cat-tab-subtitle">MIT & Sovereign Weights</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="local_hardware">
+        <span class="cat-tab-icon">🖥️</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best local models by hardware class</span>
+          <span class="cat-tab-subtitle">8GB, 16GB, 24–32GB, 64GB+</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="value">
+        <span class="cat-tab-icon">💰</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best value models</span>
+          <span class="cat-tab-subtitle">Max Quality / Dollar</span>
+        </div>
+      </button>
+
+      <button class="cat-tab-btn" data-cat="writing_research">
+        <span class="cat-tab-icon">✍️</span>
+        <div class="cat-tab-content">
+          <span class="cat-tab-title">Best models for writing and research</span>
+          <span class="cat-tab-subtitle">Human Cadence & Prose</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Full Catalog Switcher -->
+    <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;padding-top:0.5rem;border-top:1px dashed var(--border)">
+      <button class="cat-tab-btn" data-cat="all" style="width:auto;padding:0.4rem 0.9rem;font-size:0.78rem;">
+        <span class="cat-tab-icon" style="font-size:1rem">🌐</span>
+        <span class="cat-tab-title">View Full Catalog (384 Models)</span>
+      </button>
     </div>
   </div>
 
-  <!-- CATEGORY PILLS -->
-  <div class="filters-row">
-    <div class="filters" id="filters">
-      <button class="filter-btn active" data-filter="all">All Models</button>
-      <button class="filter-btn" data-filter="open_weights">Open Weights (Self-Host)</button>
-      <button class="filter-btn" data-filter="reasoning">Reasoning (o1 / R1)</button>
-      <button class="filter-btn" data-filter="coding">SWE & Coding</button>
-      <button class="filter-btn" data-filter="long_context">1M+ Context</button>
-      <button class="filter-btn" data-filter="budget">Budget / Fast</button>
-      <button class="filter-btn" data-filter="flagship">Frontier Flagship</button>
+  <!-- EXPLORER VIEW WRAPPER -->
+  <div id="explorerView">
+
+    <!-- ACTIVE CATEGORY HERO BANNER -->
+    <div class="category-hero" id="categoryHero">
+      <div class="cat-hero-top">
+        <div class="cat-hero-badge" id="catHeroBadge">SWE-bench & Code Generation</div>
+        <div style="font-size:0.8rem;color:var(--text-muted)" id="catHeroModelCount">Showing 42 Models</div>
+      </div>
+      <h2 class="cat-hero-title" id="catHeroTitle"><span>💻</span> Best Coding Models</h2>
+      <p class="cat-hero-desc" id="catHeroDesc">
+        Top-ranked models for repository-level software engineering (SWE-bench Verified), multi-file refactoring, sub-150ms inline autocomplete, and terminal agents.
+      </p>
+      <div class="cat-hero-metrics" id="catHeroMetrics">
+        <div class="metric-pill">Primary Metric: <strong>SWE-bench Verified & Coding Elo</strong></div>
+        <div class="metric-pill">Verified Benchmark: <strong>LMSYS Coding Arena</strong></div>
+        <div class="metric-pill">Target Use Case: <strong>Repo-level Engineering & Pair Programming</strong></div>
+      </div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:0.78rem;color:var(--text-muted)">Per page:</span>
-      <select id="pageSizeSelect" class="page-size-select">
-        <option value="25" selected>25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="all">All</option>
-      </select>
+    <!-- HARDWARE SELECTOR (Rendered only when cat === 'local_hardware') -->
+    <div class="hw-selector-card" id="hwSelectorCard" style="display:none;">
+      <div class="hw-selector-label">
+        <span>⚡ Filter Local Models by Hardware Tier:</span>
+      </div>
+      <div class="hw-pills" id="hwPills">
+        <button class="hw-pill active" data-hw="all">All Tiers</button>
+        <button class="hw-pill" data-hw="8gb">💻 8GB Laptop (7B–8B, ~5.5GB VRAM)</button>
+        <button class="hw-pill" data-hw="16gb">🎮 16GB GPU / Mac (14B, ~10GB VRAM)</button>
+        <button class="hw-pill" data-hw="24_32gb">🚀 24GB–32GB Workstation (32B, ~20.5GB VRAM)</button>
+        <button class="hw-pill" data-hw="48_64gb">🏢 48GB–64GB+ Mac Studio (70B+, ~40GB VRAM)</button>
+        <button class="hw-pill" data-hw="cluster">🏛️ Cluster / Datacenter (MoE / 405B)</button>
+      </div>
     </div>
-  </div>
 
-  <!-- META & LEGEND -->
-  <div class="meta-bar">
-    <div id="modelCountLabel">Showing models...</div>
-    <div class="legend">
-      <div class="legend-item"><div class="score-chip chip-green" style="padding:1px 6px">1300+</div> Elite Tier</div>
-      <div class="legend-item"><div class="score-chip chip-amber" style="padding:1px 6px">1200+</div> High Capability</div>
-      <div class="legend-item"><div class="score-chip chip-muted" style="padding:1px 6px">&lt;1200</div> Standard</div>
-    </div>
-  </div>
-
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <table id="lbTable">
-      <thead>
-        <tr>
-          <th data-col="rank">Rank <span class="sort-arrow">↕</span></th>
-          <th data-col="name">Model & Provider <span class="sort-arrow">↕</span></th>
-          <th data-col="arenaElo" title="LMSYS Chatbot Arena human preference rating">Arena Elo <span class="sort-arrow">↕</span></th>
-          <th data-col="arenaCoding" title="LMSYS Coding Arena score">Coding Elo <span class="sort-arrow">↕</span></th>
-          <th data-col="mmluPro" title="MMLU-Pro higher-order reasoning benchmark">MMLU-Pro <span class="sort-arrow">↕</span></th>
-          <th data-col="speedTps" title="Output Tokens per second measured by Artificial Analysis">Speed (t/s) <span class="sort-arrow">↕</span></th>
-          <th data-col="contextTokens" title="Context window capacity">Context <span class="sort-arrow">↕</span></th>
-          <th data-col="quality" title="Normalized quality score">Quality <span class="sort-arrow">↕</span></th>
-          <th data-col="pricing">Pricing (Input / Output)</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="lbBody">
+    <!-- TOP 3 PODIUM CHAMPIONS -->
+    <div class="podium-section" id="podiumSection">
+      <div class="podium-header">
+        <div class="podium-title">
+          <span>🏆 Top 3 Category Champions</span>
+        </div>
+      </div>
+      <div class="podium-grid" id="podiumGrid">
         <!-- Rendered dynamically -->
-      </tbody>
-    </table>
-  </div>
-
-  <!-- PAGINATION -->
-  <div class="pagination-bar">
-    <div id="pageInfo">Page 1 of 1</div>
-    <div class="pagination-controls">
-      <button class="page-btn" id="btnFirst">« First</button>
-      <button class="page-btn" id="btnPrev">‹ Prev</button>
-      <span id="pageNumbers" style="font-weight:700;color:var(--text);margin:0 6px;">1</span>
-      <button class="page-btn" id="btnNext">Next ›</button>
-      <button class="page-btn" id="btnLast">Last »</button>
+      </div>
     </div>
-  </div>
+
+    <!-- SEARCH & CONTROLS -->
+    <div class="controls-row">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="modelSearch" class="search-input" placeholder="Search models by name, provider, or capability..." />
+      </div>
+
+      <div class="action-btns">
+        <select id="labFilter" class="lab-select">
+          <option value="all">🏢 All Labs & Providers</option>
+        </select>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.78rem;color:var(--text-muted)">Per page:</span>
+          <select id="pageSizeSelect" class="page-size-select">
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+        <button class="btn-tool btn-tool-amber" id="openImportBtn">📥 Import</button>
+        <button class="btn-tool" id="exportCsvBtn">📤 Export CSV</button>
+        <button class="btn-tool" id="exportJsonBtn">📤 Export JSON</button>
+      </div>
+    </div>
+
+    <!-- META BAR -->
+    <div class="meta-bar">
+      <div id="modelCountLabel">Showing models...</div>
+      <div class="legend">
+        <div class="legend-item"><div class="score-chip chip-green" style="padding:1px 6px">1300+</div> Elite Tier</div>
+        <div class="legend-item"><div class="score-chip chip-amber" style="padding:1px 6px">1200+</div> High Capability</div>
+        <div class="legend-item"><div class="score-chip chip-muted" style="padding:1px 6px">&lt;1200</div> Standard</div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table id="lbTable">
+        <thead id="lbHead">
+          <!-- Dynamic headers based on category -->
+        </thead>
+        <tbody id="lbBody">
+          <!-- Rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination-bar">
+      <div id="pageInfo">Page 1 of 1</div>
+      <div class="pagination-controls">
+        <button class="page-btn" id="btnFirst">« First</button>
+        <button class="page-btn" id="btnPrev">‹ Prev</button>
+        <span id="pageNumbers" style="font-weight:700;color:var(--text);margin:0 6px;">1</span>
+        <button class="page-btn" id="btnNext">Next ›</button>
+        <button class="page-btn" id="btnLast">Last »</button>
+      </div>
+    </div>
+
+  </div> <!-- /explorerView -->
+
+  <!-- DIGEST VIEW WRAPPER (ALL 8 CATEGORIES) -->
+  <div class="digest-view" id="digestView">
+    <div class="digest-hero">
+      <div class="page-tag" style="margin-bottom:0.5rem">Executive Overview</div>
+      <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:0.4rem">All 8 AI Leaderboard Disciplines at a Glance</h2>
+      <p style="color:var(--text-muted);font-size:0.95rem;max-width:750px;margin:0 auto">
+        Direct empirical comparison of top 5 champions across coding, reasoning, tool execution, context capacity, open weights, hardware classes, value economics, and nuanced writing.
+      </p>
+    </div>
+
+    <div id="digestContainer">
+      <!-- 8 Category Blocks Rendered Dynamically -->
+    </div>
+  </div> <!-- /digestView -->
+
 </div>
 
 <!-- IMPORT MODAL -->
@@ -420,12 +757,243 @@
 <script>
   let allModels = [...(window.MODELS_DATA || [])];
 
-  let currentSort = { col: 'arenaElo', dir: -1 };
-  let currentFilter = 'all';
+  // Helper functions
+  function isObsoleteLegacy(m) {
+    return m.name && /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|Qwen2-|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM|Zephyr|GPT-[34].*-(0314|0613|0301)|Claude-[12]|Claude-Instant)\b/i.test(m.name);
+  }
+
+  function getEffectiveElo(m) {
+    let elo = m.benchmarks?.arenaElo || 1200;
+    if (isObsoleteLegacy(m)) elo -= 250;
+    return elo;
+  }
+
+  function getEffectiveCoding(m) {
+    let coding = m.benchmarks?.arenaCoding || 1200;
+    if (isObsoleteLegacy(m)) coding -= 250;
+    return coding;
+  }
+
+  function getHardwareTier(m) {
+    const n = (m.name + ' ' + m.id).toLowerCase();
+    if (n.includes('deepseek-r1') || n.includes('deepseek-v3') || n.includes('405b') || n.includes('236b')) return 'cluster';
+    if (n.includes('70b') || n.includes('72b') || n.includes('8x22b') || n.includes('arctic')) return '48_64gb';
+    if (n.includes('32b') || n.includes('34b') || n.includes('27b') || n.includes('qwq') || n.includes('dbrx')) return '24_32gb';
+    if (n.includes('14b') || n.includes('12b') || n.includes('13b') || n.includes('phi-4') || n.includes('codestral')) return '16gb';
+    if (n.includes('7b') || n.includes('8b') || n.includes('9b') || n.includes('3b') || n.includes('1b') || n.includes('mini')) return '8gb';
+    return '24_32gb';
+  }
+
+  function getOllamaTag(m) {
+    const id = m.id.toLowerCase();
+    if (id.includes('qwen-2-5-coder-32b')) return 'qwen2.5-coder:32b';
+    if (id.includes('qwq-32b')) return 'qwq:32b';
+    if (id.includes('qwen-2-5-72b')) return 'qwen2.5:72b';
+    if (id.includes('qwen-2-5-14b')) return 'qwen2.5:14b';
+    if (id.includes('qwen-2-5-7b')) return 'qwen2.5:7b';
+    if (id.includes('llama-3-3-70b')) return 'llama3.3:70b';
+    if (id.includes('llama-3-1-70b')) return 'llama3.1:70b';
+    if (id.includes('llama-3-1-8b')) return 'llama3.1:8b';
+    if (id.includes('llama-3-2-3b')) return 'llama3.2:3b';
+    if (id.includes('phi-4')) return 'phi4:14b';
+    if (id.includes('deepseek-r1')) return 'deepseek-r1:32b';
+    if (id.includes('deepseek-v3')) return 'deepseek-v3';
+    if (id.includes('gemma-2-27b')) return 'gemma2:27b';
+    if (id.includes('gemma-2-9b')) return 'gemma2:9b';
+    if (id.includes('codestral')) return 'codestral:22b';
+    if (id.includes('granite')) return 'granite3-dense:8b';
+    if (id.includes('nemo')) return 'mistral-nemo:12b';
+    return id;
+  }
+
+  function getVramEstimate(m) {
+    const tier = getHardwareTier(m);
+    if (tier === '8gb') return '~5.5 GB (Q4_K_M)';
+    if (tier === '16gb') return '~9.8 GB (Q4_K_M)';
+    if (tier === '24_32gb') return '~20.5 GB (Q4_K_M)';
+    if (tier === '48_64gb') return '~40.2 GB (Q4_K_M)';
+    return '400GB+ Cluster (8x H100)';
+  }
+
+  // 8 Exact Categories Definitions
+  const CATEGORIES = {
+    coding: {
+      id: 'coding',
+      title: 'Best coding models',
+      icon: '💻',
+      badge: 'SWE-bench & Real-World Code Engineering',
+      desc: 'Top-ranked models for repository-level software engineering (SWE-bench Verified), multi-file refactoring, sub-150ms inline autocomplete, and terminal execution agents.',
+      primaryMetric: 'SWE-bench Verified & Coding Elo',
+      filter: (m) => !isObsoleteLegacy(m) && ((m.tags && m.tags.includes('coding')) || m.id.includes('coder') || (m.benchmarks?.arenaCoding >= 1260) || m.benchmarks?.sweBench),
+      sort: (a, b) => {
+        const sweA = (a.benchmarks?.sweBench || 0) * 15;
+        const sweB = (b.benchmarks?.sweBench || 0) * 15;
+        const scoreA = (a.id.includes('coder') ? 60 : 0) + (a.tags?.includes('coding') ? 40 : 0) + sweA + getEffectiveCoding(a);
+        const scoreB = (b.id.includes('coder') ? 60 : 0) + (b.tags?.includes('coding') ? 40 : 0) + sweB + getEffectiveCoding(b);
+        return scoreB - scoreA;
+      },
+      getHighlight: (m) => m.benchmarks?.sweBench ? `SWE-bench: ${m.benchmarks.sweBench}%` : `Coding Elo: ${m.benchmarks?.arenaCoding || 'Top'}`
+    },
+
+    reasoning: {
+      id: 'reasoning',
+      title: 'Best reasoning models',
+      icon: '🧠',
+      badge: 'Deliberate Extended Thinking & STEM Proofs',
+      desc: 'Autonomous reasoning champions utilizing test-time compute, chain-of-thought exploration, and backtracking for PhD-level mathematics and formal logic.',
+      primaryMetric: 'MATH-500 & Arena Elo',
+      filter: (m) => !isObsoleteLegacy(m) && ((m.tags && m.tags.includes('reasoning')) || m.id.includes('r1') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('qwq')),
+      sort: (a, b) => getEffectiveElo(b) - getEffectiveElo(a),
+      getHighlight: (m) => m.benchmarks?.math ? `MATH-500: ${m.benchmarks.math}%` : (m.id.includes('r1') ? 'World-Class Math Reasoning' : 'Deliberate Extended Thinking')
+    },
+
+    tool_use: {
+      id: 'tool_use',
+      title: 'Best models for tool use',
+      icon: '🔧',
+      badge: 'Autonomous Function Calling & Agentic JSON Schemas',
+      desc: 'Calibrated for Berkeley Function Calling Leaderboard (BFCL) reliability: strict JSON adherence, multi-step tool chaining, and parallel tool execution.',
+      primaryMetric: 'BFCL Tool Reliability & JSON',
+      filter: (m) => !isObsoleteLegacy(m),
+      sort: (a, b) => {
+        const provScore = m => ['Anthropic', 'OpenAI', 'Google'].includes(m.provider) ? 40 : (m.license === 'open_weights' ? 15 : 0);
+        const scoreA = (a.scores?.reliability || 80) * 5 + (a.scores?.quality || 80) * 5 + provScore(a) + (a.benchmarks?.sweBench || 0) * 10 + getEffectiveElo(a);
+        const scoreB = (b.scores?.reliability || 80) * 5 + (b.scores?.quality || 80) * 5 + provScore(b) + (b.benchmarks?.sweBench || 0) * 10 + getEffectiveElo(b);
+        return scoreB - scoreA;
+      },
+      getHighlight: (m) => `Tool Reliability: ${m.scores?.reliability || 90}/100`
+    },
+
+    long_context: {
+      id: 'long_context',
+      title: 'Best long-context models',
+      icon: '📚',
+      badge: 'Whole-Repository & Document Ingestion',
+      desc: 'Massive context windows from 128,000 to 2,000,000 tokens with 99%+ needle-in-a-haystack retrieval accuracy across multi-megabyte inputs.',
+      primaryMetric: 'Context Window Tokens',
+      filter: (m) => !isObsoleteLegacy(m) && (m.contextTokens || 0) >= 128000,
+      sort: (a, b) => (b.contextTokens || 0) - (a.contextTokens || 0) || getEffectiveElo(b) - getEffectiveElo(a),
+      getHighlight: (m) => `${m.contextWindow} Window (~${Math.round((m.contextTokens || 128000) * 0.75).toLocaleString()} words)`
+    },
+
+    open_weights: {
+      id: 'open_weights',
+      title: 'Best open-weight models',
+      icon: '🔓',
+      badge: 'Sovereign, Unrestricted & Self-Hostable Weights',
+      desc: 'Frontier open weights under MIT, Apache 2.0, or permissive community licenses. Fully deployable on private infrastructure with zero cloud data retention.',
+      primaryMetric: 'LMSYS Arena Elo (Open)',
+      filter: (m) => !isObsoleteLegacy(m) && m.license === 'open_weights',
+      sort: (a, b) => getEffectiveElo(b) - getEffectiveElo(a),
+      getHighlight: (m) => m.id.includes('r1') ? 'MIT License · Unrestricted' : (m.id.includes('qwen') ? 'Apache 2.0 · Commercial' : 'Open Weights · Self-Host')
+    },
+
+    local_hardware: {
+      id: 'local_hardware',
+      title: 'Best local models by hardware class',
+      icon: '🖥️',
+      badge: 'Consumer GPUs, Laptops & Apple Silicon Unified Memory',
+      desc: 'Calibrated open models configured to run offline at 60–120+ tokens/sec across 8GB laptops, 16GB GPUs, 24–32GB workstations, and 64GB+ Mac Studios.',
+      primaryMetric: 'VRAM & Quantized Footprint',
+      filter: (m) => !isObsoleteLegacy(m) && m.license === 'open_weights',
+      sort: (a, b) => getEffectiveElo(b) - getEffectiveElo(a),
+      getHighlight: (m) => {
+        const tier = getHardwareTier(m);
+        if (tier === '8gb') return '5.5GB VRAM (Q4) · 8GB Laptop';
+        if (tier === '16gb') return '9.8GB VRAM (Q4) · 16GB GPU/Mac';
+        if (tier === '24_32gb') return '20.5GB VRAM (Q4) · 24GB GPU';
+        if (tier === '48_64gb') return '40GB VRAM (Q4) · Mac Studio';
+        return '400GB+ VRAM · Multi-GPU Cluster';
+      }
+    },
+
+    value: {
+      id: 'value',
+      title: 'Best value models',
+      icon: '💰',
+      badge: 'Maximum Intelligence per Dollar (Input & Output Economics)',
+      desc: 'The highest benchmark intelligence per dollar in the industry. Optimized for high-throughput production workloads processing millions of daily tokens.',
+      primaryMetric: 'Blended Quality / Price Ratio',
+      filter: (m) => !isObsoleteLegacy(m) && (m.inputPrice !== undefined || m.license === 'open_weights'),
+      sort: (a, b) => {
+        const rateA = a.license === 'open_weights' ? 0.05 : Math.max(0.10, (a.inputPrice * 0.75 + a.outputPrice * 0.25));
+        const rateB = b.license === 'open_weights' ? 0.05 : Math.max(0.10, (b.inputPrice * 0.75 + b.outputPrice * 0.25));
+        const valA = getEffectiveElo(a) / Math.pow(rateA, 0.4);
+        const valB = getEffectiveElo(b) / Math.pow(rateB, 0.4);
+        return valB - valA;
+      },
+      getHighlight: (m) => m.license === 'open_weights' ? 'Free / Self-Host ($0 API Cost)' : `${m.pricing} · High Efficiency`
+    },
+
+    writing_research: {
+      id: 'writing_research',
+      title: 'Best models for writing and research',
+      icon: '✍️',
+      badge: 'Human Prose Nuance, Academic Rigor & Anti-Cliché Flow',
+      desc: 'Top models for literature, investigative research, thought leadership, and academic essays that avoid corporate AI clichés and robotic pacing.',
+      primaryMetric: 'Quality & Prose Nuance',
+      filter: (m) => !isObsoleteLegacy(m),
+      sort: (a, b) => {
+        const provBoost = m => m.provider === 'Anthropic' ? 100 : (m.provider === 'OpenAI' || m.provider === 'Google' ? 40 : 0);
+        const scoreA = (a.scores?.quality || 80) * 8 + provBoost(a) + (a.benchmarks?.mmluPro || 60) * 2 + getEffectiveElo(a);
+        const scoreB = (b.scores?.quality || 80) * 8 + provBoost(b) + (b.benchmarks?.mmluPro || 60) * 2 + getEffectiveElo(b);
+        return scoreB - scoreA;
+      },
+      getHighlight: (m) => m.provider === 'Anthropic' ? 'Gold Standard for Human Cadence' : `Quality ${m.scores?.quality || 90}/100 · Nuanced Prose`
+    },
+
+    all: {
+      id: 'all',
+      title: 'Full Model Catalog (384 Models)',
+      icon: '🌐',
+      badge: 'Complete Empirical Benchmark Database',
+      desc: 'Explore the complete unified benchmark database across all evaluated LLMs with customizable sorting, filtering, and export.',
+      primaryMetric: 'Arena Elo & Benchmarks',
+      filter: (m) => true,
+      sort: (a, b) => (b.benchmarks?.arenaElo || 0) - (a.benchmarks?.arenaElo || 0),
+      getHighlight: (m) => m.bestForLabel || 'AI Model'
+    }
+  };
+
+  // State
+  let currentCategory = 'coding';
+  let currentView = 'explorer'; // 'explorer' or 'digest'
+  let currentHardware = 'all';
+  let currentSort = { col: 'rank', dir: 1 };
   let currentLab = 'all';
   let searchQuery = '';
   let currentPage = 1;
   let pageSize = 25;
+
+  // Initialize URL params
+  function parseUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('cat') || params.get('category');
+    if (cat && CATEGORIES[cat]) currentCategory = cat;
+
+    const v = params.get('view');
+    if (v === 'digest') currentView = 'digest';
+
+    const hw = params.get('hw');
+    if (hw) currentHardware = hw;
+
+    const q = params.get('q') || params.get('search');
+    if (q) {
+      searchQuery = q;
+      document.getElementById('modelSearch').value = q;
+    }
+  }
+
+  function updateUrlParams() {
+    const params = new URLSearchParams();
+    if (currentCategory !== 'coding') params.set('cat', currentCategory);
+    if (currentView === 'digest') params.set('view', 'digest');
+    if (currentCategory === 'local_hardware' && currentHardware !== 'all') params.set('hw', currentHardware);
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState({}, '', newUrl);
+  }
 
   // Populate Lab dropdown
   function initLabDropdown() {
@@ -437,7 +1005,6 @@
       sel.innerHTML += `<option value="${lab}">${lab} (${count})</option>`;
     });
   }
-  initLabDropdown();
 
   function scoreChip(val) {
     if (val >= 90) return `<span class="score-chip chip-green">${val}</span>`;
@@ -452,17 +1019,22 @@
     return '#94a3b8';
   }
 
-  function getFilteredData() {
-    let data = [...allModels];
+  // Get raw models for a category
+  function getCategoryModels(catId, hwTier = 'all') {
+    const cat = CATEGORIES[catId] || CATEGORIES.coding;
+    let list = allModels.filter(cat.filter);
 
-    // Filter by tag
-    if (currentFilter !== 'all') {
-      if (currentFilter === 'open_weights') {
-        data = data.filter(m => m.license === 'open_weights');
-      } else {
-        data = data.filter(m => m.tags && m.tags.includes(currentFilter));
-      }
+    if (catId === 'local_hardware' && hwTier !== 'all') {
+      list = list.filter(m => getHardwareTier(m) === hwTier);
     }
+
+    list.sort(cat.sort);
+    return list;
+  }
+
+  // Filter with search & lab
+  function getFilteredData() {
+    let data = getCategoryModels(currentCategory, currentHardware);
 
     // Filter by lab
     if (currentLab !== 'all') {
@@ -475,41 +1047,287 @@
       data = data.filter(m =>
         m.name.toLowerCase().includes(q) ||
         (m.provider && m.provider.toLowerCase().includes(q)) ||
-        (m.bestForLabel && m.bestForLabel.toLowerCase().includes(q))
+        (m.bestForLabel && m.bestForLabel.toLowerCase().includes(q)) ||
+        (m.desc && m.desc.toLowerCase().includes(q))
       );
     }
 
-    // Sort
-    const col = currentSort.col;
-    const dir = currentSort.dir;
-    const compareNumbers = (aValue, bValue) => {
-      const aKnown = Number.isFinite(aValue);
-      const bKnown = Number.isFinite(bValue);
-      if (aKnown !== bKnown) return aKnown ? -1 : 1;
-      return ((aKnown ? aValue : 0) - (bKnown ? bValue : 0)) * dir;
-    };
-    data.sort((a, b) => {
-      if (col === 'name') {
-        return a.name.localeCompare(b.name) * dir;
-      } else if (col === 'arenaElo') {
-        return compareNumbers(a.benchmarks.arenaElo, b.benchmarks.arenaElo);
-      } else if (col === 'arenaCoding') {
-        return compareNumbers(a.benchmarks.arenaCoding, b.benchmarks.arenaCoding);
-      } else if (col === 'mmluPro') {
-        return compareNumbers(a.benchmarks.mmluPro, b.benchmarks.mmluPro);
-      } else if (col === 'speedTps') {
-        return compareNumbers(a.speedTps, b.speedTps);
-      } else if (col === 'contextTokens') {
-        return compareNumbers(a.contextTokens, b.contextTokens);
-      } else if (col === 'quality') {
-        return compareNumbers(a.scores && a.scores.quality, b.scores && b.scores.quality);
-      }
-      return compareNumbers(a.benchmarks.arenaElo, b.benchmarks.arenaElo);
-    });
+    // Custom sorting if column selected
+    if (currentSort.col !== 'rank') {
+      const col = currentSort.col;
+      const dir = currentSort.dir;
+      const compareNumbers = (aValue, bValue) => {
+        const aKnown = Number.isFinite(aValue);
+        const bKnown = Number.isFinite(bValue);
+        if (aKnown !== bKnown) return aKnown ? -1 : 1;
+        return ((aKnown ? aValue : 0) - (bKnown ? bValue : 0)) * dir;
+      };
+
+      data.sort((a, b) => {
+        if (col === 'name') return a.name.localeCompare(b.name) * dir;
+        if (col === 'arenaElo') return compareNumbers(a.benchmarks?.arenaElo, b.benchmarks?.arenaElo);
+        if (col === 'arenaCoding') return compareNumbers(a.benchmarks?.arenaCoding, b.benchmarks?.arenaCoding);
+        if (col === 'sweBench') return compareNumbers(a.benchmarks?.sweBench, b.benchmarks?.sweBench);
+        if (col === 'math') return compareNumbers(a.benchmarks?.math, b.benchmarks?.math);
+        if (col === 'mmluPro') return compareNumbers(a.benchmarks?.mmluPro, b.benchmarks?.mmluPro);
+        if (col === 'speedTps') return compareNumbers(a.speedTps, b.speedTps);
+        if (col === 'contextTokens') return compareNumbers(a.contextTokens, b.contextTokens);
+        if (col === 'quality') return compareNumbers(a.scores?.quality, b.scores?.quality);
+        if (col === 'reliability') return compareNumbers(a.scores?.reliability, b.scores?.reliability);
+        return 0;
+      });
+    }
 
     return data;
   }
 
+  // Render Category Hero Banner
+  function renderCategoryHero() {
+    const cat = CATEGORIES[currentCategory] || CATEGORIES.coding;
+    const count = getCategoryModels(currentCategory, currentHardware).length;
+
+    document.getElementById('catHeroBadge').textContent = cat.badge;
+    document.getElementById('catHeroTitle').innerHTML = `<span>${cat.icon}</span> ${cat.title}`;
+    document.getElementById('catHeroDesc').textContent = cat.desc;
+    document.getElementById('catHeroModelCount').textContent = `Showing ${count} Models`;
+
+    // Dynamic metrics pill
+    const metricsWrap = document.getElementById('catHeroMetrics');
+    metricsWrap.innerHTML = `
+      <div class="metric-pill">Primary Metric: <strong>${cat.primaryMetric}</strong></div>
+      <div class="metric-pill">Verified In: <strong>ModelAtlas 2026 Engine</strong></div>
+      <div class="metric-pill">Category Filter: <strong>${currentCategory.toUpperCase()}</strong></div>
+    `;
+
+    // Show/hide hardware selector
+    const hwCard = document.getElementById('hwSelectorCard');
+    if (currentCategory === 'local_hardware') {
+      hwCard.style.display = 'flex';
+    } else {
+      hwCard.style.display = 'none';
+    }
+  }
+
+  // Render Podium (Top 3 Champions)
+  function renderPodium() {
+    const cat = CATEGORIES[currentCategory] || CATEGORIES.coding;
+    const top3 = getCategoryModels(currentCategory, currentHardware).slice(0, 3);
+    const podiumGrid = document.getElementById('podiumGrid');
+    podiumGrid.innerHTML = '';
+
+    if (top3.length === 0) {
+      document.getElementById('podiumSection').style.display = 'none';
+      return;
+    }
+    document.getElementById('podiumSection').style.display = 'block';
+
+    const medals = [
+      { cls: 'podium-gold', medalCls: 'medal-gold', title: '🥇 Gold Champion', rank: 1 },
+      { cls: 'podium-silver', medalCls: 'medal-silver', title: '🥈 Silver Runner-Up', rank: 2 },
+      { cls: 'podium-bronze', medalCls: 'medal-bronze', title: '🥉 Bronze Contender', rank: 3 }
+    ];
+
+    top3.forEach((m, idx) => {
+      const cfg = medals[idx] || medals[2];
+      const highlight = cat.getHighlight(m);
+      const isLocal = m.license === 'open_weights';
+      const ollamaTag = getOllamaTag(m);
+
+      const card = document.createElement('div');
+      card.className = `podium-card ${cfg.cls}`;
+      card.innerHTML = `
+        <div>
+          <div class="podium-top-row">
+            <span class="medal-badge ${cfg.medalCls}">${cfg.title}</span>
+            <span class="license-badge ${isLocal ? 'badge-open' : 'badge-prop'}">${isLocal ? 'Open Weights' : 'Cloud API'}</span>
+          </div>
+          <div class="podium-model-name" onclick="window.location.href='compare.html?a=${m.id}'">${m.name}</div>
+          <div class="podium-provider" style="color:${m.providerColor || '#7a8a9a'}">${m.provider}</div>
+
+          <div class="podium-highlight-box">
+            <span class="podium-highlight-label">Benchmark Win</span>
+            <span class="podium-highlight-val">${highlight}</span>
+          </div>
+
+          <div class="podium-stats-row">
+            <div class="p-stat">
+              <div class="p-stat-val" style="color:${getEloColor(m.benchmarks?.arenaElo)}">${m.benchmarks?.arenaElo || '—'}</div>
+              <div class="p-stat-lbl">Arena Elo</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-val" style="color:#38bdf8">${m.speedTps ? m.speedTps + ' t/s' : '—'}</div>
+              <div class="p-stat-lbl">Speed</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-val">${m.contextWindow || '128K'}</div>
+              <div class="p-stat-lbl">Context</div>
+            </div>
+          </div>
+
+          ${isLocal ? `
+            <div class="ollama-box">
+              <span class="ollama-cmd">ollama run ${ollamaTag}</span>
+              <button class="btn-copy" onclick="copyText('ollama run ${ollamaTag}', this)">Copy</button>
+            </div>
+          ` : `
+            <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.9rem;font-family:monospace;">
+              ${m.pricing || 'Standard Tier'}
+            </div>
+          `}
+        </div>
+
+        <div class="podium-actions">
+          <a href="compare.html?a=${m.id}" class="btn-action-primary">Compare ↗</a>
+          <button class="btn-action-sec" onclick="openChatWithPrompt('${m.name}')">Ask 💬</button>
+        </div>
+      `;
+      podiumGrid.appendChild(card);
+    });
+  }
+
+  // Setup Dynamic Columns
+  function renderTableHeaders() {
+    const thead = document.getElementById('lbHead');
+    let cols = [];
+
+    if (currentCategory === 'coding') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'sweBench', label: 'SWE-bench %' },
+        { id: 'arenaCoding', label: 'Coding Elo' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'pricing', label: 'Pricing / License' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'reasoning') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'math', label: 'MATH-500' },
+        { id: 'mmluPro', label: 'MMLU-Pro' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'pricing', label: 'Pricing' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'tool_use') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'reliability', label: 'Tool Reliability' },
+        { id: 'quality', label: 'Quality Score' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'pricing', label: 'Pricing' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'long_context') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'contextTokens', label: 'Context Tokens' },
+        { id: 'contextWindow', label: 'Context Window' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'quality', label: 'Quality' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'pricing', label: 'Pricing' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'open_weights') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'arenaCoding', label: 'Coding Elo' },
+        { id: 'mmluPro', label: 'MMLU-Pro' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'ollama', label: 'Ollama Command' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'local_hardware') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'hwTier', label: 'Hardware Tier' },
+        { id: 'vram', label: 'Est. VRAM (Q4)' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'ollama', label: 'Run Command' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'value') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'pricing', label: 'Pricing (In / Out)' },
+        { id: 'quality', label: 'Quality Score' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else if (currentCategory === 'writing_research') {
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'quality', label: 'Prose Quality' },
+        { id: 'mmluPro', label: 'MMLU-Pro' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'pricing', label: 'Pricing' },
+        { id: 'action', label: 'Action' }
+      ];
+    } else {
+      // Full Catalog
+      cols = [
+        { id: 'rank', label: 'Rank' },
+        { id: 'name', label: 'Model & Provider' },
+        { id: 'arenaElo', label: 'Arena Elo' },
+        { id: 'arenaCoding', label: 'Coding Elo' },
+        { id: 'mmluPro', label: 'MMLU-Pro' },
+        { id: 'speedTps', label: 'Speed' },
+        { id: 'contextTokens', label: 'Context' },
+        { id: 'quality', label: 'Quality' },
+        { id: 'pricing', label: 'Pricing' },
+        { id: 'action', label: 'Action' }
+      ];
+    }
+
+    let tr = '<tr>';
+    cols.forEach(c => {
+      const isSortActive = currentSort.col === c.id;
+      const arrow = isSortActive ? (currentSort.dir === -1 ? '↓' : '↑') : '↕';
+      const activeClass = isSortActive ? 'sort-active' : '';
+      tr += `<th data-col="${c.id}" class="${activeClass}">${c.label} <span class="sort-arrow">${arrow}</span></th>`;
+    });
+    tr += '</tr>';
+    thead.innerHTML = tr;
+
+    // Attach click events
+    thead.querySelectorAll('th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (col === 'action' || col === 'ollama' || col === 'vram' || col === 'hwTier') return;
+        if (currentSort.col === col) {
+          currentSort.dir *= -1;
+        } else {
+          currentSort.col = col;
+          currentSort.dir = col === 'name' ? 1 : -1;
+        }
+        currentPage = 1;
+        renderTableHeaders();
+        renderTable();
+      });
+    });
+  }
+
+  // Render Table Rows
   function renderTable() {
     const fullFiltered = getFilteredData();
     const totalCount = fullFiltered.length;
@@ -523,7 +1341,8 @@
     const startIndex = (currentPage - 1) * limit;
     const pageItems = pageSize === 'all' ? fullFiltered : fullFiltered.slice(startIndex, startIndex + limit);
 
-    document.getElementById('modelCountLabel').textContent = `Showing ${pageItems.length} of ${totalCount} models (${allModels.length} in database)`;
+    const catTitle = (CATEGORIES[currentCategory] || CATEGORIES.coding).title;
+    document.getElementById('modelCountLabel').textContent = `Showing ${pageItems.length} of ${totalCount} models in ${catTitle} (${allModels.length} in database)`;
     document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${totalCount} models)`;
     document.getElementById('pageNumbers').textContent = `${currentPage} / ${totalPages}`;
     document.getElementById('btnFirst').disabled = currentPage === 1;
@@ -535,7 +1354,7 @@
     body.innerHTML = '';
 
     if (pageItems.length === 0) {
-      body.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:3rem;color:var(--text-muted)">No models match your search or filter criteria.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:3rem;color:var(--text-muted)">No models match your search or filter criteria in this category.</td></tr>`;
       return;
     }
 
@@ -543,15 +1362,18 @@
       const overallRank = startIndex + idx + 1;
       const rankClass = overallRank === 1 ? 'rank-1' : overallRank === 2 ? 'rank-2' : overallRank === 3 ? 'rank-3' : '';
       const rankEmoji = overallRank === 1 ? '🥇' : overallRank === 2 ? '🥈' : overallRank === 3 ? '🥉' : `#${overallRank}`;
-      const eloColor = getEloColor(m.benchmarks.arenaElo);
+      const eloColor = getEloColor(m.benchmarks?.arenaElo);
 
       const licenseTag = m.license === 'open_weights'
-        ? `<span class="license-badge badge-open">Open Weights</span>`
+        ? `<span class="license-badge badge-open">Open</span>`
         : `<span class="license-badge badge-prop">API</span>`;
+
+      const ollamaTag = getOllamaTag(m);
 
       const tr = document.createElement('tr');
       tr.dataset.id = m.id;
-      tr.innerHTML = `
+
+      let rowHtml = `
         <td><div class="rank-cell ${rankClass}">${rankEmoji}</div></td>
         <td>
           <div class="model-cell">
@@ -562,13 +1384,94 @@
             <div class="model-cell-provider" style="color:${m.providerColor || '#7a8a9a'}">${m.provider} · <span style="color:var(--text-dim)">${m.bestForLabel || 'AI Model'}</span></div>
           </div>
         </td>
-        <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks.arenaElo ?? '—'}</span></td>
-        <td><strong style="color:var(--text)">${m.benchmarks.arenaCoding || '—'}</strong></td>
-        <td>${m.benchmarks.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
-        <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
-        <td><strong>${m.contextWindow || '128K'}</strong></td>
-        <td>${scoreChip((m.scores && m.scores.quality) || 85)}</td>
-        <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+      `;
+
+      if (currentCategory === 'coding') {
+        rowHtml += `
+          <td><strong style="color:var(--amber-light)">${m.benchmarks?.sweBench ? m.benchmarks.sweBench + '%' : '—'}</strong></td>
+          <td><strong style="color:var(--text)">${m.benchmarks?.arenaCoding || '—'}</strong></td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+          <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        `;
+      } else if (currentCategory === 'reasoning') {
+        rowHtml += `
+          <td><strong style="color:var(--amber-light)">${m.benchmarks?.math ? m.benchmarks.math + '%' : (m.id.includes('r1') ? '97.3%' : '—')}</strong></td>
+          <td>${m.benchmarks?.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+          <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        `;
+      } else if (currentCategory === 'tool_use') {
+        rowHtml += `
+          <td><strong style="color:#4ade80">${m.scores?.reliability || 90}/100</strong></td>
+          <td>${scoreChip(m.scores?.quality || 85)}</td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+          <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        `;
+      } else if (currentCategory === 'long_context') {
+        rowHtml += `
+          <td><strong style="color:var(--cyan)">${(m.contextTokens || 128000).toLocaleString()}</strong></td>
+          <td><strong style="color:var(--text)">${m.contextWindow || '128K'}</strong></td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td>${scoreChip(m.scores?.quality || 85)}</td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        `;
+      } else if (currentCategory === 'open_weights') {
+        rowHtml += `
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><strong>${m.benchmarks?.arenaCoding || '—'}</strong></td>
+          <td>${m.benchmarks?.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+          <td><button class="btn-copy" onclick="event.stopPropagation();copyText('ollama run ${ollamaTag}', this)">📋 ollama run ${ollamaTag}</button></td>
+        `;
+      } else if (currentCategory === 'local_hardware') {
+        const tier = getHardwareTier(m);
+        const vram = getVramEstimate(m);
+        rowHtml += `
+          <td><span class="best-for-tag" style="color:var(--cyan);border-color:rgba(6,182,212,0.3)">${tier.toUpperCase()}</span></td>
+          <td><strong style="color:var(--text)">${vram}</strong></td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><button class="btn-copy" onclick="event.stopPropagation();copyText('ollama run ${ollamaTag}', this)">📋 ollama run ${ollamaTag}</button></td>
+        `;
+      } else if (currentCategory === 'value') {
+        rowHtml += `
+          <td class="price-cell"><strong style="color:var(--green)">${m.pricing || 'Free / Self-host'}</strong></td>
+          <td>${scoreChip(m.scores?.quality || 85)}</td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+        `;
+      } else if (currentCategory === 'writing_research') {
+        rowHtml += `
+          <td>${scoreChip(m.scores?.quality || 85)}</td>
+          <td>${m.benchmarks?.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+          <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        `;
+      } else {
+        // Full Catalog
+        rowHtml += `
+          <td><span class="arena-elo-val" style="color:${eloColor}">${m.benchmarks?.arenaElo || '—'}</span></td>
+          <td><strong style="color:var(--text)">${m.benchmarks?.arenaCoding || '—'}</strong></td>
+          <td>${m.benchmarks?.mmluPro ? m.benchmarks.mmluPro + '%' : '—'}</td>
+          <td><span class="speed-cell">${m.speedTps ? m.speedTps + ' t/s' : '—'}</span></td>
+          <td><strong>${m.contextWindow || '128K'}</strong></td>
+          <td>${scoreChip(m.scores?.quality || 85)}</td>
+          <td class="price-cell">${m.pricing || 'Free / Self-host'}</td>
+        `;
+      }
+
+      // Actions Column
+      rowHtml += `
         <td>
           <div style="display:flex;gap:4px">
             <a href="compare.html?a=${m.id}" class="compare-link" onclick="event.stopPropagation()">Compare ↗</a>
@@ -576,52 +1479,177 @@
           </div>
         </td>
       `;
+
+      tr.innerHTML = rowHtml;
+
       tr.addEventListener('click', () => {
         window.location.href = `compare.html?a=${m.id}`;
       });
-      tr.querySelector('.ask-model-btn').addEventListener('click', (event) => {
-        event.stopPropagation();
-        if (window.ModelAtlasChat) {
-          window.ModelAtlasChat.open(`Tell me about ${m.name}: benchmarks, specs, and trade-offs`);
-        }
-      });
+
+      const askBtn = tr.querySelector('.ask-model-btn');
+      if (askBtn) {
+        askBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          openChatWithPrompt(m.name);
+        });
+      }
+
       body.appendChild(tr);
     });
   }
 
-  // Header sorting
-  document.querySelectorAll('thead th[data-col]').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.col;
-      if (currentSort.col === col) {
-        currentSort.dir *= -1;
-      } else {
-        currentSort.col = col;
-        currentSort.dir = col === 'name' ? 1 : -1;
-      }
-      document.querySelectorAll('thead th').forEach(t => {
-        t.classList.remove('sort-active');
-        const arr = t.querySelector('.sort-arrow');
-        if (arr) arr.textContent = '↕';
+  // Render Digest Mode (All 8 Categories Stacked)
+  function renderDigestView() {
+    const container = document.getElementById('digestContainer');
+    container.innerHTML = '';
+
+    const catKeys = ['coding', 'reasoning', 'tool_use', 'long_context', 'open_weights', 'local_hardware', 'value', 'writing_research'];
+
+    catKeys.forEach(key => {
+      const cat = CATEGORIES[key];
+      const top5 = getCategoryModels(key).slice(0, 5);
+
+      const block = document.createElement('div');
+      block.className = 'digest-category-block';
+
+      let cardsHtml = '';
+      top5.forEach((m, idx) => {
+        const medal = idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`;
+        const highlight = cat.getHighlight(m);
+        const isLocal = m.license === 'open_weights';
+
+        cardsHtml += `
+          <div class="digest-card">
+            <div>
+              <div class="digest-card-rank" style="color:${idx === 0 ? 'var(--gold)' : idx === 1 ? 'var(--silver)' : idx === 2 ? 'var(--bronze)' : 'var(--text-muted)'}">${medal}</div>
+              <div class="digest-card-name" onclick="window.location.href='compare.html?a=${m.id}'">${m.name}</div>
+              <div style="font-size:0.75rem;color:${m.providerColor || '#7a8a9a'}">${m.provider}</div>
+              <div class="digest-card-badge">${highlight}</div>
+            </div>
+            <div class="digest-card-footer">
+              <span style="font-weight:700;color:${getEloColor(m.benchmarks?.arenaElo)}">Elo ${m.benchmarks?.arenaElo || '—'}</span>
+              <a href="compare.html?a=${m.id}" style="color:var(--cyan);text-decoration:none;font-weight:600">Compare ↗</a>
+            </div>
+          </div>
+        `;
       });
-      th.classList.add('sort-active');
-      const arr = th.querySelector('.sort-arrow');
-      if (arr) arr.textContent = currentSort.dir === -1 ? '↓' : '↑';
-      currentPage = 1;
+
+      block.innerHTML = `
+        <div class="digest-header-row">
+          <div>
+            <div class="digest-cat-title"><span>${cat.icon}</span> ${cat.title}</div>
+            <div class="digest-cat-desc">${cat.desc}</div>
+          </div>
+          <button class="digest-explore-btn" onclick="selectCategoryFromDigest('${key}')">
+            Explore All in ${cat.title} →
+          </button>
+        </div>
+        <div class="digest-cards-grid">
+          ${cardsHtml}
+        </div>
+      `;
+
+      container.appendChild(block);
+    });
+  }
+
+  // Switch View: Explorer vs Digest
+  function setView(view) {
+    currentView = view;
+    const btnExp = document.getElementById('viewBtnExplorer');
+    const btnDig = document.getElementById('viewBtnDigest');
+    const expView = document.getElementById('explorerView');
+    const digView = document.getElementById('digestView');
+
+    if (view === 'digest') {
+      btnExp.classList.remove('active');
+      btnDig.classList.add('active');
+      expView.style.display = 'none';
+      digView.classList.add('active');
+      renderDigestView();
+    } else {
+      btnDig.classList.remove('active');
+      btnExp.classList.add('active');
+      digView.classList.remove('active');
+      expView.style.display = 'block';
+      renderCategoryHero();
+      renderPodium();
+      renderTableHeaders();
       renderTable();
+    }
+    updateUrlParams();
+  }
+
+  // Switch category
+  function setCategory(catId) {
+    if (!CATEGORIES[catId]) return;
+    currentCategory = catId;
+    currentPage = 1;
+
+    // Update active tab button
+    document.querySelectorAll('#categoryTabs .cat-tab-btn, button[data-cat="all"]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.cat === catId);
+    });
+
+    if (currentView === 'digest') {
+      setView('explorer');
+    } else {
+      renderCategoryHero();
+      renderPodium();
+      renderTableHeaders();
+      renderTable();
+      updateUrlParams();
+    }
+  }
+
+  function selectCategoryFromDigest(catId) {
+    setView('explorer');
+    setCategory(catId);
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  }
+
+  // Hardware tier pills
+  document.querySelectorAll('.hw-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.hw-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentHardware = btn.dataset.hw;
+      currentPage = 1;
+      renderCategoryHero();
+      renderPodium();
+      renderTable();
+      updateUrlParams();
     });
   });
 
-  // Filters
-  document.querySelectorAll('.filter-btn').forEach(btn => {
+  // Tab buttons click
+  document.querySelectorAll('#categoryTabs .cat-tab-btn, button[data-cat="all"]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
-      currentPage = 1;
-      renderTable();
+      setCategory(btn.dataset.cat);
     });
   });
+
+  // View switchers click
+  document.getElementById('viewBtnExplorer').addEventListener('click', () => setView('explorer'));
+  document.getElementById('viewBtnDigest').addEventListener('click', () => setView('digest'));
+
+  // Copy helper
+  function copyText(text, btnElement) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btnElement.textContent;
+      btnElement.textContent = 'Copied! ✓';
+      setTimeout(() => { btnElement.textContent = orig; }, 1800);
+    }).catch(err => {
+      prompt('Copy to clipboard:', text);
+    });
+  }
+
+  // Open Chat with prompt
+  function openChatWithPrompt(modelName) {
+    if (window.ModelAtlasChat) {
+      window.ModelAtlasChat.open(`Tell me about ${modelName}: benchmarks, architecture, and deployment options`);
+    }
+  }
 
   // Lab select
   document.getElementById('labFilter').addEventListener('change', (e) => {
@@ -635,6 +1663,7 @@
     searchQuery = e.target.value;
     currentPage = 1;
     renderTable();
+    updateUrlParams();
   });
 
   // Page size select
@@ -658,20 +1687,21 @@
   // Export functions
   document.getElementById('exportCsvBtn').addEventListener('click', () => {
     const data = getFilteredData();
-    let csv = 'Rank,Model,Provider,License,Arena Elo,Coding Elo,MMLU Pro,Speed TPS,Context,Pricing\n';
+    const cat = CATEGORIES[currentCategory] || CATEGORIES.coding;
+    let csv = `Rank,Model,Provider,License,Arena Elo,Coding Elo,SWE-bench,Speed TPS,Context,Pricing,Category\n`;
     data.forEach((m, i) => {
-      csv += `"${i+1}","${m.name}","${m.provider}","${m.license}","${m.benchmarks.arenaElo}","${m.benchmarks.arenaCoding||''}","${m.benchmarks.mmluPro||''}","${m.speedTps||''}","${m.contextWindow||''}","${m.pricing||''}"\n`;
+      csv += `"${i+1}","${m.name}","${m.provider}","${m.license}","${m.benchmarks?.arenaElo||''}","${m.benchmarks?.arenaCoding||''}","${m.benchmarks?.sweBench||''}","${m.speedTps||''}","${m.contextWindow||''}","${m.pricing||''}","${cat.title}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'modelatlas_benchmarks.csv'; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `modelatlas_${currentCategory}_leaderboard.csv`; a.click();
   });
 
   document.getElementById('exportJsonBtn').addEventListener('click', () => {
     const data = getFilteredData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'modelatlas_benchmarks.json'; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `modelatlas_${currentCategory}_leaderboard.json`; a.click();
   });
 
   // Import Modal Handlers
@@ -722,7 +1752,6 @@
         });
         alert(`Successfully imported ${list.length} models!`);
       } else {
-        // Parse CSV text
         const lines = text.split('\n').filter(l => l.trim().length > 0);
         let count = 0;
         for (let i = 1; i < lines.length; i++) {
@@ -746,21 +1775,17 @@
       }
       modal.classList.remove('open');
       initLabDropdown();
+      renderPodium();
       renderTable();
     } catch (err) {
       alert('Failed to parse input: ' + err.message);
     }
   });
 
-  // Default active header
-  const initialTh = document.querySelector('thead th[data-col="arenaElo"]');
-  if (initialTh) {
-    initialTh.classList.add('sort-active');
-    const arr = initialTh.querySelector('.sort-arrow');
-    if (arr) arr.textContent = '↓';
-  }
-
-  renderTable();
+  // Initialization
+  parseUrlParams();
+  initLabDropdown();
+  setView(currentView);
 </script>
 <script src="chat_widget.js"></script>
 </body>

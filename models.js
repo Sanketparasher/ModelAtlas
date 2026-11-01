@@ -162,7 +162,7 @@
   },
   {
     "id": "mistral-medium",
-    "name": "Medium",
+    "name": "Mistral Medium",
     "provider": "Mistral",
     "providerColor": "#f97316",
     "license": "proprietary",
