@@ -1,8 +1,7 @@
 // ModelAtlas Unified Dataset
-// Sourced from:
-// 1. LMSYS Chatbot Arena (arena.lmsys.org) - Crowdsourced human preference Elo ratings
-// 2. Artificial Analysis (artificialanalysis.ai) - Quality index, Speed (t/s), API pricing
-// 3. Hugging Face Open LLM Leaderboard v2 - MMLU-Pro, MATH-500, SWE-bench Verified
+// Reference datasets used across catalog; individual model values may have incomplete provenance.
+// Per-metric source and retrieval timestamp are recorded in benchmarkProvenance when available.
+// Missing provenance for existing values is intentionally not inferred.
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {

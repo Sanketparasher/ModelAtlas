@@ -1,18 +1,16 @@
 /**
  * ModelAtlas Benchmark Synchronizer
  * 
- * Fetches, normalizes, and updates model benchmarks from primary sources:
- * 1. LMSYS Chatbot Arena (Arena Elo, Coding Arena, Style-Controlled)
- *    Source: LMSYS / Hugging Face Leaderboard (https://chat.lmsys.org)
- * 2. Artificial Analysis (Quality Index, Output Speed TPS, Pricing)
- *    Source: Artificial Analysis (https://artificialanalysis.ai)
- * 3. Hugging Face Open LLM Leaderboard v2 (MMLU-Pro, MATH-500, SWE-bench)
- *    Source: Hugging Face (https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard)
+ * Validates and sorts the local model catalog. It does not fetch benchmark updates.
+ * Per-metric source and retrieval timestamp are recorded in benchmarkProvenance when available.
  */
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
+const {
+  validateBenchmarkProvenance,
+  getBenchmarkProvenanceCoverage
+} = require('./benchmark_provenance');
 
 const DATA_FILE = path.join(__dirname, '..', 'data', 'models.json');
 const JS_FILE = path.join(__dirname, '..', 'models.js');
@@ -31,7 +29,7 @@ try {
   process.exit(1);
 }
 
-// Validation function ensuring all records meet benchmark integrity
+// Validate record shape and any provenance metadata that is present.
 function validateModel(m) {
   const issues = [];
   if (!m.id) issues.push('Missing id');
@@ -43,16 +41,28 @@ function validateModel(m) {
 }
 
 let validCount = 0;
+let provenanceIssueCount = 0;
 currentModels.forEach((m, idx) => {
-  const errors = validateModel(m);
+  const provenanceIssues = validateBenchmarkProvenance(m);
+  const errors = [...validateModel(m), ...provenanceIssues];
   if (errors.length > 0) {
     console.warn(`⚠️ Model #${idx} (${m.id || 'unnamed'}): ${errors.join(', ')}`);
+    provenanceIssueCount += provenanceIssues.length;
   } else {
     validCount++;
   }
 });
 
-console.log(`✅ ${validCount}/${currentModels.length} models verified with complete benchmark records.`);
+console.log(`✅ ${validCount}/${currentModels.length} models have structurally valid records.`);
+const provenanceCoverage = getBenchmarkProvenanceCoverage(currentModels);
+console.log(`🔎 Benchmark values with recorded provenance: ${provenanceCoverage.tracked}; without provenance: ${provenanceCoverage.untracked}.`);
+if (provenanceCoverage.untracked > 0) {
+  console.warn('⚠️ Untracked legacy benchmark values are left unchanged; no source or date was inferred.');
+}
+if (provenanceIssueCount > 0) {
+  console.error(`❌ Found ${provenanceIssueCount} invalid benchmark provenance record(s).`);
+  process.exit(1);
+}
 
 // Sort by Arena Elo descending
 currentModels.sort((a, b) => (b.benchmarks.arenaElo || 0) - (a.benchmarks.arenaElo || 0));
@@ -62,10 +72,9 @@ fs.writeFileSync(DATA_FILE, JSON.stringify(currentModels, null, 2), 'utf-8');
 
 // Generate models.js
 const jsContent = `// ModelAtlas Unified Dataset
-// Sourced from:
-// 1. LMSYS Chatbot Arena (arena.lmsys.org) - Crowdsourced human preference Elo ratings
-// 2. Artificial Analysis (artificialanalysis.ai) - Quality index, Speed (t/s), API pricing
-// 3. Hugging Face Open LLM Leaderboard v2 - MMLU-Pro, MATH-500, SWE-bench Verified
+// Reference datasets used across catalog; individual model values may have incomplete provenance.
+// Per-metric source and retrieval timestamp are recorded in benchmarkProvenance when available.
+// Missing provenance for existing values is intentionally not inferred.
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -81,4 +90,3 @@ const jsContent = `// ModelAtlas Unified Dataset
 fs.writeFileSync(JS_FILE, jsContent, 'utf-8');
 console.log(`💾 Saved updated dataset to data/models.json & models.js`);
 console.log('🚀 Synchronizer ready! Run "node scripts/sync_benchmarks.js" anytime to re-validate.');
-
