@@ -328,6 +328,37 @@
       }).join('');
 
       const hasElo = Number.isFinite(m.benchmarks.arenaElo);
+      const benchmarkProvenance = Object.entries(m.benchmarks || {})
+        .filter(([, value]) => Number.isFinite(value))
+        .map(([metric]) => {
+          const provenance = m.benchmarkProvenance?.[metric];
+          if (!provenance) {
+            return `<li><strong>${escapeHtml(metric)}</strong>: Source and date not recorded for this catalog value.</li>`;
+          }
+          const source = escapeHtml(provenance.source || 'Source unavailable');
+          let sourceLink = '';
+          if (provenance.sourceUrl) {
+            try {
+              const parsedUrl = new URL(provenance.sourceUrl, window.location.href);
+              if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+                sourceLink = ` · <a href="${escapeHtml(parsedUrl.href)}" target="_blank" rel="noopener noreferrer">source</a>`;
+              }
+            } catch {
+              sourceLink = '';
+            }
+          }
+          const sourceMetric = Array.isArray(provenance.sourceMetric)
+            ? provenance.sourceMetric.join(', ')
+            : provenance.sourceMetric;
+          const note = provenance.note ? ` — ${escapeHtml(provenance.note)}` : '';
+          const sourceDate = provenance.sourceDate
+            ? `benchmark date ${escapeHtml(provenance.sourceDate)}`
+            : 'benchmark date not recorded';
+          const recordedDate = provenance.retrievedAt
+            ? `fetched ${escapeHtml(provenance.retrievedAt)}`
+            : `recorded ${escapeHtml(provenance.recordedAt || 'date unavailable')}`;
+          return `<li><strong>${escapeHtml(metric)}</strong>: ${source} (${escapeHtml(provenance.method || 'unspecified')}; ${escapeHtml(sourceMetric || 'metric unavailable')}; ${sourceDate}; ${recordedDate})${sourceLink}${note}</li>`;
+        }).join('');
       return `<div class="compare-card ${isWinner && hasElo ? 'winner-card' : ''}">
         ${isWinner && hasElo ? `<div class="winner-badge">Higher Arena Elo</div>` : ''}
         <div class="model-header">
@@ -352,6 +383,11 @@
           <tr><td>Listed Pricing</td><td>${m.pricing || 'Unavailable; check provider'}</td></tr>
           <tr><td>Deployment Type</td><td>${m.license === 'open_weights' ? 'Open Weights (Self-Hostable)' : 'Proprietary Cloud API'}</td></tr>
         </table>
+        <details class="benchmark-provenance">
+          <summary>Benchmark sources and dates</summary>
+          <ul>${benchmarkProvenance || '<li>No benchmark values are available.</li>'}</ul>
+          <p>Unrecorded provenance is not inferred for legacy catalog values.</p>
+        </details>
       </div>`;
     }
 

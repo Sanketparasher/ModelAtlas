@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { createBenchmarkProvenance } = require('./benchmark_provenance');
 
 const DATA_FILE = path.join(__dirname, '..', 'data', 'models.json');
 const JS_FILE = path.join(__dirname, '..', 'models.js');
@@ -71,15 +72,29 @@ function assignProviderColor(org) {
 async function run() {
   const localArg = process.argv[2];
   let csvText = '';
+  let sourceUrl;
 
   if (localArg && fs.existsSync(localArg)) {
     console.log(`📂 Reading local CSV: ${localArg}`);
     csvText = fs.readFileSync(localArg, 'utf-8');
   } else {
     const defaultUrl = 'https://huggingface.co/spaces/lmarena-ai/arena-leaderboard/raw/main/leaderboard_table_20250804.csv';
+    sourceUrl = defaultUrl;
     console.log(`🌐 Fetching latest LMSYS CSV table from: ${defaultUrl}`);
     csvText = await fetchUrl(defaultUrl);
   }
+
+  const source = sourceUrl ? 'LMArena leaderboard CSV snapshot' : 'User-provided CSV';
+  const recordedAt = new Date().toISOString();
+  const sourceRecord = (sourceMetric, method, note) => createBenchmarkProvenance({
+    source,
+    sourceUrl,
+    recordedAt,
+    ...(sourceUrl ? { retrievedAt: recordedAt } : {}),
+    sourceMetric,
+    method,
+    note
+  });
 
   const rawRows = parseCSV(csvText);
   console.log(`📊 Successfully parsed ${rawRows.length} rows from CSV.`);
@@ -109,15 +124,43 @@ async function run() {
     const mmluPct = mmlu > 1 ? mmlu : Math.round(mmlu * 1000) / 10;
     const mtBench = parseFloat(row['MT-bench (score)'] || 0);
 
-    // Approximate Arena Elo based on MT-bench and MMLU if not explicitly present
+    // Keep the existing estimate visible as estimated rather than presenting it as an Arena result.
     const estElo = Math.round(1000 + (mtBench * 35) + (mmluPct * 1.5));
+    const estimateSources = ['MT-bench (score)', 'MMLU'].filter(metric => row[metric] !== undefined && row[metric] !== '');
 
     if (existingMap.has(id)) {
       // Update benchmark if missing
       const m = existingMap.get(id);
-      if (!m.benchmarks.mmluPro && mmluPct > 0) m.benchmarks.mmluPro = mmluPct;
+      if (m.benchmarks && !m.benchmarks.mmluPro && mmluPct > 0) {
+        m.benchmarks.mmluPro = mmluPct;
+        m.benchmarkProvenance = m.benchmarkProvenance || {};
+        m.benchmarkProvenance.mmluPro = sourceRecord(
+          'MMLU',
+          'proxy',
+          'Imported MMLU is recorded in the legacy mmluPro field as a proxy; it is not an MMLU-Pro result.'
+        );
+      }
       updatedCount++;
     } else {
+      const benchmarkProvenance = {
+        arenaElo: sourceRecord(
+          estimateSources.length ? estimateSources : 'fallback estimate inputs unavailable',
+          'estimated',
+          'Estimated from MT-bench and MMLU; not a measured Chatbot Arena Elo.'
+        ),
+        arenaCoding: sourceRecord(
+          'arenaElo',
+          'derived',
+          'Derived as 98% of the estimated Arena Elo; not a measured Coding Arena result.'
+        ),
+        ...(mmluPct > 0 ? {
+          mmluPro: sourceRecord(
+            'MMLU',
+            'proxy',
+            'Imported MMLU is recorded in the legacy mmluPro field as a proxy; it is not an MMLU-Pro result.'
+          )
+        } : {})
+      };
       // Add new model entry
       const newModel = {
         id: id,
@@ -128,8 +171,9 @@ async function run() {
         benchmarks: {
           arenaElo: estElo,
           arenaCoding: Math.round(estElo * 0.98),
-          mmluPro: mmluPct > 0 ? mmluPct : 55.0
+          ...(mmluPct > 0 ? { mmluPro: mmluPct } : {})
         },
+        benchmarkProvenance,
         scores: {
           quality: Math.min(95, Math.round((estElo - 950) / 4.2)),
           cost: isOpen ? 98 : 75,
@@ -148,7 +192,7 @@ async function run() {
         bestFor: ["writing", "research", "chatbot"],
         privacyLevel: isOpen ? "self_host" : "cloud",
         tags: isOpen ? ["open_weights"] : ["flagship"],
-        desc: `${rawName} developed by ${org}. Verified in LMSYS Chatbot Arena evaluation benchmark suite.`
+        desc: `${rawName} developed by ${org}. Imported from a leaderboard CSV; benchmark provenance and estimation methods are listed with the record.`
       };
 
       existingMap.set(id, newModel);
@@ -162,10 +206,9 @@ async function run() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(finalModels, null, 2), 'utf-8');
 
   const jsContent = `// ModelAtlas Unified Dataset
-// Sourced from:
-// 1. LMSYS Chatbot Arena (arena.lmsys.org) - Crowdsourced human preference Elo ratings
-// 2. Artificial Analysis (artificialanalysis.ai) - Quality index, Speed (t/s), API pricing
-// 3. Hugging Face Open LLM Leaderboard v2 - MMLU-Pro, MATH-500, SWE-bench Verified
+// Reference datasets used across catalog; individual model values may have incomplete provenance.
+// Per-metric source and retrieval timestamp are recorded in benchmarkProvenance when available.
+// Missing provenance for existing values is intentionally not inferred.
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -189,4 +232,3 @@ run().catch(err => {
   console.error('❌ Ingestion Error:', err);
   process.exit(1);
 });
-
