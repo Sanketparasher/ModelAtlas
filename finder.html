@@ -1446,7 +1446,7 @@
         if (model.license !== 'open_weights' || parameterCountB === null || parameterCountB < 14 || parameterCountB > 80) score = 0;
         else {
           if (parameterCountB >= 32) score *= 1.40;
-          if (model.id === 'qwq-32b-preview' || model.id === 'qwen-2-5-coder-32b' || model.id === 'llama-3-3-70b' || model.id === 'deepseek-r1') score *= 1.30;
+          if (parameterCountB >= 30 && (model.tags?.includes('coding') || model.tags?.includes('reasoning') || (model.benchmarks?.arenaCoding >= 1280) || (model.benchmarks?.arenaElo >= 1280))) score *= 1.30;
         }
       }
       if (ans.reasoning_mode === 'extended_thinking' && model.tags && model.tags.includes('reasoning')) {
@@ -1527,7 +1527,7 @@
         if (model.license !== 'open_weights') score = 0;
         else {
           score *= 1.45;
-          if (model.id === 'deepseek-r1' || model.id === 'llama-3-3-70b' || model.id === 'qwen-2-5-72b') score *= 1.30;
+          if ((model.benchmarks && (model.benchmarks.arenaElo >= 1300 || model.benchmarks.mmluPro >= 75)) || (model.tags && (model.tags.includes('reasoning') || model.tags.includes('flagship')))) score *= 1.30;
         }
       } else if (ans.enterprise_compliance === 'zdr_commercial' || ans.enterprise_compliance === 'private_cloud_vpc') {
         if (model.privacyLevel !== 'cloud') score = 0;
@@ -1538,7 +1538,8 @@
         if (model.benchmarks && model.benchmarks.arenaElo >= 1350) score *= 1.20;
         // Enterprise scale filter: penalize small sub-14B models for legal/financial audits
         if (model.name.match(/\b(7B|8B|3B|1B|6B|OpenChat)\b/i)) score *= 0.60;
-        if (model.name.match(/\b(70B|72B|405B|R1|8x22B)\b/i) || model.id === 'deepseek-r1') score *= 1.25;
+        const paramScaleB = getApproxParameterCountB(model);
+        if ((paramScaleB !== null && paramScaleB >= 65) || (model.tags && model.tags.includes('reasoning')) || (model.benchmarks && model.benchmarks.arenaElo >= 1350)) score *= 1.25;
       } else if (ans.enterprise_workload === 'customer_ops') {
         if ((model.speedTps || 0) >= 80 && model.inputPrice <= 0.5) score *= 1.30;
       } else if (ans.enterprise_workload === 'internal_rag') {
@@ -1670,7 +1671,10 @@
 
       if (ans.general_use === 'research_web' && (model.contextTokens || 0) >= 500000) score *= 1.35;
       if (ans.general_use === 'quick_chores' && (model.speedTps || 0) >= 90) score *= 1.25;
-      if (ans.general_use === 'all_rounder' && (model.id.includes('flash') || model.id === 'deepseek-v3' || model.name.includes('GPT-4o mini') || model.name.includes('Qwen 2.5 32B'))) score *= 1.25;
+      if (ans.general_use === 'all_rounder') {
+        const isEfficientHighQuality = (model.speedTps >= 90) || (model.inputPrice != null && model.inputPrice <= 0.25) || (model.tags && model.tags.includes('budget'));
+        if (isEfficientHighQuality && (model.benchmarks?.arenaElo >= 1260 || (model.scores?.quality >= 88))) score *= 1.25;
+      }
       if (ans.response_speed === 'deep_thought' && model.tags && model.tags.includes('reasoning')) score *= 1.25;
       if (ans.response_speed === 'fast_chat' && (model.speedTps || 0) >= 80) score *= 1.20;
 

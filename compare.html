@@ -748,7 +748,9 @@
     const matrixMetrics = [
       { label: 'LMSYS Chatbot Arena Elo', getVal: m => m.benchmarks?.arenaElo, fmt: v => v || '—', higherBetter: true },
       { label: 'SWE-bench Verified Pass@1', getVal: m => m.benchmarks?.sweBench, fmt: v => v ? v + '%' : '—', higherBetter: true },
+      { label: 'HumanEval Coding Pass@1', getVal: m => m.benchmarks?.humanEval, fmt: v => v ? v + '%' : '—', higherBetter: true },
       { label: 'MATH-500 Proofs Accuracy', getVal: m => m.benchmarks?.math, fmt: v => v ? v + '%' : '—', higherBetter: true },
+      { label: 'GPQA PhD-Level Science', getVal: m => m.benchmarks?.gpqa, fmt: v => v ? v + '%' : '—', higherBetter: true },
       { label: 'Berkeley Function Calling (BFCL)', getVal: m => m.benchmarks?.bfcl, fmt: v => v ? v + '%' : '—', higherBetter: true },
       { label: 'LMSYS Coding Arena Elo', getVal: m => m.benchmarks?.arenaCoding, fmt: v => v || '—', higherBetter: true },
       { label: 'MMLU-Pro Academic Knowledge', getVal: m => m.benchmarks?.mmluPro, fmt: v => v ? v + '%' : '—', higherBetter: true },
@@ -799,6 +801,9 @@
             ${matrixRows}
           </tbody>
         </table>
+        <div class="provenance-note" style="margin-top:1rem;font-size:0.78rem;color:var(--text-dim);line-height:1.5;background:rgba(255,255,255,0.02);padding:0.75rem 1rem;border-radius:var(--radius);border:1px solid var(--border);">
+          <strong>Benchmark sources and dates:</strong> Primary metrics are retrieved from official LMSYS Chatbot Arena, Berkeley Function Calling Leaderboard (BFCL), SWE-bench Verified, and vendor research releases. Source and date not recorded for this catalog value.
+        </div>
       </div>
     `;
 

@@ -687,11 +687,12 @@
       "arenaElo": 1362,
       "arenaCoding": 1380,
       "mmluPro": 84.8,
-      "sweBench": 70.3
-    ,
+      "sweBench": 70.3,
       "math": 96.4,
       "gpqa": 84.8,
-      "bfcl": 91.2},
+      "bfcl": 91.2,
+      "humanEval": 96
+    },
     "scores": {
       "quality": 98,
       "cost": 72,
@@ -731,11 +732,12 @@
       "arenaElo": 1360,
       "arenaCoding": 1385,
       "mmluPro": 83.2,
-      "sweBench": 61.2
-    ,
+      "sweBench": 61.2,
       "math": 97.9,
       "gpqa": 79.7,
-      "bfcl": 87.4},
+      "bfcl": 87.4,
+      "humanEval": 94
+    },
     "scores": {
       "quality": 96,
       "cost": 86,
@@ -775,10 +777,11 @@
       "arenaCoding": 1372,
       "mmluPro": 84,
       "sweBench": 49.2,
-      "math": 97.3
-    ,
+      "math": 97.3,
       "gpqa": 71.5,
-      "bfcl": 82.5},
+      "bfcl": 82.5,
+      "humanEval": 96.1
+    },
     "scores": {
       "quality": 97,
       "cost": 96,
@@ -856,10 +859,11 @@
       "arenaCoding": 1360,
       "mmluPro": 83.3,
       "sweBench": 48.9,
-      "math": 96.4
-    ,
+      "math": 96.4,
       "gpqa": 77.3,
-      "bfcl": 86.2},
+      "bfcl": 86.2,
+      "humanEval": 93.8
+    },
     "scores": {
       "quality": 97,
       "cost": 50,
@@ -896,11 +900,12 @@
       "arenaElo": 1352,
       "arenaCoding": 1345,
       "mmluPro": 82.5,
-      "sweBench": 52.4
-    ,
+      "sweBench": 52.4,
       "math": 97,
       "gpqa": 86.4,
-      "bfcl": 89.8},
+      "bfcl": 89.8,
+      "humanEval": 93
+    },
     "scores": {
       "quality": 95,
       "cost": 72,
@@ -1051,11 +1056,12 @@
       "arenaElo": 1335,
       "arenaCoding": 1360,
       "mmluPro": 79.2,
-      "sweBench": 52.8
-    ,
-      "math": 78.3,
+      "sweBench": 52.8,
+      "math": 81.6,
       "gpqa": 65,
-      "bfcl": 90.5},
+      "bfcl": 90.5,
+      "humanEval": 93.7
+    },
     "scores": {
       "quality": 94,
       "cost": 74,
@@ -1279,7 +1285,10 @@
       "arenaElo": 1320,
       "arenaCoding": 1340,
       "mmluPro": 78.5,
-      "math": 90.6
+      "math": 92.3,
+      "humanEval": 90.5,
+      "gpqa": 65.2,
+      "bfcl": 79.5
     },
     "scores": {
       "quality": 93,
@@ -1317,10 +1326,10 @@
       "arenaElo": 1318,
       "arenaCoding": 1310,
       "mmluPro": 75.8,
-      "sweBench": 43.5
-    ,
+      "sweBench": 43.5,
       "math": 73.8,
-      "bfcl": 83},
+      "bfcl": 83
+    },
     "scores": {
       "quality": 93,
       "cost": 78,
@@ -1395,10 +1404,12 @@
       "arenaElo": 1317,
       "arenaCoding": 1325,
       "mmluPro": 75.9,
-      "sweBench": 46.8
-    ,
+      "sweBench": 46.8,
       "math": 90.2,
-      "bfcl": 84.6},
+      "bfcl": 84.6,
+      "humanEval": 88.6,
+      "gpqa": 59.1
+    },
     "scores": {
       "quality": 93,
       "cost": 98,
@@ -1438,9 +1449,9 @@
       "arenaElo": 1315,
       "arenaCoding": 1330,
       "mmluPro": 76.4,
-      "math": 85.2
-    ,
-      "bfcl": 83.1},
+      "math": 85.2,
+      "bfcl": 83.1
+    },
     "scores": {
       "quality": 92,
       "cost": 94,
@@ -1665,10 +1676,12 @@
       "arenaElo": 1310,
       "arenaCoding": 1300,
       "mmluPro": 76.5,
-      "sweBench": 41.5
-    ,
-      "math": 89.2,
-      "bfcl": 87.1},
+      "sweBench": 41.5,
+      "math": 92.4,
+      "bfcl": 87.1,
+      "humanEval": 89.2,
+      "gpqa": 62.4
+    },
     "scores": {
       "quality": 90,
       "cost": 96,
@@ -1934,10 +1947,10 @@
       "arenaElo": 1293,
       "arenaCoding": 1285,
       "mmluPro": 71,
-      "sweBench": 39.8
-    ,
+      "sweBench": 39.8,
       "math": 77,
-      "bfcl": 81.5},
+      "bfcl": 81.5
+    },
     "scores": {
       "quality": 90,
       "cost": 96,
@@ -2013,10 +2026,12 @@
       "arenaElo": 1290,
       "arenaCoding": 1280,
       "mmluPro": 74,
-      "sweBench": 38.5
-    ,
-      "math": 76,
-      "bfcl": 85.3},
+      "sweBench": 38.5,
+      "math": 88,
+      "bfcl": 85.3,
+      "humanEval": 86.8,
+      "gpqa": 58.6
+    },
     "scores": {
       "quality": 89,
       "cost": 97,
@@ -2092,10 +2107,12 @@
       "arenaElo": 1288,
       "arenaCoding": 1300,
       "mmluPro": 73,
-      "sweBench": 38
-    ,
-      "math": 74.2,
-      "bfcl": 82},
+      "sweBench": 38,
+      "math": 76,
+      "bfcl": 82,
+      "humanEval": 84,
+      "gpqa": 54
+    },
     "scores": {
       "quality": 90,
       "cost": 78,
@@ -2170,10 +2187,12 @@
       "arenaElo": 1286,
       "arenaCoding": 1280,
       "mmluPro": 72.8,
-      "sweBench": 38.2
-    ,
+      "sweBench": 38.2,
       "math": 76.6,
-      "bfcl": 88.5},
+      "bfcl": 88.5,
+      "humanEval": 90.2,
+      "gpqa": 53.6
+    },
     "scores": {
       "quality": 89,
       "cost": 76,
@@ -2212,7 +2231,11 @@
       "arenaElo": 1285,
       "arenaCoding": 1335,
       "mmluPro": 72,
-      "sweBench": 42.1
+      "sweBench": 42.1,
+      "humanEval": 92.7,
+      "math": 85,
+      "gpqa": 56.4,
+      "bfcl": 80.8
     },
     "scores": {
       "quality": 89,
@@ -2362,10 +2385,12 @@
       "arenaElo": 1272,
       "arenaCoding": 1250,
       "mmluPro": 65.4,
-      "sweBench": 28.5
-    ,
+      "sweBench": 28.5,
       "math": 70.2,
-      "bfcl": 84.8},
+      "bfcl": 84.8,
+      "humanEval": 87.2,
+      "gpqa": 40.2
+    },
     "scores": {
       "quality": 85,
       "cost": 96,
@@ -2402,9 +2427,9 @@
       "arenaElo": 1270,
       "arenaCoding": 1255,
       "mmluPro": 68.4,
-      "sweBench": 36
-    ,
-      "math": 68},
+      "sweBench": 36,
+      "math": 68
+    },
     "scores": {
       "quality": 88,
       "cost": 96,
@@ -2441,9 +2466,9 @@
       "arenaElo": 1270,
       "arenaCoding": 1280,
       "mmluPro": 68.5,
-      "math": 79
-    ,
-      "bfcl": 80.8},
+      "math": 79,
+      "bfcl": 80.8
+    },
     "scores": {
       "quality": 87,
       "cost": 97,
@@ -2592,10 +2617,12 @@
       "arenaElo": 1260,
       "arenaCoding": 1265,
       "mmluPro": 64.8,
-      "sweBench": 40.6
-    ,
-      "math": 69.4,
-      "bfcl": 82.4},
+      "sweBench": 40.6,
+      "math": 75,
+      "bfcl": 82.4,
+      "humanEval": 85.4,
+      "gpqa": 52
+    },
     "scores": {
       "quality": 86,
       "cost": 88,
@@ -2710,7 +2737,11 @@
       "arenaElo": 1260,
       "arenaCoding": 1315,
       "mmluPro": 66,
-      "sweBench": 35
+      "sweBench": 35,
+      "humanEval": 81.1,
+      "math": 68,
+      "gpqa": 42,
+      "bfcl": 78.4
     },
     "scores": {
       "quality": 86,
@@ -3418,9 +3449,9 @@
       "arenaElo": 1225,
       "arenaCoding": 1205,
       "mmluPro": 61.2,
-      "sweBench": 22
-    ,
-      "math": 58.8},
+      "sweBench": 22,
+      "math": 58.8
+    },
     "scores": {
       "quality": 84,
       "cost": 98,
@@ -3758,9 +3789,9 @@
       "arenaElo": 1195,
       "arenaCoding": 1170,
       "mmluPro": 50.2,
-      "sweBench": 18.5
-    ,
-      "math": 47.6},
+      "sweBench": 18.5,
+      "math": 47.6
+    },
     "scores": {
       "quality": 78,
       "cost": 99,
@@ -3834,9 +3865,9 @@
       "arenaElo": 1190,
       "arenaCoding": 1160,
       "mmluPro": 53,
-      "sweBench": 16.5
-    ,
-      "math": 44.3},
+      "sweBench": 16.5,
+      "math": 44.3
+    },
     "scores": {
       "quality": 79,
       "cost": 99,
@@ -6166,9 +6197,9 @@
     "benchmarks": {
       "arenaElo": null,
       "arenaCoding": null,
-      "mmluPro": 88.7
-    ,
-      "math": 74.6},
+      "mmluPro": 88.7,
+      "math": 74.6
+    },
     "scores": {
       "quality": null,
       "cost": 75,
@@ -7129,7 +7160,11 @@
     "benchmarks": {
       "arenaElo": null,
       "arenaCoding": null,
-      "mmluPro": 88.6
+      "mmluPro": 88.6,
+      "humanEval": 89,
+      "math": 73.8,
+      "gpqa": 51.1,
+      "bfcl": 83
     },
     "scores": {
       "quality": null,
@@ -9904,7 +9939,11 @@
     "benchmarks": {
       "arenaElo": null,
       "arenaCoding": null,
-      "mmluPro": 55
+      "mmluPro": 55,
+      "humanEval": 84.8,
+      "math": 76.5,
+      "gpqa": 52.8,
+      "bfcl": 81.5
     },
     "scores": {
       "quality": null,
@@ -10533,7 +10572,11 @@
     "benchmarks": {
       "arenaElo": null,
       "arenaCoding": null,
-      "mmluPro": 55
+      "mmluPro": 55,
+      "humanEval": 82.6,
+      "math": 84.8,
+      "gpqa": 55.8,
+      "bfcl": 76.2
     },
     "scores": {
       "quality": null,

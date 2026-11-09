@@ -352,6 +352,7 @@
       text-transform: uppercase; letter-spacing: 0.05em;
     }
     .badge-open { background: var(--green-dim); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-cluster { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
     .badge-prop { background: rgba(255,255,255,0.06); color: var(--text-muted); }
     .model-cell-provider { font-size: 0.73rem; font-weight: 600; }
 
@@ -837,7 +838,7 @@
     if (id.includes('llama-3-1-8b')) return 'llama3.1:8b';
     if (id.includes('llama-3-2-3b')) return 'llama3.2:3b';
     if (id.includes('phi-4')) return 'phi4:14b';
-    if (id.includes('deepseek-r1')) return 'deepseek-r1:32b';
+    if (id.includes('deepseek-r1')) return 'deepseek-r1:671b';
     if (id.includes('deepseek-v3')) return 'deepseek-v3';
     if (id.includes('gemma-2-27b')) return 'gemma2:27b';
     if (id.includes('gemma-2-9b')) return 'gemma2:9b';
@@ -845,6 +846,19 @@
     if (id.includes('granite')) return 'granite3-dense:8b';
     if (id.includes('nemo')) return 'mistral-nemo:12b';
     return id;
+  }
+
+  function getModelBlendedRate(m) {
+    if (m.inputPrice != null && m.outputPrice != null && (m.inputPrice > 0 || m.outputPrice > 0)) {
+      return m.inputPrice * 0.75 + m.outputPrice * 0.25;
+    }
+    const name = ((m.name || '') + ' ' + (m.id || '')).toLowerCase();
+    if (/671b|405b/.test(name)) return 1.80;
+    if (/70b|72b/.test(name)) return 0.50;
+    if (/32b|34b|27b/.test(name)) return 0.22;
+    if (/14b/.test(name)) return 0.12;
+    if (/7b|8b/.test(name)) return 0.07;
+    return 0.15;
   }
 
   function getVramEstimate(m) {
@@ -957,13 +971,19 @@
       primaryMetric: 'Blended Quality / Price Ratio',
       filter: (m) => !isObsoleteLegacy(m) && (m.inputPrice !== undefined || m.license === 'open_weights'),
       sort: (a, b) => {
-        const rateA = a.license === 'open_weights' ? 0.05 : Math.max(0.10, (a.inputPrice * 0.75 + a.outputPrice * 0.25));
-        const rateB = b.license === 'open_weights' ? 0.05 : Math.max(0.10, (b.inputPrice * 0.75 + b.outputPrice * 0.25));
-        const valA = getEffectiveElo(a) / Math.pow(rateA, 0.4);
-        const valB = getEffectiveElo(b) / Math.pow(rateB, 0.4);
+        const rateA = Math.max(0.07, getModelBlendedRate(a));
+        const rateB = Math.max(0.07, getModelBlendedRate(b));
+        const valA = (getEffectiveElo(a) * (a.scores?.quality || 85)) / Math.pow(rateA, 0.45);
+        const valB = (getEffectiveElo(b) * (b.scores?.quality || 85)) / Math.pow(rateB, 0.45);
         return valB - valA;
       },
-      getHighlight: (m) => m.license === 'open_weights' ? 'Free / Self-Host ($0 API Cost)' : `${m.pricing} · High Efficiency`
+      getHighlight: (m) => {
+        const rate = getModelBlendedRate(m);
+        if (m.inputPrice > 0 || m.outputPrice > 0) {
+          return `$${rate.toFixed(2)}/M blended · ${m.scores?.quality || 90}/100 Quality`;
+        }
+        return `Free Open Weights (~$${rate.toFixed(2)}/M compute) · ${m.scores?.quality || 88}/100`;
+      }
     },
 
     writing_research: {
@@ -975,12 +995,16 @@
       primaryMetric: 'Quality & Prose Nuance',
       filter: (m) => !isObsoleteLegacy(m),
       sort: (a, b) => {
-        const provBoost = m => m.provider === 'Anthropic' ? 100 : (m.provider === 'OpenAI' || m.provider === 'Google' ? 40 : 0);
-        const scoreA = (a.scores?.quality || 80) * 8 + provBoost(a) + (a.benchmarks?.mmluPro || 60) * 2 + getEffectiveElo(a);
-        const scoreB = (b.scores?.quality || 80) * 8 + provBoost(b) + (b.benchmarks?.mmluPro || 60) * 2 + getEffectiveElo(b);
+        const contextBonus = m => (m.contextTokens >= 1000000 ? 35 : (m.contextTokens >= 200000 ? 15 : 0));
+        const scoreA = (a.scores?.quality || 85) * 6 + (a.benchmarks?.mmluPro || 65) * 4 + contextBonus(a) + getEffectiveElo(a);
+        const scoreB = (b.scores?.quality || 85) * 6 + (b.benchmarks?.mmluPro || 65) * 4 + contextBonus(b) + getEffectiveElo(b);
         return scoreB - scoreA;
       },
-      getHighlight: (m) => m.provider === 'Anthropic' ? 'Gold Standard for Human Cadence' : `Quality ${m.scores?.quality || 90}/100 · Nuanced Prose`
+      getHighlight: (m) => {
+        if (m.provider === 'Anthropic') return 'Gold Standard for Human Cadence & Nuance';
+        if (m.contextTokens >= 1000000) return `2M Deep Research Archive · MMLU-Pro ${m.benchmarks?.mmluPro || 82}%`;
+        return `MMLU-Pro: ${m.benchmarks?.mmluPro || 80}% · Quality ${m.scores?.quality || 92}/100`;
+      }
     },
 
     all: {
@@ -1174,6 +1198,7 @@
       const cfg = medals[idx] || medals[2];
       const highlight = cat.getHighlight(m);
       const isLocal = m.license === 'open_weights';
+      const isCluster = getHardwareTier(m) === 'cluster' || /671b|405b|236b/i.test((m.name || '') + ' ' + (m.id || ''));
       const ollamaTag = getOllamaTag(m);
 
       const card = document.createElement('div');
@@ -1182,7 +1207,7 @@
         <div>
           <div class="podium-top-row">
             <span class="medal-badge ${cfg.medalCls}">${cfg.title}</span>
-            <span class="license-badge ${isLocal ? 'badge-open' : 'badge-prop'}">${isLocal ? 'Open Weights' : 'Cloud API'}</span>
+            <span class="license-badge ${isLocal ? (isCluster ? 'badge-cluster' : 'badge-open') : 'badge-prop'}">${isLocal ? (isCluster ? '⚠️ Cluster (671B)' : 'Open Weights') : 'Cloud API'}</span>
           </div>
           <div class="podium-model-name" onclick="window.location.href='compare.html?a=${m.id}'">${m.name}</div>
           <div class="podium-provider" style="color:${m.providerColor || '#7a8a9a'}">${m.provider}</div>
@@ -1207,12 +1232,20 @@
             </div>
           </div>
 
-          ${isLocal ? `
+          ${isLocal ? (isCluster ? `
+            <div class="ollama-box" style="border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.08);">
+              <span class="ollama-cmd" style="color:#fca5a5;">ollama run ${ollamaTag}</span>
+              <button class="btn-copy" onclick="copyText('ollama run ${ollamaTag}', this)">Copy</button>
+            </div>
+            <div style="font-size:0.72rem;color:#f87171;margin-bottom:0.75rem;line-height:1.35;">
+              ⚠️ <strong>Requires 400GB+ VRAM Cluster:</strong> Full 671B MoE. For single workstation, run <code>ollama run deepseek-r1:32b</code>.
+            </div>
+          ` : `
             <div class="ollama-box">
               <span class="ollama-cmd">ollama run ${ollamaTag}</span>
               <button class="btn-copy" onclick="copyText('ollama run ${ollamaTag}', this)">Copy</button>
             </div>
-          ` : `
+          `) : `
             <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.9rem;font-family:monospace;">
               ${m.pricing || 'Standard Tier'}
             </div>

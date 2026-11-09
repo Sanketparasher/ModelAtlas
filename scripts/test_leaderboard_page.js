@@ -71,6 +71,19 @@ function getEffectiveCoding(m) {
 
 console.log('\n=== VERIFYING TOP 3 CHAMPIONS FOR ALL 8 DISCIPLINES ===');
 
+function getModelBlendedRate(m) {
+  if (m.inputPrice != null && m.outputPrice != null && (m.inputPrice > 0 || m.outputPrice > 0)) {
+    return m.inputPrice * 0.75 + m.outputPrice * 0.25;
+  }
+  const name = ((m.name || '') + ' ' + (m.id || '')).toLowerCase();
+  if (/671b|405b/.test(name)) return 1.80;
+  if (/70b|72b/.test(name)) return 0.50;
+  if (/32b|34b|27b/.test(name)) return 0.22;
+  if (/14b/.test(name)) return 0.12;
+  if (/7b|8b/.test(name)) return 0.07;
+  return 0.15;
+}
+
 const CATEGORIES = {
   coding: {
     title: 'Best coding models',
@@ -117,10 +130,10 @@ const CATEGORIES = {
     title: 'Best value models',
     filter: (m) => !isObsoleteLegacy(m) && (m.inputPrice !== undefined || m.license === 'open_weights'),
     sort: (a, b) => {
-      const rateA = a.license === 'open_weights' ? 0.05 : Math.max(0.10, (a.inputPrice * 0.75 + a.outputPrice * 0.25));
-      const rateB = b.license === 'open_weights' ? 0.05 : Math.max(0.10, (b.inputPrice * 0.75 + b.outputPrice * 0.25));
-      const valA = getEffectiveElo(a) / Math.pow(rateA, 0.4);
-      const valB = getEffectiveElo(b) / Math.pow(rateB, 0.4);
+      const rateA = Math.max(0.07, getModelBlendedRate(a));
+      const rateB = Math.max(0.07, getModelBlendedRate(b));
+      const valA = (getEffectiveElo(a) * (a.scores?.quality || 85)) / Math.pow(rateA, 0.45);
+      const valB = (getEffectiveElo(b) * (b.scores?.quality || 85)) / Math.pow(rateB, 0.45);
       return valB - valA;
     }
   },
@@ -128,9 +141,9 @@ const CATEGORIES = {
     title: 'Best models for writing and research',
     filter: (m) => !isObsoleteLegacy(m),
     sort: (a, b) => {
-      const provBoost = m => m.provider === 'Anthropic' ? 100 : (m.provider === 'OpenAI' || m.provider === 'Google' ? 40 : 0);
-      const scoreA = (a.scores?.quality || 80) * 8 + provBoost(a) + (a.benchmarks?.mmluPro || 60) * 2 + getEffectiveElo(a);
-      const scoreB = (b.scores?.quality || 80) * 8 + provBoost(b) + (b.benchmarks?.mmluPro || 60) * 2 + getEffectiveElo(b);
+      const contextBonus = m => (m.contextTokens >= 1000000 ? 35 : (m.contextTokens >= 200000 ? 15 : 0));
+      const scoreA = (a.scores?.quality || 85) * 6 + (a.benchmarks?.mmluPro || 65) * 4 + contextBonus(a) + getEffectiveElo(a);
+      const scoreB = (b.scores?.quality || 85) * 6 + (b.benchmarks?.mmluPro || 65) * 4 + contextBonus(b) + getEffectiveElo(b);
       return scoreB - scoreA;
     }
   }
