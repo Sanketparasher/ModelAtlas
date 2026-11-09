@@ -4,6 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dynamic Model Finder — ModelAtlas</title>
+  <meta name="description" content="Personalized AI model recommendation engine. Answer a few questions about your workflow, hardware, and budget to find your ideal LLM." />
+  <meta name="keywords" content="AI model finder, LLM selector, model recommendation, self-hosted LLM, coding models, enterprise AI" />
+  <link rel="canonical" href="https://sanketparasher.github.io/ModelAtlas/finder.html" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23040b13'/%3E%3Cpath d='M7 24V8l9 10 9-10v16' fill='none' stroke='url(%23g)' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23f59e0b'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ModelAtlas" />
+  <meta property="og:url" content="https://sanketparasher.github.io/ModelAtlas/finder.html" />
+  <meta property="og:title" content="Dynamic Model Finder — ModelAtlas" />
+  <meta property="og:description" content="Get an instant empirical recommendation tailored to your budget, latency SLA, hardware, and workflow." />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://sanketparasher.github.io/ModelAtlas/finder.html" />
+  <meta name="twitter:title" content="Dynamic Model Finder — ModelAtlas" />
+  <meta name="twitter:description" content="Get an instant empirical recommendation tailored to your budget, latency SLA, hardware, and workflow." />
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ModelAtlas Finder",
+    "url": "https://sanketparasher.github.io/ModelAtlas/finder.html",
+    "description": "Adaptive questionnaire recommending AI models based on technical requirements, latency SLAs, and cost constraints.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "All"
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -281,6 +311,8 @@
       <button type="button" class="preset-btn" onclick="applyQuickPreset('coder')">💻 Developer</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('api')">🔌 API Builder</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('enterprise')">🏢 Enterprise</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('academic_research')">🔬 Research</button>
+      <button type="button" class="preset-btn" onclick="applyQuickPreset('creative_writing')">📖 Creative Writing</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('student')">🎒 Student</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('creator')">✍️ Creator</button>
       <button type="button" class="preset-btn" onclick="applyQuickPreset('general')">🌟 Everyday</button>
@@ -447,6 +479,13 @@
               label: 'Autonomous Agentic Coding Loop (Devin / Claude Code style)',
               desc: 'Terminal bash execution, git command handling, reading linter feedback, and applying clean patch diffs.',
               pill: 'Tool & Terminal'
+            },
+            {
+              val: 'finetune_lora',
+              icon: '🧬',
+              label: 'Model Fine-Tuning & Custom LoRA Training',
+              desc: 'Training custom adapters (LoRA/QLoRA) or fine-tuning on proprietary repositories. Demands open weights with permissive licenses.',
+              pill: 'LoRA & Base'
             }
           ]
         },
@@ -1267,6 +1306,19 @@
       student_budget: 'strictly_free',
       explanation_style: 'pedagogical_deep'
     },
+    academic_research: {
+      persona: 'student',
+      academic_workload: 'specialized_research',
+      student_budget: 'student_sub',
+      explanation_style: 'pedagogical_deep'
+    },
+    creative_writing: {
+      persona: 'creator',
+      creator_focus: 'longform_prose',
+      voice_nuance: 'avoid_cliches',
+      deliberation_depth: 'deep_polish',
+      creator_budget: 'premium_pro'
+    },
     creator: {
       persona: 'creator',
       creator_focus: 'longform_prose',
@@ -1342,6 +1394,10 @@
         weights.quality += 0.15;
         weights.speed += 0.10;
         weights.cost += 0.10;
+      } else if (ans.coding_scope === 'finetune_lora') {
+        weights.privacy += 0.35;
+        weights.quality += 0.15;
+        weights.cost += 0.10;
       }
 
       if (ans.reasoning_mode === 'extended_thinking') {
@@ -1372,6 +1428,14 @@
       if (ans.coding_scope === 'inline_fim') {
         if ((model.speedTps || 0) >= 100) score *= 1.25;
         if (model.tags && model.tags.includes('coding')) score *= 1.20;
+      } else if (ans.coding_scope === 'finetune_lora') {
+        if (model.license === 'open_weights') {
+          score *= 1.40;
+          const paramB = getApproxParameterCountB(model);
+          if (paramB !== null && paramB >= 7 && paramB <= 72) score *= 1.25;
+        } else {
+          score *= 0.15;
+        }
       }
       if (ans.env_target === 'local_consumer') {
         const parameterCountB = getApproxParameterCountB(model);

@@ -20,6 +20,9 @@
     budgetModel: null,
     activeTrack: null,
     extractedConstraints: null,
+    userHardware: null,
+    userBudget: null,
+    conversationHistory: [],
     turns: [] // Array of { role: 'user' | 'bot', text: string }
   };
 
@@ -246,16 +249,32 @@
       else ans.coding_scope = 'repo_refactor';
 
       // Check workstation capacity BEFORE consumer laptop to avoid downgrading high-RAM setups
-      if (/workstation|mac studio|24gb|32gb|48gb|64gb|128gb|192gb|rtx 3090|rtx 4090|multi-gpu/i.test(t)) ans.env_target = 'local_workstation';
-      else if (/laptop|macbook|consumer|8gb|16gb|single gpu|rtx 3060|rtx 4060|offline|local/i.test(t)) ans.env_target = 'local_consumer';
-      else ans.env_target = 'cloud_managed';
+      if (/workstation|mac studio|24gb|32gb|48gb|64gb|128gb|192gb|rtx 3090|rtx 4090|multi-gpu/i.test(t)) {
+        ans.env_target = 'local_workstation';
+        sessionMemory.userHardware = { vram: 64, env_target: 'local_workstation', label: '64GB Workstation' };
+      } else if (/laptop|macbook|consumer|8gb|16gb|single gpu|rtx 3060|rtx 4060|offline|local/i.test(t)) {
+        ans.env_target = 'local_consumer';
+        sessionMemory.userHardware = { vram: 16, env_target: 'local_consumer', label: '16GB Laptop' };
+      } else if (prevMemory?.userHardware && (/run|offline|local|my machine|my laptop|my mac|locally/i.test(t))) {
+        ans.env_target = prevMemory.userHardware.env_target;
+      } else {
+        ans.env_target = 'cloud_managed';
+      }
 
       if (/reasoning|think|deep|math|logic/i.test(t)) ans.reasoning_mode = 'extended_thinking';
       else ans.reasoning_mode = 'instant_stream';
 
-      if (/free|\$0|zero cost|open weight/i.test(t)) ans.budget_level = 'zero_cost';
-      else if (/premium|best possible|frontier/i.test(t)) ans.budget_level = 'frontier_tier';
-      else ans.budget_level = 'value_tier';
+      if (/free|\$0|zero cost|open weight/i.test(t)) {
+        ans.budget_level = 'zero_cost';
+        sessionMemory.userBudget = 'zero_cost';
+      } else if (/premium|best possible|frontier/i.test(t)) {
+        ans.budget_level = 'frontier_tier';
+        sessionMemory.userBudget = 'frontier_tier';
+      } else if (prevMemory?.userBudget) {
+        ans.budget_level = prevMemory.userBudget;
+      } else {
+        ans.budget_level = 'value_tier';
+      }
     } else if (persona === 'student') {
       if (/book|textbook|300 page|summar/i.test(t)) ans.academic_workload = 'book_summarization';
       else if (/medical|engineering|usmle|doctor|clinical|thermo/i.test(t)) ans.academic_workload = 'specialized_research';
@@ -879,11 +898,22 @@
   // ─── CONVERSATIONAL PRONOUN & MULTI-TURN RESOLVER ─────────────────────────
   function resolvePronounQuery(query, memory) {
     let q = query.trim();
+
+    // Runner-up references
+    if (/\b(the runner[- ]?up|second choice|other model|runner up)\b/i.test(q) && memory?.runnerModel) {
+      q = q.replace(/\b(the runner[- ]?up|second choice|other model|runner up)\b/gi, memory.runnerModel.name);
+    }
+
+    // Budget model references
+    if (/\b(the budget (?:option|pick|model)|cheaper (?:option|one))\b/i.test(q) && memory?.budgetModel) {
+      q = q.replace(/\b(the budget (?:option|pick|model)|cheaper (?:option|one))\b/gi, memory.budgetModel.name);
+    }
+
     const lastModel = memory?.lastRecommendedModel;
     if (!lastModel) return q;
 
     // Replace pronouns like "it", "this model", "the model" with the actual model name
-    const pronounRegex = /\b(it|this model|the model|this ai|that model)\b/gi;
+    const pronounRegex = /\b(it|this model|the model|this ai|that model|the winner|the top one|first pick)\b/gi;
     if (pronounRegex.test(q)) {
       return q.replace(pronounRegex, lastModel.name);
     }
@@ -1441,6 +1471,7 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
   async function handleUserMessage(text) {
     appendUserMessage(text);
     sessionMemory.turns.push({ role: 'user', text });
+    sessionMemory.conversationHistory.push({ role: 'user', text, timestamp: Date.now() });
 
     // Typing indicator
     const container = document.getElementById('atlas-chat-msgs');
@@ -1469,6 +1500,7 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
       document.getElementById(loadingId)?.remove();
       appendBotMessage(botHtml);
       sessionMemory.turns.push({ role: 'bot', text: botHtml });
+      sessionMemory.conversationHistory.push({ role: 'assistant', text: botHtml, timestamp: Date.now() });
     } catch (e) {
       document.getElementById(loadingId)?.remove();
       appendBotMessage(`❌ Error processing query: ${e.message}`);
@@ -1755,6 +1787,18 @@ Track: ${sessionMemory.activeTrack || 'General'}`;
     },
     getMemory: function () {
       return sessionMemory;
+    },
+    getConversationHistory: function () {
+      return sessionMemory.conversationHistory;
+    },
+    clearHistory: function () {
+      sessionMemory.turns = [];
+      sessionMemory.conversationHistory = [];
+      sessionMemory.lastRecommendedModel = null;
+      sessionMemory.runnerModel = null;
+      sessionMemory.budgetModel = null;
+      sessionMemory.userHardware = null;
+      sessionMemory.userBudget = null;
     },
     updateHardwareWidget: function (newVram, widgetId) {
       const vram = parseInt(newVram, 10) || 16;
