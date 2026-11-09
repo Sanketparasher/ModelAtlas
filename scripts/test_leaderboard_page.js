@@ -93,8 +93,8 @@ const CATEGORIES = {
     filter: (m) => !isObsoleteLegacy(m) && m.benchmarks?.arenaElo != null,
     sort: (a, b) => {
       const provScore = m => ['Anthropic', 'OpenAI', 'Google'].includes(m.provider) ? 40 : (m.license === 'open_weights' ? 15 : 0);
-      const scoreA = (a.scores?.reliability || 80) * 5 + (a.scores?.quality || 80) * 5 + provScore(a) + (a.benchmarks?.sweBench || 0) * 10 + getEffectiveElo(a);
-      const scoreB = (b.scores?.reliability || 80) * 5 + (b.scores?.quality || 80) * 5 + provScore(b) + (b.benchmarks?.sweBench || 0) * 10 + getEffectiveElo(b);
+      const scoreA = (a.benchmarks?.bfcl || (a.scores?.reliability || 80) * 0.9) * 12 + provScore(a) + (a.benchmarks?.sweBench || 0) * 8 + getEffectiveElo(a);
+      const scoreB = (b.benchmarks?.bfcl || (b.scores?.reliability || 80) * 0.9) * 12 + provScore(b) + (b.benchmarks?.sweBench || 0) * 8 + getEffectiveElo(b);
       return scoreB - scoreA;
     }
   },
