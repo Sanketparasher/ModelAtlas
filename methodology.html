@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scoring Methodology & Architecture — ModelAtlas</title>
+  <meta name="description" content="Technical documentation of the ModelAtlas empirical evaluation pipeline: data storage architecture, benchmark calibration, 6-dimension radar scoring, and multi-attribute recommendation algorithms." />
+  <meta name="keywords" content="LLM benchmark methodology, ModelAtlas architecture, Chatbot Arena Elo normalization, SWE-bench scoring, KV cache calculation, AI recommendation algorithms" />
+  <link rel="canonical" href="https://sanketparasher.github.io/ModelAtlas/methodology.html" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23040b13'/%3E%3Cpath d='M7 24V8l9 10 9-10v16' fill='none' stroke='url(%23g)' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23f59e0b'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="ModelAtlas" />
+  <meta property="og:url" content="https://sanketparasher.github.io/ModelAtlas/methodology.html" />
+  <meta property="og:title" content="Scoring Methodology & Technical Architecture — ModelAtlas" />
+  <meta property="og:description" content="How ModelAtlas indexes 384+ models, calibrates empirical benchmarks, normalizes historical Arena Elo drift, and powers deterministic recommendation algorithms." />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://sanketparasher.github.io/ModelAtlas/methodology.html" />
+  <meta name="twitter:title" content="Scoring Methodology & Technical Architecture — ModelAtlas" />
+  <meta name="twitter:description" content="Transparent, peer-verifiable technical breakdown of ModelAtlas evaluation pipelines and algorithms." />
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "ModelAtlas Empirical Benchmark Methodology and Evaluation Architecture",
+    "description": "Scientific specification of how ModelAtlas stores, normalizes, compares, and recommends Large Language Models.",
+    "author": {
+      "@type": "Organization",
+      "name": "ModelAtlas Research"
+    },
+    "datePublished": "2026-11-01",
+    "dateModified": "2026-11-14"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="chat_widget.css" />
+
+  <style>
+    :root {
+      --bg: #040b13; --bg2: #071018; --bg3: #0d1a26; --bg4: #132232;
+      --border: rgba(255,255,255,0.08); --border-hover: rgba(245,158,11,0.4);
+      --amber: #f59e0b; --amber-light: #fbbf24; --amber-dim: rgba(245,158,11,0.12);
+      --cyan: #06b6d4; --cyan-light: #22d3ee; --cyan-dim: rgba(6,182,212,0.12);
+      --purple: #8b5cf6; --purple-light: #a78bfa; --purple-dim: rgba(139,92,246,0.12);
+      --green: #22c55e; --green-light: #4ade80; --green-dim: rgba(34,197,94,0.12);
+      --red: #ef4444; --red-dim: rgba(239,68,68,0.12);
+      --text: #e8edf2; --text-muted: #8b9bb0; --text-dim: #546578;
+      --radius: 12px; --radius-lg: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,11,19,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 0 2rem;
+    }
+    .nav-inner { max-width: 1300px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--amber), var(--cyan)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #040b13; }
+    .nav-links { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
+    .nav-cta { background: var(--amber) !important; color: #040b13 !important; font-weight: 600 !important; }
+    .nav-hamburger { display: none; cursor: pointer; padding: 0.5rem; background: none; border: none; color: var(--text); font-size: 1.25rem; }
+
+    /* HEADER */
+    .page-header {
+      padding: 3.5rem 2rem 2.5rem; text-align: center;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(6,182,212,0.18) 0%, transparent 70%);
+      border-bottom: 1px solid var(--border);
+    }
+    .page-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--cyan-light); background: var(--cyan-dim); border: 1px solid rgba(6,182,212,0.3);
+      padding: 0.35rem 0.9rem; border-radius: 99px; margin-bottom: 1rem;
+    }
+    .page-header h1 { font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 900; letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 1rem; }
+    .page-header p { color: var(--text-muted); font-size: 1.1rem; max-width: 820px; margin: 0 auto 1.5rem; }
+
+    .verification-strip {
+      display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.75rem;
+    }
+    .v-pill {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600;
+      padding: 0.35rem 0.85rem; border-radius: 99px; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); color: var(--text);
+    }
+    .v-pill span { color: var(--amber-light); font-weight: 700; }
+
+    /* CONTENT LAYOUT */
+    .methodology-wrap {
+      max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 6rem;
+      display: grid; grid-template-columns: 260px 1fr; gap: 2.5rem; align-items: start;
+    }
+
+    /* SIDEBAR TOC */
+    .toc-sticky {
+      position: sticky; top: 84px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .toc-title { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+    .toc-links { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; }
+    .toc-links a {
+      text-decoration: none; color: var(--text-muted); font-size: 0.86rem; font-weight: 500;
+      padding: 0.45rem 0.75rem; border-radius: 6px; transition: all 0.2s; display: block;
+    }
+    .toc-links a:hover, .toc-links a.active {
+      color: var(--amber-light); background: rgba(245,158,11,0.1); border-left: 2px solid var(--amber);
+    }
+
+    /* MAIN CONTENT */
+    .content-area { min-width: 0; }
+    .method-section {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 2.25rem; margin-bottom: 2rem; position: relative; overflow: hidden;
+    }
+    .method-section::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--amber), var(--cyan));
+    }
+    .section-num {
+      display: inline-block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem;
+    }
+    .method-section h2 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; color: #fff; }
+    .method-section p { color: var(--text-muted); font-size: 0.96rem; margin-bottom: 1.25rem; line-height: 1.7; }
+    .method-section h3 { font-size: 1.15rem; font-weight: 700; margin: 1.5rem 0 0.6rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+
+    /* CALLOUT BOXES */
+    .callout {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 1.5rem; margin: 1.25rem 0; font-size: 0.9rem; line-height: 1.6;
+    }
+    .callout-amber { border-left: 3px solid var(--amber); background: rgba(245,158,11,0.05); }
+    .callout-cyan { border-left: 3px solid var(--cyan); background: rgba(6,182,212,0.05); }
+    .callout-green { border-left: 3px solid var(--green); background: rgba(34,197,94,0.05); }
+    .callout-title { font-weight: 700; margin-bottom: 0.35rem; color: #fff; display: flex; align-items: center; gap: 6px; }
+
+    /* MATH & CODE FORMULA BLOCKS */
+    .formula-card {
+      background: #02060b; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+      padding: 1.25rem; margin: 1.25rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+      color: #38bdf8; overflow-x: auto;
+    }
+    .formula-expl { font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.6rem; }
+
+    /* COMPARISON GRIDS */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.25rem 0; }
+    .grid-card {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem; font-size: 0.88rem;
+    }
+    .grid-card-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; color: #fff; }
+
+    /* TABLE */
+    .tech-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.86rem; }
+    .tech-table th { background: var(--bg3); padding: 0.75rem 1rem; text-align: left; font-weight: 700; color: var(--text); border-bottom: 1px solid var(--border); }
+    .tech-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+    .tech-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; background: var(--bg2); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.82rem; color: var(--text-dim); }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .methodology-wrap { grid-template-columns: 1fr; }
+      .toc-sticky { display: none; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: block; }
+      .nav-links.open {
+        display: flex; flex-direction: column; position: fixed; inset: 64px 0 0;
+        background: var(--bg); padding: 2rem; gap: 0.5rem; z-index: 99;
+      }
+      .method-section { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">M</div>
+      ModelAtlas
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="finder.html">Finder</a></li>
+      <li><a href="leaderboard.html">Leaderboard</a></li>
+      <li><a href="compare.html">Compare</a></li>
+      <li><a href="methodology.html" class="active">Methodology</a></li>
+      <li><a href="finder.html" class="nav-cta btn" style="padding:0.4rem 1rem;font-size:0.88rem;">Start Finder →</a></li>
+    </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle navigation">☰</button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="page-tag">Scientific Evaluation Governance</div>
+  <h1>Evaluation Methodology & Architecture</h1>
+  <p>How ModelAtlas stores, calibrates, compares, and recommends frontier and open-weights models. Transparent, reproducible, and vendor-neutral.</p>
+  <div class="verification-strip">
+    <div class="v-pill">🛡️ <span>Zero Data Retention</span> (100% In-Browser)</div>
+    <div class="v-pill">📊 <span>384+ Models</span> Evaluated</div>
+    <div class="v-pill">🔬 <span>Multi-Metric Calibration</span> (SWE-bench / LMSYS / BFCL)</div>
+    <div class="v-pill">⚡ <span>Sub-15ms</span> Deterministic Inference</div>
+  </div>
+</header>
+
+<div class="methodology-wrap">
+
+  <!-- STICKY TOC -->
+  <aside class="toc-sticky">
+    <div class="toc-title">Table of Contents</div>
+    <ul class="toc-links">
+      <li><a href="#storage-architecture" class="active">1. Data Storage & Privacy</a></li>
+      <li><a href="#benchmark-normalization">2. Benchmark Normalization</a></li>
+      <li><a href="#radar-metrics">3. 6-Dimension Radar Formulation</a></li>
+      <li><a href="#recommendation-engine">4. Recommendation Algorithms</a></li>
+      <li><a href="#hardware-kvcache">5. Hardware Sizing & KV Cache</a></li>
+      <li><a href="#rag-advisor">6. In-Browser RAG Advisor</a></li>
+      <li><a href="#provenance">7. Benchmark Provenance</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content-area">
+
+    <!-- 1. DATA STORAGE & ARCHITECTURE -->
+    <section class="method-section" id="storage-architecture">
+      <span class="section-num">Section 01</span>
+      <h2>Data Architecture & Storage</h2>
+      <p>
+        ModelAtlas is engineered around a <strong>zero-backend, client-side data architecture</strong>. Unlike conventional SaaS platforms that require server roundtrips, database lookups, and API key billing, ModelAtlas indexes its entire corpus of 384+ models directly inside the user's browser runtime.
+      </p>
+
+      <div class="grid-2">
+        <div class="grid-card">
+          <div class="grid-card-title">📦 Structured In-Browser Corpus (models.js)</div>
+          <p>
+            The catalog is authored as a Universal Module Definition (UMD) package (<code>models.js</code>). Each model entry includes verified LMSYS Arena Elo ratings, SWE-bench Verified coding scores, MATH-500 accuracies, Berkeley Function Calling (BFCL) reliability, VRAM memory requirements, context limits, and token pricing rates.
+          </p>
+        </div>
+        <div class="grid-card">
+          <div class="grid-card-title">🛡️ Absolute Zero Data Retention (ZDR)</div>
+          <p>
+            Because all scoring, filtering, radar chart rendering, and questionnaire assessments execute locally in the client V8 JavaScript engine, <strong>zero prompts, company secrets, questionnaire answers, or hardware profiles ever leave your machine</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-green">
+        <div class="callout-title">✅ Operational Guarantee</div>
+        ModelAtlas does not run tracking pixels, user profiling cookies, or external recommendation telemetry. The entire application runs offline once loaded, achieving sub-15ms calculations and $0 hosting bills.
+      </div>
+    </section>
+
+    <!-- 2. BENCHMARK NORMALIZATION -->
+    <section class="method-section" id="benchmark-normalization">
+      <span class="section-num">Section 02</span>
+      <h2>Benchmark Calibration & Arena Elo Normalization</h2>
+      <p>
+        A foundational problem with public AI leaderboards is <strong>historical rating drift</strong>. Chatbot Arena's Elo system is an adaptive Bradley-Terry matchmaking scale. Older models from 2023 (such as GPT-4-0314, Qwen 1.5, or Claude-2) accumulated high historical Elos because they only competed against weak contemporaries.
+      </p>
+
+      <div class="callout callout-amber">
+        <div class="callout-title">⚠️ The Naive Elo Trap</div>
+        If raw Elo is sorted without temporal adjustments, GPT-4-0314 (1443 Elo) or Qwen1.5-110B (1431 Elo) would rank above Claude 3.7 Sonnet (1362 Elo) or OpenAI o3-mini (1360 Elo). This misleads users into picking deprecated models.
+      </div>
+
+      <h3>The ModelAtlas Effective Elo Solution</h3>
+      <p>
+        To preserve scientific ranking integrity without deleting historical records, ModelAtlas applies a verified legacy classification filter:
+      </p>
+
+      <div class="formula-card">
+        isObsoleteLegacy(m) := RegexMatch(m.name, m.id, [GPT-4-0314, Claude-1/2, Qwen1.5, Llama-2, Mistral-Medium, Starling-LM...])<br><br>
+        getEffectiveElo(m) := m.benchmarks.arenaElo - (isObsoleteLegacy(m) ? 250 : 0)
+        <div class="formula-expl">
+          A -250 Elo baseline normalization penalty restores modern frontier models (Claude 3.7, o3-mini, DeepSeek R1, Gemini 2.5 Pro) to their rightful leadership positions, while keeping historical models accessible for longitudinal analysis.
+        </div>
+      </div>
+
+      <table class="tech-table">
+        <thead>
+          <tr>
+            <th>Benchmark Metric</th>
+            <th>Primary Evaluation Target</th>
+            <th>Source Authority</th>
+            <th>Typical Frontier Range</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>LMSYS Arena Elo</strong></td>
+            <td>Blind human preference & conversational general intelligence</td>
+            <td>LMSYS Chatbot Arena</td>
+            <td>1,280 – 1,365 Elo</td>
+          </tr>
+          <tr>
+            <td><strong>SWE-bench Verified</strong></td>
+            <td>Multi-file GitHub repository software engineering & bug fixing</td>
+            <td>SWE-bench Verified (500 tasks)</td>
+            <td>48.0% – 70.3%</td>
+          </tr>
+          <tr>
+            <td><strong>HumanEval Pass@1</strong></td>
+            <td>Standalone algorithmic function generation & syntax correctness</td>
+            <td>OpenAI HumanEval</td>
+            <td>85.0% – 96.1%</td>
+          </tr>
+          <tr>
+            <td><strong>MATH-500 / AIME</strong></td>
+            <td>Doctoral-level mathematical proofing and competition logic</td>
+            <td>MATH-500 / AIME 2024-2025</td>
+            <td>80.0% – 97.9%</td>
+          </tr>
+          <tr>
+            <td><strong>BFCL Overall %</strong></td>
+            <td>Function calling AST validation, multi-tool chaining & JSON adherence</td>
+            <td>Berkeley Function Calling Leaderboard</td>
+            <td>80.0% – 91.2%</td>
+          </tr>
+          <tr>
+            <td><strong>MMLU-Pro</strong></td>
+            <td>Multidisciplinary reasoning across STEM, economics, and law</td>
+            <td>MMLU-Pro (10-choice)</td>
+            <td>75.0% – 84.8%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 3. RADAR METRICS -->
+    <section class="method-section" id="radar-metrics">
+      <span class="section-num">Section 03</span>
+      <h2>6-Dimension Radar Metric Formulations</h2>
+      <p>
+        The interactive radar chart on the Model Comparison page evaluates every LLM across six normalized axes (0 to 100):
+      </p>
+
+      <div class="formula-card">
+        Quality   := Math.min(100, Math.round(((getEffectiveElo(m) - 1100) / 270) * 100))<br>
+        Speed     := Math.min(100, Math.round(((m.speedTps || 70) / 140) * 100))<br>
+        Context   := Math.min(100, Math.round((Math.log10(m.contextTokens || 128000) - 4.5) / (Math.log10(2000000) - 4.5) * 100))<br>
+        Reasoning := Math.min(100, Math.round(m.benchmarks.math || (getEffectiveElo(m) - 1100) / 2.7))<br>
+        Coding    := Math.min(100, Math.round((sweBench * 0.6) + (codingEloScore * 0.4)))<br>
+        Value     := Math.min(100, Math.round((getEffectiveElo(m) * qualityScore) / Math.pow(blendedRate, 0.45) / 3800 * 100))
+        <div class="formula-expl">
+          Context scaling uses a logarithmic transformation so that a 2M token window (Gemini 2.5 Pro) scales proportionally alongside 128k and 200k windows without compressing the lower range.
+        </div>
+      </div>
+
+      <h3>Blended Token Economics Formula</h3>
+      <p>
+        Real-world API workloads process predominantly input prompt tokens with a smaller ratio of generated output tokens. Simple average pricing misrepresents enterprise cost:
+      </p>
+
+      <div class="formula-card">
+        Blended Cost / Million Tokens = (0.75 × Input Price) + (0.25 × Output Price)<br><br>
+        Monthly Bill = (Monthly Tokens / 1,000,000) × Blended Cost
+        <div class="formula-expl">
+          For self-hosted open-weights models, ModelAtlas estimates the equivalent amortized GPU compute footprint per million tokens (e.g. ~$0.07/M for 8B up to ~$1.80/M for 671B MoE).
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. RECOMMENDATION ENGINE -->
+    <section class="method-section" id="recommendation-engine">
+      <span class="section-num">Section 04</span>
+      <h2>The 3-Tier Multi-Attribute Recommendation Engine</h2>
+      <p>
+        The Model Finder does not use simplistic keyword matching. It implements <strong>Multi-Attribute Utility Theory (MAUT)</strong> combined with <strong>Elimination-by-Aspects (EBA)</strong>:
+      </p>
+
+      <div class="callout callout-cyan">
+        <div class="callout-title">Tier 1: Hard Constraint Pruning (Elimination-by-Aspects)</div>
+        Before mathematical utility scoring begins, candidate models that violate hard physical or regulatory boundaries are immediately pruned:
+        <ul style="margin: 0.5rem 0 0 1.25rem;">
+          <li><strong>Air-Gapped Sovereign:</strong> If the user selects on-premise air-gapped compliance, proprietary cloud models (Claude, GPT-4o, Gemini) receive a strict score of <code>0</code>.</li>
+          <li><strong>Consumer Local Hardware:</strong> If a user has an 8GB or 16GB machine, models with parameter counts >14B receive a score of <code>0</code> to prevent out-of-memory kernel panics.</li>
+          <li><strong>Zero Cost Budget:</strong> Paid proprietary APIs receive a strict filter if user specifies $0 budget without hosted free tier.</li>
+        </ul>
+      </div>
+
+      <div class="callout callout-amber">
+        <div class="callout-title">Tier 2: Dynamic Persona Utility Weighting (MAUT)</div>
+        The remaining candidates are scored against the user's workflow persona vector:
+        <table class="tech-table" style="margin-top:0.75rem;">
+          <thead>
+            <tr>
+              <th>Workflow Persona</th>
+              <th>Quality</th>
+              <th>Cost Efficiency</th>
+              <th>Inference Speed</th>
+              <th>Context</th>
+              <th>Privacy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Software Engineer (Coder)</strong></td>
+              <td><strong>35%</strong></td>
+              <td>10%</td>
+              <td>20%</td>
+              <td>15%</td>
+              <td>10%</td>
+            </tr>
+            <tr>
+              <td><strong>API SaaS Builder</strong></td>
+              <td>25%</td>
+              <td><strong>30%</strong></td>
+              <td>25%</td>
+              <td>10%</td>
+              <td>5%</td>
+            </tr>
+            <tr>
+              <td><strong>Enterprise CISO / Compliance</strong></td>
+              <td>30%</td>
+              <td>10%</td>
+              <td>10%</td>
+              <td>20%</td>
+              <td><strong>20%</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Student & Academic Researcher</strong></td>
+              <td>30%</td>
+              <td><strong>35%</strong></td>
+              <td>10%</td>
+              <td>15%</td>
+              <td>5%</td>
+            </tr>
+            <tr>
+              <td><strong>Content Creator / Writer</strong></td>
+              <td><strong>40%</strong></td>
+              <td>15%</td>
+              <td>15%</td>
+              <td>15%</td>
+              <td>5%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-green">
+        <div class="callout-title">Tier 3: Verified Benchmark Multipliers</div>
+        Models with proven, peer-reviewed benchmark wins receive targeted multipliers for matching workloads:
+        <ul style="margin: 0.5rem 0 0 1.25rem;">
+          <li>Repository refactoring with SWE-bench Verified $\ge 45\%$: <strong>+30% boost</strong></li>
+          <li>STEM & calculus proofing with MATH-500 $\ge 90\%$: <strong>+35% boost</strong></li>
+          <li>Autonomous agentic loops with BFCL $\ge 88\%$: <strong>+35% boost</strong></li>
+          <li>Whole-repo/document ingestion with Context $\ge 1\text{M tokens}$: <strong>+40% boost</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. HARDWARE SIZING -->
+    <section class="method-section" id="hardware-kvcache">
+      <span class="section-num">Section 05</span>
+      <h2>Local Hardware Sizing & KV Cache Memory Physics</h2>
+      <p>
+        A frequent failure mode for AI practitioners is downloading an open-weights model that exceeds their physical GPU VRAM. ModelAtlas calculates memory requirements using physical parameter quantization formulas:
+      </p>
+
+      <div class="formula-card">
+        VRAM (Model Weights Q4_K_M) ≈ Parameters (B) × 0.55 GB + 1.2 GB (Runtime Overhead)<br><br>
+        Examples:<br>
+        • 7B–8B Model  (Qwen 2.5 7B, Llama 3.1 8B)   := ~5.5 GB VRAM  → Fits 8GB Laptops / M-series Macs<br>
+        • 14B Model    (Qwen 2.5 14B, Phi-4)          := ~9.8 GB VRAM  → Fits 16GB GPUs (RTX 4060Ti / Mac 16GB)<br>
+        • 32B Model    (Qwen 2.5 32B, QwQ 32B)        := ~20.5 GB VRAM → Fits 24GB GPUs (RTX 3090/4090)<br>
+        • 70B Model    (Llama 3.3 70B, Qwen 2.5 72B)  := ~40.2 GB VRAM → Requires 2x 24GB GPUs or 64GB Mac Studio<br>
+        • 671B MoE     (DeepSeek R1, DeepSeek V3)     := ~400 GB+ VRAM → Requires 8x 80GB Datacenter Cluster
+      </div>
+
+      <h3>The KV Cache Footprint at Long Context</h3>
+      <p>
+        Running 128k or 256k context locally requires significant additional memory for the <strong>Key-Value (KV) Cache</strong>:
+      </p>
+
+      <div class="formula-card">
+        Memory_KV (Bytes) = 2 × n_layers × n_heads × d_head × n_tokens × bytes_per_element<br><br>
+        For a 70B model at 128k tokens in 16-bit precision:<br>
+        KV Cache alone consumes ~16GB to 32GB of VRAM in addition to model weights.
+        <div class="formula-expl">
+          ModelAtlas explicitly flags the KV cache requirements in AI Advisor responses and hardware guides, recommending FP8 KV cache or vLLM PagedAttention for long-context local deployments.
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. IN-BROWSER RAG ADVISOR -->
+    <section class="method-section" id="rag-advisor">
+      <span class="section-num">Section 06</span>
+      <h2>In-Browser RAG AI Advisor Engine</h2>
+      <p>
+        The ModelAtlas AI Advisor (<code>chat_widget.js</code>) is powered by a client-side Retrieval-Augmented Generation (RAG) knowledge engine. It indexes nine verified technical reference documents:
+      </p>
+
+      <div class="grid-2">
+        <div class="grid-card">
+          <div class="grid-card-title">📚 Domain Knowledge Corpus</div>
+          <p>
+            1. VRAM Hardware Sizing & Quantization<br>
+            2. Multi-GPU MoE Cluster Architecture<br>
+            3. Head-to-Head Frontier Showdowns<br>
+            4. Long-Context Needle-in-a-Haystack<br>
+            5. Free Access & Student Tier Economics<br>
+            6. Enterprise ZDR, HIPAA & SOC-2<br>
+            7. Prompt Caching & Cost Halving<br>
+            8. Anti-Cliché Writing Prompts<br>
+            9. Open-Weights Commercial Licensing
+          </p>
+        </div>
+        <div class="grid-card">
+          <div class="grid-card-title">🧠 Multi-Turn Conversational Memory</div>
+          <p>
+            The advisor maintains session memory across conversational turns, persisting user hardware constraints, budget preferences, and pronouns (e.g. resolving "Can it run on my machine?" to the last recommended model).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. PROVENANCE -->
+    <section class="method-section" id="provenance">
+      <span class="section-num">Section 07</span>
+      <h2>Provenance & Automated Synchronization</h2>
+      <p>
+        ModelAtlas maintains strict benchmark auditability. Metrics are parsed directly from authoritative sources via automated ingestion scripts (<code>scripts/ingest_lmsys_csv.js</code>, <code>scripts/sync_benchmarks.js</code>).
+      </p>
+      <div class="callout callout-cyan">
+        <div class="callout-title">Source Data Transparency</div>
+        Every metric traces back to its original public evaluation harness:
+        <ul style="margin: 0.5rem 0 0 1.25rem;">
+          <li>LMSYS Chatbot Arena Leaderboard CSV dumps (Chatbot Arena Bradley-Terry Elo)</li>
+          <li>Berkeley Function Calling Leaderboard (BFCL AST & Executable evaluation)</li>
+          <li>SWE-bench Verified GitHub evaluation logs (Princeton University)</li>
+          <li>Official OpenAI, Anthropic, Google DeepMind, and DeepSeek Research Technical Reports</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="finder.html">Finder</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="compare.html">Compare</a>
+      <a href="methodology.html">Methodology</a>
+    </div>
+    <p class="footer-copy">© 2026 ModelAtlas · Empirical, vendor-neutral AI model intelligence · Open & Free</p>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav hamburger toggle
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+
+  // Smooth scroll & active link highlight in TOC
+  const tocLinks = document.querySelectorAll('.toc-links a');
+  const sections = document.querySelectorAll('.method-section');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.offsetTop - 120;
+      if (window.scrollY >= top) current = sec.getAttribute('id');
+    });
+    tocLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  });
+</script>
+<script src="chat_widget.js"></script>
+</body>
+</html>

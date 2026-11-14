@@ -326,6 +326,7 @@
       <li><a href="finder.html">Finder</a></li>
       <li><a href="leaderboard.html">Leaderboard</a></li>
       <li><a href="compare.html">Compare</a></li>
+      <li><a href="methodology.html">Methodology</a></li>
       <li><a href="finder.html" class="nav-cta btn" style="padding:0.4rem 1rem;font-size:0.88rem;">Start Finder →</a></li>
     </ul>
     <button class="nav-hamburger" id="hamburger" aria-label="Menu">☰</button>
@@ -334,7 +335,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge"><span></span> Benchmark-informed · Updated Oct 2026</div>
+  <div class="hero-badge"><span></span> Benchmark-informed · Updated November 2026</div>
   <h1>Find Your Perfect<br>AI Model</h1>
   <p class="hero-sub">Answer a few tailored questions to get a model recommendation built around <em style="color:var(--amber-light);font-style:normal;font-weight:600;">YOUR workflow</em> — not just generic advice.</p>
   <div class="hero-actions">
@@ -463,6 +464,7 @@
       <a href="finder.html">Finder</a>
       <a href="leaderboard.html">Leaderboard</a>
       <a href="compare.html">Compare</a>
+      <a href="methodology.html">Methodology</a>
     </div>
     <p class="footer-copy">© 2026 ModelAtlas · Benchmark-informed AI model recommendations · Free to use</p>
   </div>
@@ -476,10 +478,23 @@
     document.getElementById('navLinks').classList.toggle('open');
   });
 
+  function isObsoleteLegacy(m) {
+    const text = ((m.name || '') + ' ' + (m.id || '')).trim();
+    return /\b(OpenChat|Starling|WizardLM|Llama-?2|SOLAR|Qwen1\.5|Qwen2(?![-.]?5)|Qwen-[0-9]+[bB]|NV-Llama|Vicuna|Guanaco|MPT|ChatGLM|Zephyr|Tulu|OpenAssistant|Mistral-Medium|Mixtral-8x7B|Mistral-7B|GPT-[34].*-(0314|0613|0301)|Claude-[12]|Claude-Instant)\b/i.test(text);
+  }
+
+  function getEffectiveElo(m) {
+    const raw = m.benchmarks?.arenaElo;
+    if (raw == null) return 0;
+    let elo = raw;
+    if (isObsoleteLegacy(m)) elo -= 250;
+    return elo;
+  }
+
   // Featured models from unified dataset
   const allModels = window.MODELS_DATA || [];
-  // Grab top 6 models by Arena Elo
-  const featured = [...allModels].sort((a, b) => (b.benchmarks.arenaElo || 0) - (a.benchmarks.arenaElo || 0)).slice(0, 6);
+  // Grab top 6 modern frontier models by Effective Arena Elo
+  const featured = [...allModels].filter(m => !isObsoleteLegacy(m) && m.benchmarks?.arenaElo != null).sort((a, b) => getEffectiveElo(b) - getEffectiveElo(a)).slice(0, 6);
 
   const grid = document.getElementById('modelsGrid');
   grid.innerHTML = '';
