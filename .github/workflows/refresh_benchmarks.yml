@@ -1,0 +1,80 @@
+name: Automated Benchmark Sync
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC (weekly refresh matching LMSYS battle calculation cycles)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force re-sync and verification even if no upstream CSV diff'
+        required: false
+        default: false
+        type: boolean
+      custom_csv_url:
+        description: 'Optional custom LMSYS or benchmark CSV URL'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  sync-benchmarks:
+    runs-on: ubuntu-latest
+    name: Sync, Calibrate & Deploy Benchmarks
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Ingest Upstream Benchmark Data
+        run: |
+          if [ -n "${{ inputs.custom_csv_url }}" ]; then
+            echo "🌐 Ingesting from custom CSV URL: ${{ inputs.custom_csv_url }}"
+            node scripts/ingest_lmsys_csv.js "${{ inputs.custom_csv_url }}"
+          else
+            echo "🔄 Validating and synchronizing benchmark catalog..."
+            node scripts/sync_benchmarks.js
+          fi
+
+      - name: Run ModelAtlas RAG Advisor Test Suite
+        run: node scripts/test_rag_advisor.js
+
+      - name: Run Leaderboard Category Conformance Suite
+        run: node scripts/test_leaderboard_page.js
+
+      - name: Run 14-Persona Scenario Evaluation Suite
+        run: node scripts/eval_scenarios.js
+
+      - name: Run Benchmark Provenance Suite
+        run: node scripts/test_benchmark_provenance.js
+
+      - name: Commit and Deploy Updated Benchmarks
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "📦 Detected updated benchmark datasets. Committing..."
+            git add data/models.json models.js
+            git commit -m "chore(automation): sync benchmark dataset and recalculate ratings [skip ci]"
+            git push origin main
+            
+            echo "🚀 Merging updates to gh-pages deployment branch..."
+            git checkout gh-pages
+            git merge main --no-edit
+            git push origin gh-pages
+            echo "✅ Live deployment updated successfully!"
+          else
+            echo "✨ No benchmark drift detected. Dataset is already up-to-date."
+          fi

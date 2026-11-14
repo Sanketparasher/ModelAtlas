@@ -1,0 +1,33 @@
+name: ModelAtlas Continuous Integration
+
+on:
+  push:
+    branches: [ main, gh-pages ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Benchmark & Decision Engine Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify Benchmark Provenance & Coverage
+        run: node scripts/test_benchmark_provenance.js
+
+      - name: Test AI Advisor RAG Engine (21 Tests)
+        run: node scripts/test_rag_advisor.js
+
+      - name: Test Leaderboard 8 Categories & Full Catalog
+        run: node scripts/test_leaderboard_page.js
+
+      - name: Test Finder 14 Real-World Workload Scenarios
+        run: node scripts/eval_scenarios.js
