@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scoring Methodology & Architecture — ModelAtlas</title>
-  <meta name="description" content="Technical documentation of the ModelAtlas empirical evaluation pipeline: data storage architecture, benchmark calibration, 6-dimension radar scoring, and multi-attribute recommendation algorithms." />
+  <title>How ModelAtlas Works — Interactive Methodology & Architecture</title>
+  <meta name="description" content="Visual and interactive exploration of how ModelAtlas indexes 384+ models, normalizes historical Arena Elo drift, calculates 6D radar metrics, and recommends the best LLM for your workload." />
   <meta name="keywords" content="LLM benchmark methodology, ModelAtlas architecture, Chatbot Arena Elo normalization, SWE-bench scoring, KV cache calculation, AI recommendation algorithms" />
   <link rel="canonical" href="https://sanketparasher.github.io/ModelAtlas/methodology.html" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23040b13'/%3E%3Cpath d='M7 24V8l9 10 9-10v16' fill='none' stroke='url(%23g)' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23f59e0b'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E" />
@@ -13,14 +13,14 @@
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="ModelAtlas" />
   <meta property="og:url" content="https://sanketparasher.github.io/ModelAtlas/methodology.html" />
-  <meta property="og:title" content="Scoring Methodology & Technical Architecture — ModelAtlas" />
-  <meta property="og:description" content="How ModelAtlas indexes 384+ models, calibrates empirical benchmarks, normalizes historical Arena Elo drift, and powers deterministic recommendation algorithms." />
+  <meta property="og:title" content="How ModelAtlas Works — Interactive Methodology & Architecture" />
+  <meta property="og:description" content="Picturesque, interactive walkthrough of our zero-retention data vault, Bradley-Terry Elo calibration, 6D radar morphing, and hardware memory physics." />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://sanketparasher.github.io/ModelAtlas/methodology.html" />
-  <meta name="twitter:title" content="Scoring Methodology & Technical Architecture — ModelAtlas" />
-  <meta name="twitter:description" content="Transparent, peer-verifiable technical breakdown of ModelAtlas evaluation pipelines and algorithms." />
+  <meta name="twitter:title" content="How ModelAtlas Works — Interactive Methodology & Architecture" />
+  <meta name="twitter:description" content="Picturesque, interactive walkthrough of our zero-retention data vault, Bradley-Terry Elo calibration, and hardware memory physics." />
 
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -28,7 +28,7 @@
     "@context": "https://schema.org",
     "@type": "TechArticle",
     "headline": "ModelAtlas Empirical Benchmark Methodology and Evaluation Architecture",
-    "description": "Scientific specification of how ModelAtlas stores, normalizes, compares, and recommends Large Language Models.",
+    "description": "Scientific and interactive specification of how ModelAtlas stores, normalizes, compares, and recommends Large Language Models.",
     "author": {
       "@type": "Organization",
       "name": "ModelAtlas Research"
@@ -76,36 +76,37 @@
 
     /* HEADER */
     .page-header {
-      padding: 3.5rem 2rem 2.5rem; text-align: center;
-      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(6,182,212,0.18) 0%, transparent 70%);
+      padding: 4rem 2rem 3rem; text-align: center;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(6,182,212,0.2) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 30% at 80% 30%, rgba(124,58,237,0.12) 0%, transparent 60%);
       border-bottom: 1px solid var(--border);
     }
     .page-tag {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--cyan-light); background: var(--cyan-dim); border: 1px solid rgba(6,182,212,0.3);
-      padding: 0.35rem 0.9rem; border-radius: 99px; margin-bottom: 1rem;
+      padding: 0.35rem 0.95rem; border-radius: 99px; margin-bottom: 1.2rem;
     }
-    .page-header h1 { font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 900; letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 1rem; }
-    .page-header p { color: var(--text-muted); font-size: 1.1rem; max-width: 820px; margin: 0 auto 1.5rem; }
+    .page-header h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 900; letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 1rem; }
+    .page-header p { color: var(--text-muted); font-size: 1.15rem; max-width: 820px; margin: 0 auto 1.75rem; }
 
     .verification-strip {
       display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.75rem;
     }
     .v-pill {
-      display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600;
-      padding: 0.35rem 0.85rem; border-radius: 99px; background: rgba(255,255,255,0.04);
+      display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600;
+      padding: 0.4rem 0.95rem; border-radius: 99px; background: rgba(255,255,255,0.04);
       border: 1px solid var(--border); color: var(--text);
     }
     .v-pill span { color: var(--amber-light); font-weight: 700; }
 
-    /* CONTENT LAYOUT */
+    /* MAIN WRAP */
     .methodology-wrap {
-      max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 6rem;
+      max-width: 1240px; margin: 0 auto; padding: 3rem 1.5rem 6rem;
       display: grid; grid-template-columns: 260px 1fr; gap: 2.5rem; align-items: start;
     }
 
-    /* SIDEBAR TOC */
+    /* STICKY TOC */
     .toc-sticky {
       position: sticky; top: 84px; background: var(--bg2); border: 1px solid var(--border);
       border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
@@ -120,55 +121,204 @@
       color: var(--amber-light); background: rgba(245,158,11,0.1); border-left: 2px solid var(--amber);
     }
 
-    /* MAIN CONTENT */
+    /* CONTENT AREA */
     .content-area { min-width: 0; }
-    .method-section {
+    .visual-section {
       background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 2.25rem; margin-bottom: 2rem; position: relative; overflow: hidden;
+      padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
     }
-    .method-section::before {
+    .visual-section::before {
       content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
       background: linear-gradient(180deg, var(--amber), var(--cyan));
     }
-    .section-num {
+    .section-badge {
       display: inline-block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em;
       text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem;
     }
-    .method-section h2 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; color: #fff; }
-    .method-section p { color: var(--text-muted); font-size: 0.96rem; margin-bottom: 1.25rem; line-height: 1.7; }
-    .method-section h3 { font-size: 1.15rem; font-weight: 700; margin: 1.5rem 0 0.6rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .visual-section h2 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.8rem; color: #fff; }
+    .visual-section > p { color: var(--text-muted); font-size: 1rem; margin-bottom: 1.5rem; line-height: 1.7; }
 
-    /* CALLOUT BOXES */
-    .callout {
+    /* PLAIN ENGLISH TLDR BOX */
+    .tldr-box {
+      background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(124,58,237,0.06));
+      border: 1px solid rgba(6,182,212,0.25); border-radius: var(--radius);
+      padding: 1.1rem 1.4rem; margin-bottom: 1.75rem;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .tldr-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1.2; margin-top: 2px; }
+    .tldr-text { font-size: 0.94rem; color: #e2e8f0; line-height: 1.55; }
+    .tldr-text strong { color: var(--cyan-light); }
+
+    /* ─────────────────────────────────────────
+       PICTURESQUE COMPONENT 1: PIPELINE DIAGRAM
+       ───────────────────────────────────────── */
+    .pipeline-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;
+      margin: 1.75rem 0; position: relative;
+    }
+    .pipe-step {
+      background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.25s;
+      position: relative;
+    }
+    .pipe-step:hover, .pipe-step.active {
+      border-color: var(--amber); transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(245,158,11,0.15); background: rgba(245,158,11,0.04);
+    }
+    .pipe-num {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--bg4);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;
+      font-weight: 800; color: var(--amber-light); margin-bottom: 0.6rem; border: 1px solid var(--border);
+    }
+    .pipe-step.active .pipe-num { background: var(--amber); color: #040b13; }
+    .pipe-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .pipe-title { font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 0.25rem; }
+    .pipe-sub { font-size: 0.72rem; color: var(--text-dim); line-height: 1.35; }
+    .pipe-card-detail {
+      background: #02060b; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 1.5rem; margin-top: 1rem; font-size: 0.92rem; color: var(--text-muted);
+      border-left: 3px solid var(--amber); line-height: 1.6; animation: fadeIn 0.3s ease;
+    }
+
+    /* ─────────────────────────────────────────
+       PICTURESQUE COMPONENT 2: ELO TIME MACHINE
+       ───────────────────────────────────────── */
+    .time-machine-container {
       background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1.25rem 1.5rem; margin: 1.25rem 0; font-size: 0.9rem; line-height: 1.6;
+      padding: 1.75rem; margin: 1.75rem 0;
     }
-    .callout-amber { border-left: 3px solid var(--amber); background: rgba(245,158,11,0.05); }
-    .callout-cyan { border-left: 3px solid var(--cyan); background: rgba(6,182,212,0.05); }
-    .callout-green { border-left: 3px solid var(--green); background: rgba(34,197,94,0.05); }
-    .callout-title { font-weight: 700; margin-bottom: 0.35rem; color: #fff; display: flex; align-items: center; gap: 6px; }
-
-    /* MATH & CODE FORMULA BLOCKS */
-    .formula-card {
-      background: #02060b; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
-      padding: 1.25rem; margin: 1.25rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
-      color: #38bdf8; overflow-x: auto;
+    .tm-toggle-bar {
+      display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+      flex-wrap: wrap;
     }
-    .formula-expl { font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.6rem; }
+    .tm-toggle-btn {
+      background: var(--bg4); border: 1px solid var(--border); color: var(--text-muted);
+      padding: 0.55rem 1.25rem; border-radius: 99px; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .tm-toggle-btn:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+    .tm-toggle-btn.active {
+      background: var(--amber); color: #040b13; border-color: var(--amber);
+      box-shadow: 0 0 20px rgba(245,158,11,0.3);
+    }
+    .tm-cards-list {
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .tm-card {
+      background: #050e18; border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; transition: all 0.35s ease;
+    }
+    .tm-card.legacy-demoted { opacity: 0.55; border-color: rgba(239,68,68,0.25); }
+    .tm-card.frontier-elevated { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.03); }
+    .tm-left { display: flex; align-items: center; gap: 12px; }
+    .tm-rank { font-weight: 900; font-size: 1.1rem; width: 32px; color: var(--text-muted); }
+    .tm-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
+    .tm-year { font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .year-2023 { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .year-2026 { background: rgba(34,197,94,0.15); color: #86efac; }
+    .tm-right { display: flex; align-items: center; gap: 1rem; }
+    .tm-elo { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.05rem; }
+    .tm-status-pill { font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+    .pill-inflated { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .pill-calibrated { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
 
-    /* COMPARISON GRIDS */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.25rem 0; }
-    .grid-card {
+    /* ─────────────────────────────────────────
+       PICTURESQUE COMPONENT 3: PERSONA RADAR SANDBOX
+       ───────────────────────────────────────── */
+    .radar-sandbox-card {
       background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1.25rem; font-size: 0.88rem;
+      padding: 1.75rem; margin: 1.75rem 0;
+      display: grid; grid-template-columns: 320px 1fr; gap: 2rem; align-items: center;
     }
-    .grid-card-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; color: #fff; }
+    .rs-controls { display: flex; flex-direction: column; gap: 0.6rem; }
+    .rs-persona-btn {
+      background: var(--bg4); border: 1px solid var(--border); color: var(--text-muted);
+      padding: 0.75rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.88rem;
+      cursor: pointer; transition: all 0.2s; text-align: left; display: flex; align-items: center; justify-content: space-between;
+      font-family: inherit;
+    }
+    .rs-persona-btn:hover { color: #fff; border-color: rgba(245,158,11,0.3); }
+    .rs-persona-btn.active {
+      background: rgba(245,158,11,0.12); color: #fff; border-color: var(--amber);
+      box-shadow: 0 4px 15px rgba(245,158,11,0.15);
+    }
+    .rs-canvas-wrap {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    #miniRadarCanvas { max-width: 100%; height: auto; }
+    .rs-caption { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem; text-align: center; }
 
-    /* TABLE */
-    .tech-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.86rem; }
-    .tech-table th { background: var(--bg3); padding: 0.75rem 1rem; text-align: left; font-weight: 700; color: var(--text); border-bottom: 1px solid var(--border); }
-    .tech-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-muted); }
-    .tech-table tr:hover td { background: rgba(255,255,255,0.02); }
+    /* ─────────────────────────────────────────
+       PICTURESQUE COMPONENT 4: HARDWARE MEMORY SIZER
+       ───────────────────────────────────────── */
+    .hardware-infographic-card {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.75rem; margin: 1.75rem 0;
+    }
+    .hw-slider-box {
+      margin-bottom: 2rem; padding: 1.25rem; background: var(--bg4); border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .hw-slider-label {
+      display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 700;
+      margin-bottom: 0.75rem; color: var(--text);
+    }
+    .hw-slider-label span { color: var(--cyan-light); font-family: 'JetBrains Mono', monospace; }
+    .hw-range {
+      width: 100%; accent-color: var(--cyan); cursor: pointer; height: 6px;
+    }
+    .hw-tier-cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem;
+    }
+    .hw-device-card {
+      background: #050e18; border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .hw-device-title { font-weight: 700; font-size: 0.92rem; color: #fff; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 6px; }
+    .hw-model-name { font-size: 0.75rem; color: var(--amber-light); margin-bottom: 0.75rem; font-weight: 600; }
+    .hw-bar-bg { height: 10px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; margin-bottom: 0.5rem; display: flex; }
+    .hw-bar-weights { height: 100%; background: var(--cyan); border-radius: 99px 0 0 99px; transition: width 0.3s; }
+    .hw-bar-kv { height: 100%; background: #f43f5e; transition: width 0.3s; }
+    .hw-legend { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); }
+
+    /* ─────────────────────────────────────────
+       PICTURESQUE COMPONENT 5: 3-STAGE ELIMINATION FUNNEL
+       ───────────────────────────────────────── */
+    .funnel-container {
+      display: flex; flex-direction: column; gap: 0.85rem; margin: 1.75rem 0;
+    }
+    .funnel-level {
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      position: relative; transition: all 0.2s;
+    }
+    .funnel-lvl-1 { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); width: 100%; }
+    .funnel-lvl-2 { background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.3); width: 85%; margin: 0 auto; }
+    .funnel-lvl-3 { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); width: 70%; margin: 0 auto; }
+    .funnel-lvl-4 { background: rgba(34,197,94,0.15); border: 1.5px solid rgba(34,197,94,0.5); width: 55%; margin: 0 auto; }
+    .funnel-label { font-weight: 800; font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .funnel-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    .funnel-count {
+      font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.15rem;
+      background: rgba(0,0,0,0.4); padding: 0.3rem 0.8rem; border-radius: 8px;
+    }
+
+    /* COLLAPSIBLE MATH DRAWER */
+    details.math-drawer {
+      background: #02060b; border: 1px solid var(--border); border-radius: var(--radius);
+      margin: 1.25rem 0; overflow: hidden;
+    }
+    details.math-drawer summary {
+      padding: 0.9rem 1.25rem; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+      color: var(--text-muted); display: flex; align-items: center; justify-content: space-between;
+      user-select: none; transition: color 0.2s;
+    }
+    details.math-drawer summary:hover { color: #fff; background: rgba(255,255,255,0.02); }
+    details.math-drawer[open] summary { border-bottom: 1px solid var(--border); color: var(--amber-light); }
+    .drawer-content { padding: 1.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #38bdf8; line-height: 1.7; }
+    .drawer-expl { font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.5rem; }
 
     /* FOOTER */
     footer { border-top: 1px solid var(--border); padding: 3rem 2rem; background: var(--bg2); }
@@ -182,7 +332,8 @@
     @media (max-width: 900px) {
       .methodology-wrap { grid-template-columns: 1fr; }
       .toc-sticky { display: none; }
-      .grid-2 { grid-template-columns: 1fr; }
+      .radar-sandbox-card { grid-template-columns: 1fr; }
+      .funnel-lvl-2, .funnel-lvl-3, .funnel-lvl-4 { width: 100%; }
     }
     @media (max-width: 768px) {
       .nav-links { display: none; }
@@ -191,8 +342,9 @@
         display: flex; flex-direction: column; position: fixed; inset: 64px 0 0;
         background: var(--bg); padding: 2rem; gap: 0.5rem; z-index: 99;
       }
-      .method-section { padding: 1.5rem; }
+      .visual-section { padding: 1.5rem; }
     }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
@@ -219,10 +371,10 @@
 <!-- PAGE HEADER -->
 <header class="page-header">
   <div class="page-tag">Scientific Evaluation Governance</div>
-  <h1>Evaluation Methodology & Architecture</h1>
-  <p>How ModelAtlas stores, calibrates, compares, and recommends frontier and open-weights models. Transparent, reproducible, and vendor-neutral.</p>
+  <h1>How ModelAtlas Works</h1>
+  <p>An interactive, visual walkthrough of our zero-retention data vault, Bradley-Terry Elo calibration, 6D radar morphing, and hardware memory physics.</p>
   <div class="verification-strip">
-    <div class="v-pill">🛡️ <span>Zero Data Retention</span> (100% In-Browser)</div>
+    <div class="v-pill">🛡️ <span>Zero Data Retention</span> (100% Client-Side)</div>
     <div class="v-pill">📊 <span>384+ Models</span> Evaluated</div>
     <div class="v-pill">🔬 <span>Multi-Metric Calibration</span> (SWE-bench / LMSYS / BFCL)</div>
     <div class="v-pill">⚡ <span>Sub-15ms</span> Deterministic Inference</div>
@@ -233,335 +385,402 @@
 
   <!-- STICKY TOC -->
   <aside class="toc-sticky">
-    <div class="toc-title">Table of Contents</div>
+    <div class="toc-title">Visual Roadmap</div>
     <ul class="toc-links">
-      <li><a href="#storage-architecture" class="active">1. Data Storage & Privacy</a></li>
-      <li><a href="#benchmark-normalization">2. Benchmark Normalization</a></li>
-      <li><a href="#radar-metrics">3. 6-Dimension Radar Formulation</a></li>
-      <li><a href="#recommendation-engine">4. Recommendation Algorithms</a></li>
-      <li><a href="#hardware-kvcache">5. Hardware Sizing & KV Cache</a></li>
-      <li><a href="#rag-advisor">6. In-Browser RAG Advisor</a></li>
-      <li><a href="#provenance">7. Benchmark Provenance</a></li>
+      <li><a href="#pipeline-diagram" class="active">1. The Evaluation Journey</a></li>
+      <li><a href="#time-machine">2. The Elo Time Machine</a></li>
+      <li><a href="#radar-sandbox">3. Radar Persona Sandbox</a></li>
+      <li><a href="#funnel-diagram">4. 3-Stage Elimination Funnel</a></li>
+      <li><a href="#hardware-infographic">5. Hardware & KV Cache Physics</a></li>
+      <li><a href="#provenance-vault">6. The Data Vault & Privacy</a></li>
     </ul>
   </aside>
 
   <!-- CONTENT -->
   <main class="content-area">
 
-    <!-- 1. DATA STORAGE & ARCHITECTURE -->
-    <section class="method-section" id="storage-architecture">
-      <span class="section-num">Section 01</span>
-      <h2>Data Architecture & Storage</h2>
-      <p>
-        ModelAtlas is engineered around a <strong>zero-backend, client-side data architecture</strong>. Unlike conventional SaaS platforms that require server roundtrips, database lookups, and API key billing, ModelAtlas indexes its entire corpus of 384+ models directly inside the user's browser runtime.
-      </p>
+    <!-- 1. INTERACTIVE PIPELINE DIAGRAM -->
+    <section class="visual-section" id="pipeline-diagram">
+      <span class="section-badge">Visual Architecture 01</span>
+      <h2>The Life Cycle of an AI Model in ModelAtlas</h2>
+      <p>Click any stage in the pipeline below to see the live data transformation that occurs before a recommendation reaches your screen.</p>
 
-      <div class="grid-2">
-        <div class="grid-card">
-          <div class="grid-card-title">📦 Structured In-Browser Corpus (models.js)</div>
-          <p>
-            The catalog is authored as a Universal Module Definition (UMD) package (<code>models.js</code>). Each model entry includes verified LMSYS Arena Elo ratings, SWE-bench Verified coding scores, MATH-500 accuracies, Berkeley Function Calling (BFCL) reliability, VRAM memory requirements, context limits, and token pricing rates.
-          </p>
-        </div>
-        <div class="grid-card">
-          <div class="grid-card-title">🛡️ Absolute Zero Data Retention (ZDR)</div>
-          <p>
-            Because all scoring, filtering, radar chart rendering, and questionnaire assessments execute locally in the client V8 JavaScript engine, <strong>zero prompts, company secrets, questionnaire answers, or hardware profiles ever leave your machine</strong>.
-          </p>
+      <div class="tldr-box">
+        <div class="tldr-icon">💡</div>
+        <div class="tldr-text">
+          <strong>In Plain English:</strong> Raw AI benchmarks on Twitter and arXiv are noisy, unstandardized, and often misleading. ModelAtlas pulls raw evaluation dumps, standardizes them across 6 normalized dimensions, runs them through an inflation-adjustment filter, and pairs them to your hardware in under 15 milliseconds.
         </div>
       </div>
 
-      <div class="callout callout-green">
-        <div class="callout-title">✅ Operational Guarantee</div>
-        ModelAtlas does not run tracking pixels, user profiling cookies, or external recommendation telemetry. The entire application runs offline once loaded, achieving sub-15ms calculations and $0 hosting bills.
+      <!-- Interactive Pipeline Nodes -->
+      <div class="pipeline-grid" id="pipelineGrid">
+        <div class="pipe-step active" data-step="0">
+          <div class="pipe-num">1</div>
+          <div class="pipe-icon">🌐</div>
+          <div class="pipe-title">Raw Ingestion</div>
+          <div class="pipe-sub">LMSYS, BFCL, SWE-bench CSVs</div>
+        </div>
+        <div class="pipe-step" data-step="1">
+          <div class="pipe-num">2</div>
+          <div class="pipe-icon">🛡️</div>
+          <div class="pipe-title">Client-Side Vault</div>
+          <div class="pipe-sub">Zero-Retention In-Browser Index</div>
+        </div>
+        <div class="pipe-step" data-step="2">
+          <div class="pipe-num">3</div>
+          <div class="pipe-icon">⚖️</div>
+          <div class="pipe-title">Elo Calibration</div>
+          <div class="pipe-sub">Bradley-Terry Scale Inflation Fix</div>
+        </div>
+        <div class="pipe-step" data-step="3">
+          <div class="pipe-num">4</div>
+          <div class="pipe-icon">🕸️</div>
+          <div class="pipe-title">6D Radar Morph</div>
+          <div class="pipe-sub">Quality, Speed, Context, Value</div>
+        </div>
+        <div class="pipe-step" data-step="4">
+          <div class="pipe-num">5</div>
+          <div class="pipe-icon">🏆</div>
+          <div class="pipe-title">Decision Match</div>
+          <div class="pipe-sub">Hardware & Workflow Fit</div>
+        </div>
+      </div>
+
+      <div class="pipe-card-detail" id="pipeDetail">
+        <strong>Stage 1: Raw Ingestion & Metric Harmonization</strong><br>
+        Automated GitHub Actions pull public evaluation tables directly from LMSYS Chatbot Arena dumps (1M+ human blind battles), Berkeley Function Calling Leaderboards (BFCL tool execution), and Princeton SWE-bench Verified logs.
       </div>
     </section>
 
-    <!-- 2. BENCHMARK NORMALIZATION -->
-    <section class="method-section" id="benchmark-normalization">
-      <span class="section-num">Section 02</span>
-      <h2>Benchmark Calibration & Arena Elo Normalization</h2>
+    <!-- 2. INTERACTIVE ELO TIME MACHINE -->
+    <section class="visual-section" id="time-machine">
+      <span class="section-badge">Interactive Experiment 02</span>
+      <h2>The Elo Inflation Time Machine</h2>
       <p>
-        A foundational problem with public AI leaderboards is <strong>historical rating drift</strong>. Chatbot Arena's Elo system is an adaptive Bradley-Terry matchmaking scale. Older models from 2023 (such as GPT-4-0314, Qwen 1.5, or Claude-2) accumulated high historical Elos because they only competed against weak contemporaries.
+        Why don't we rank GPT-4-0314 as the #1 model in the world? Toggle the live time-machine below to see how Bradley-Terry matchmaking drift distorts raw numbers without ModelAtlas calibration.
       </p>
 
-      <div class="callout callout-amber">
-        <div class="callout-title">⚠️ The Naive Elo Trap</div>
-        If raw Elo is sorted without temporal adjustments, GPT-4-0314 (1443 Elo) or Qwen1.5-110B (1431 Elo) would rank above Claude 3.7 Sonnet (1362 Elo) or OpenAI o3-mini (1360 Elo). This misleads users into picking deprecated models.
+      <div class="tldr-box">
+        <div class="tldr-icon">🕰️</div>
+        <div class="tldr-text">
+          <strong>The Problem:</strong> When GPT-4 launched in March 2023, it battled weak models like GPT-3.5 and Llama 1, earning a massive historical Elo of <strong>1443</strong>. Modern champions like Claude 3.7 Sonnet (<strong>1362</strong>) only fight super-intelligent opponents. Raw rankings create a broken trust signal by ranking ancient 2023 models above modern frontier AI.
+        </div>
       </div>
 
-      <h3>The ModelAtlas Effective Elo Solution</h3>
+      <div class="time-machine-container">
+        <div class="tm-toggle-bar">
+          <button class="tm-toggle-btn active" id="btnCalibrated" onclick="setEloView(true)">
+            ✅ ModelAtlas Calibrated View (Accurate 2026)
+          </button>
+          <button class="tm-toggle-btn" id="btnRaw" onclick="setEloView(false)">
+            ❌ Raw Uncalibrated Elo (Distorted Historical)
+          </button>
+        </div>
+
+        <div class="tm-cards-list" id="tmCardsList">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <details class="math-drawer">
+        <summary>🔬 For Math & Research Nerds: The Normalization Formula ▾</summary>
+        <div class="drawer-content">
+          $$\text{isObsoleteLegacy}(m) := \text{RegexMatch}(m, [\text{GPT-4-0314}, \text{Claude-1}, \text{Qwen1.5}, \text{Llama-2}, \dots])$$
+          $$\text{EffectiveElo}(m) := \text{RawElo}(m) - (\text{isObsoleteLegacy}(m) \;?\; 250 : 0)$$
+          <div class="drawer-expl">
+            A -250 Elo correction penalty calibrates the 2023 baseline against contemporary frontier matchmaking distributions without deleting historical models from research archives.
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 3. INTERACTIVE RADAR SANDBOX -->
+    <section class="visual-section" id="radar-sandbox">
+      <span class="section-badge">Interactive Simulation 03</span>
+      <h2>Persona Radar Morph Sandbox</h2>
       <p>
-        To preserve scientific ranking integrity without deleting historical records, ModelAtlas applies a verified legacy classification filter:
+        Click each workflow archetype below to watch the 6-dimension evaluation polygon morph in real time, illustrating how Multi-Attribute Utility Theory (MAUT) reshapes the scoring landscape.
       </p>
 
-      <div class="formula-card">
-        isObsoleteLegacy(m) := RegexMatch(m.name, m.id, [GPT-4-0314, Claude-1/2, Qwen1.5, Llama-2, Mistral-Medium, Starling-LM...])<br><br>
-        getEffectiveElo(m) := m.benchmarks.arenaElo - (isObsoleteLegacy(m) ? 250 : 0)
-        <div class="formula-expl">
-          A -250 Elo baseline normalization penalty restores modern frontier models (Claude 3.7, o3-mini, DeepSeek R1, Gemini 2.5 Pro) to their rightful leadership positions, while keeping historical models accessible for longitudinal analysis.
+      <div class="tldr-box">
+        <div class="tldr-icon">🕸️</div>
+        <div class="tldr-text">
+          <strong>In Plain English:</strong> There is no single "best" AI model. A software engineer refactoring a repo cares about SWE-bench coding and inference speed; a corporate lawyer cares about privacy and massive document context; a broke solo founder cares about intelligence per dollar. Watch the radar polygon adapt to each persona below.
+        </div>
+      </div>
+
+      <div class="radar-sandbox-card">
+        <div class="rs-controls">
+          <div style="font-size:0.75rem;font-weight:800;letter-spacing:0.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.4rem;">Select Workflow Persona:</div>
+          <button class="rs-persona-btn active" onclick="morphRadar('coder', this)">
+            <span>💻 Software Engineer</span>
+            <span style="font-size:0.75rem;color:var(--cyan);">Coding + Speed</span>
+          </button>
+          <button class="rs-persona-btn" onclick="morphRadar('api', this)">
+            <span>🔌 High-Volume API SaaS</span>
+            <span style="font-size:0.75rem;color:var(--amber);">Sub-$0.25 + JSON</span>
+          </button>
+          <button class="rs-persona-btn" onclick="morphRadar('enterprise', this)">
+            <span>🏢 Sovereign Enterprise</span>
+            <span style="font-size:0.75rem;color:var(--purple);">Air-Gapped + Context</span>
+          </button>
+          <button class="rs-persona-btn" onclick="morphRadar('student', this)">
+            <span>🎒 Academic Researcher</span>
+            <span style="font-size:0.75rem;color:var(--green);">MATH-500 + $0 Cost</span>
+          </button>
+          <button class="rs-persona-btn" onclick="morphRadar('creator', this)">
+            <span>✍️ Longform Book Author</span>
+            <span style="font-size:0.75rem;color:#f472b6;">Nuance + Anti-Cliché</span>
+          </button>
+        </div>
+
+        <div class="rs-canvas-wrap">
+          <canvas id="miniRadarCanvas" width="380" height="320"></canvas>
+          <div class="rs-caption" id="radarCaption">Software Engineer Profile: Heavy emphasis on SWE-bench Verified (70.3%) and Coding Arena Elo.</div>
+        </div>
+      </div>
+
+      <details class="math-drawer">
+        <summary>🔬 Mathematical Utility Function: Multi-Attribute Utility Theory (MAUT) ▾</summary>
+        <div class="drawer-content">
+          $$U(m) = \sum_{d \in \text{Dims}} w_d \cdot S_d(m) \cdot \prod_{b \in \text{Boosts}} \beta_b(m)$$
+          $$\text{where } \sum w_d = 1.0 \quad \text{and } S_d(m) \in [0, 100]$$
+          <div class="drawer-expl">
+            Dims = {Quality, CostEfficiency, Speed, Context, Privacy, Reliability}. Boosts (β) include empirical milestone wins such as SWE-bench ≥ 45% (1.30x) and MATH-500 ≥ 90% (1.35x).
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 4. 3-STAGE ELIMINATION FUNNEL -->
+    <section class="visual-section" id="funnel-diagram">
+      <span class="section-badge">Decision Architecture 04</span>
+      <h2>The 3-Stage Elimination Funnel</h2>
+      <p>How ModelAtlas narrows down 384 candidate models into your top champion and runner-up in under 15 milliseconds.</p>
+
+      <div class="tldr-box">
+        <div class="tldr-icon">🌪️</div>
+        <div class="tldr-text">
+          <strong>The Process:</strong> Rather than evaluating every model on every dimension, ModelAtlas uses <strong>Elimination-by-Aspects (EBA)</strong>. We first eliminate models that would literally crash your computer (VRAM overflow) or get you fired (cloud models on air-gapped data), then rank the survivors with surgical precision.
+        </div>
+      </div>
+
+      <div class="funnel-container">
+        <div class="funnel-level funnel-lvl-1">
+          <div>
+            <div class="funnel-label"><span>🌐</span> Global Model Universe</div>
+            <div class="funnel-desc">All indexed frontier, open-weights, and specialized LLMs in the ModelAtlas index.</div>
+          </div>
+          <div class="funnel-count" style="color:var(--purple-light);">384 Models</div>
+        </div>
+
+        <div class="funnel-level funnel-lvl-2">
+          <div>
+            <div class="funnel-label"><span>✂️</span> Stage 1: Hard Constraint Pruning</div>
+            <div class="funnel-desc">Eliminates models violating physical VRAM bounds, strict air-gapped on-premise rules, or budget ceilings.</div>
+          </div>
+          <div class="funnel-count" style="color:var(--cyan-light);">~25 Survivors</div>
+        </div>
+
+        <div class="funnel-level funnel-lvl-3">
+          <div>
+            <div class="funnel-label"><span>⚖️</span> Stage 2: Persona Utility Scoring</div>
+            <div class="funnel-desc">Applies workflow weights (Coding, API Speed, Sovereign Privacy, Prose Nuance).</div>
+          </div>
+          <div class="funnel-count" style="color:var(--amber-light);">Top 5 Ranked</div>
+        </div>
+
+        <div class="funnel-level funnel-lvl-4">
+          <div>
+            <div class="funnel-label"><span>🏆</span> Stage 3: Benchmark Multipliers & Pair Match</div>
+            <div class="funnel-desc">Validates SWE-bench, MATH-500, and BFCL wins to isolate the Gold Champion & Runner-Up.</div>
+          </div>
+          <div class="funnel-count" style="color:var(--green-light);">#1 Pick + Runner-Up</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. HARDWARE MEMORY SIZER -->
+    <section class="visual-section" id="hardware-infographic">
+      <span class="section-badge">Hardware Physics 05</span>
+      <h2>Local VRAM Sizing & KV Cache Memory Physics</h2>
+      <p>
+        Move the <strong>Context Length Slider</strong> below to watch how the Key-Value (KV) Cache dynamically inflates the total VRAM consumption across different machine classes.
+      </p>
+
+      <div class="tldr-box">
+        <div class="tldr-icon">🖥️</div>
+        <div class="tldr-text">
+          <strong>The Trap:</strong> Many developers believe a "70B model only needs 40GB VRAM." That is true only for short inputs! When you feed a 70B model a 128,000-token context, the Key-Value (KV) cache alone consumes an extra <strong>16GB to 32GB</strong> of GPU memory. ModelAtlas models both weights and KV cache to prevent out-of-memory errors.
+        </div>
+      </div>
+
+      <div class="hardware-infographic-card">
+        <div class="hw-slider-box">
+          <div class="hw-slider-label">
+            <span>📏 Active Prompt Context Length:</span>
+            <span id="sliderContextVal">16,000 tokens (Standard)</span>
+          </div>
+          <input type="range" class="hw-range" id="hwContextRange" min="2000" max="128000" step="2000" value="16000" oninput="updateHwBars(this.value)">
+        </div>
+
+        <div class="hw-tier-cards-grid">
+          <!-- 8GB Laptop -->
+          <div class="hw-device-card">
+            <div>
+              <div class="hw-device-title">💻 8GB Laptop</div>
+              <div class="hw-model-name">Qwen 2.5 7B (Q4)</div>
+            </div>
+            <div>
+              <div class="hw-bar-bg">
+                <div class="hw-bar-weights" id="barWeights8" style="width: 68%;"></div>
+                <div class="hw-bar-kv" id="barKv8" style="width: 8%;"></div>
+              </div>
+              <div class="hw-legend">
+                <span id="textTotal8">6.1 GB / 8 GB</span>
+                <span style="color:#4ade80;">Safe Fit ✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 16GB GPU -->
+          <div class="hw-device-card">
+            <div>
+              <div class="hw-device-title">🎮 16GB GPU / Mac</div>
+              <div class="hw-model-name">Phi-4 (14B) (Q4)</div>
+            </div>
+            <div>
+              <div class="hw-bar-bg">
+                <div class="hw-bar-weights" id="barWeights16" style="width: 61%;"></div>
+                <div class="hw-bar-kv" id="barKv16" style="width: 10%;"></div>
+              </div>
+              <div class="hw-legend">
+                <span id="textTotal16">11.4 GB / 16 GB</span>
+                <span style="color:#4ade80;">Safe Fit ✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 24GB Desktop -->
+          <div class="hw-device-card">
+            <div>
+              <div class="hw-device-title">🚀 24GB RTX 4090</div>
+              <div class="hw-model-name">QwQ 32B (Q4)</div>
+            </div>
+            <div>
+              <div class="hw-bar-bg">
+                <div class="hw-bar-weights" id="barWeights24" style="width: 85%;"></div>
+                <div class="hw-bar-kv" id="barKv24" style="width: 7%;"></div>
+              </div>
+              <div class="hw-legend">
+                <span id="textTotal24">22.1 GB / 24 GB</span>
+                <span style="color:#fbbf24;">Tight Fit ⚠️</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 64GB Mac Studio -->
+          <div class="hw-device-card">
+            <div>
+              <div class="hw-device-title">🏢 64GB Mac Studio</div>
+              <div class="hw-model-name">Llama 3.3 70B (Q4)</div>
+            </div>
+            <div>
+              <div class="hw-bar-bg">
+                <div class="hw-bar-weights" id="barWeights64" style="width: 62%;"></div>
+                <div class="hw-bar-kv" id="barKv64" style="width: 12%;"></div>
+              </div>
+              <div class="hw-legend">
+                <span id="textTotal64">47.4 GB / 64 GB</span>
+                <span style="color:#4ade80;">Safe Fit ✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cluster -->
+          <div class="hw-device-card" style="border-color:rgba(239,68,68,0.3);">
+            <div>
+              <div class="hw-device-title" style="color:#f87171;">🏛️ Datacenter Node</div>
+              <div class="hw-model-name">DeepSeek R1 671B</div>
+            </div>
+            <div>
+              <div class="hw-bar-bg">
+                <div class="hw-bar-weights" style="width: 85%;background:#ef4444;"></div>
+                <div class="hw-bar-kv" style="width: 15%;background:#f43f5e;"></div>
+              </div>
+              <div class="hw-legend">
+                <span style="color:#fca5a5;">400+ GB VRAM</span>
+                <span style="color:#f87171;">Cluster Only 🚨</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <details class="math-drawer">
+        <summary>🔬 Mathematical Equations: Memory Footprint & KV Cache ▾</summary>
+        <div class="drawer-content">
+          $$\text{VRAM}_{\text{Weights}} \approx \text{Parameters (B)} \times 0.55\text{ GB} + 1.2\text{ GB (CUDA Overhead)}$$
+          $$\text{KV Cache Memory (Bytes)} = 2 \times n_{\text{layers}} \times n_{\text{heads}} \times d_{\text{head}} \times \text{Tokens} \times \text{BytesPerElement}$$
+          <div class="drawer-expl">
+            For FP16 KV cache, BytesPerElement = 2. When running 128k context, FP8 quantization (BytesPerElement = 1) or PagedAttention is mathematically required to avoid out-of-memory kernel panics.
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 6. DATA VAULT & PRIVACY -->
+    <section class="visual-section" id="provenance-vault">
+      <span class="section-badge">Security & Integrity 06</span>
+      <h2>The Data Vault & Zero Data Retention Architecture</h2>
+      <p>How ModelAtlas guarantees absolute privacy and reproducible scientific provenance.</p>
+
+      <div class="tldr-box">
+        <div class="tldr-icon">🔒</div>
+        <div class="tldr-text">
+          <strong>Privacy Guarantee:</strong> You do not need to create an account, enter a credit card, or transmit company secrets. ModelAtlas runs <strong>100% in-browser</strong>. No API logs, no database storage, no telemetry tracking.
         </div>
       </div>
 
       <table class="tech-table">
         <thead>
           <tr>
-            <th>Benchmark Metric</th>
-            <th>Primary Evaluation Target</th>
-            <th>Source Authority</th>
-            <th>Typical Frontier Range</th>
+            <th>Security / Governance Dimension</th>
+            <th>Conventional AI Recommendation SaaS</th>
+            <th>ModelAtlas In-Browser Architecture</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>LMSYS Arena Elo</strong></td>
-            <td>Blind human preference & conversational general intelligence</td>
-            <td>LMSYS Chatbot Arena</td>
-            <td>1,280 – 1,365 Elo</td>
+            <td><strong>Query Transmission</strong></td>
+            <td>Sent to remote cloud server</td>
+            <td><strong style="color:#4ade80;">Never leaves user device (0% network)</strong></td>
           </tr>
           <tr>
-            <td><strong>SWE-bench Verified</strong></td>
-            <td>Multi-file GitHub repository software engineering & bug fixing</td>
-            <td>SWE-bench Verified (500 tasks)</td>
-            <td>48.0% – 70.3%</td>
+            <td><strong>Server Data Retention</strong></td>
+            <td>Logged in backend database for 30–90 days</td>
+            <td><strong style="color:#4ade80;">Zero Data Retention (ZDR by design)</strong></td>
           </tr>
           <tr>
-            <td><strong>HumanEval Pass@1</strong></td>
-            <td>Standalone algorithmic function generation & syntax correctness</td>
-            <td>OpenAI HumanEval</td>
-            <td>85.0% – 96.1%</td>
+            <td><strong>Execution Latency</strong></td>
+            <td>400ms – 1,200ms API network roundtrip</td>
+            <td><strong style="color:#4ade80;">&lt;15ms V8 JavaScript execution</strong></td>
           </tr>
           <tr>
-            <td><strong>MATH-500 / AIME</strong></td>
-            <td>Doctoral-level mathematical proofing and competition logic</td>
-            <td>MATH-500 / AIME 2024-2025</td>
-            <td>80.0% – 97.9%</td>
+            <td><strong>Vendor Sponsorship Bias</strong></td>
+            <td>Opaque sponsored affiliate placements</td>
+            <td><strong style="color:#4ade80;">Open mathematical utility weighting</strong></td>
           </tr>
           <tr>
-            <td><strong>BFCL Overall %</strong></td>
-            <td>Function calling AST validation, multi-tool chaining & JSON adherence</td>
-            <td>Berkeley Function Calling Leaderboard</td>
-            <td>80.0% – 91.2%</td>
-          </tr>
-          <tr>
-            <td><strong>MMLU-Pro</strong></td>
-            <td>Multidisciplinary reasoning across STEM, economics, and law</td>
-            <td>MMLU-Pro (10-choice)</td>
-            <td>75.0% – 84.8%</td>
+            <td><strong>Infrastructure Cost</strong></td>
+            <td>$500 – $5,000 / month server bills</td>
+            <td><strong style="color:#4ade80;">$0 static GitHub Pages hosting</strong></td>
           </tr>
         </tbody>
       </table>
     </section>
 
-    <!-- 3. RADAR METRICS -->
-    <section class="method-section" id="radar-metrics">
-      <span class="section-num">Section 03</span>
-      <h2>6-Dimension Radar Metric Formulations</h2>
-      <p>
-        The interactive radar chart on the Model Comparison page evaluates every LLM across six normalized axes (0 to 100):
-      </p>
-
-      <div class="formula-card">
-        Quality   := Math.min(100, Math.round(((getEffectiveElo(m) - 1100) / 270) * 100))<br>
-        Speed     := Math.min(100, Math.round(((m.speedTps || 70) / 140) * 100))<br>
-        Context   := Math.min(100, Math.round((Math.log10(m.contextTokens || 128000) - 4.5) / (Math.log10(2000000) - 4.5) * 100))<br>
-        Reasoning := Math.min(100, Math.round(m.benchmarks.math || (getEffectiveElo(m) - 1100) / 2.7))<br>
-        Coding    := Math.min(100, Math.round((sweBench * 0.6) + (codingEloScore * 0.4)))<br>
-        Value     := Math.min(100, Math.round((getEffectiveElo(m) * qualityScore) / Math.pow(blendedRate, 0.45) / 3800 * 100))
-        <div class="formula-expl">
-          Context scaling uses a logarithmic transformation so that a 2M token window (Gemini 2.5 Pro) scales proportionally alongside 128k and 200k windows without compressing the lower range.
-        </div>
-      </div>
-
-      <h3>Blended Token Economics Formula</h3>
-      <p>
-        Real-world API workloads process predominantly input prompt tokens with a smaller ratio of generated output tokens. Simple average pricing misrepresents enterprise cost:
-      </p>
-
-      <div class="formula-card">
-        Blended Cost / Million Tokens = (0.75 × Input Price) + (0.25 × Output Price)<br><br>
-        Monthly Bill = (Monthly Tokens / 1,000,000) × Blended Cost
-        <div class="formula-expl">
-          For self-hosted open-weights models, ModelAtlas estimates the equivalent amortized GPU compute footprint per million tokens (e.g. ~$0.07/M for 8B up to ~$1.80/M for 671B MoE).
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. RECOMMENDATION ENGINE -->
-    <section class="method-section" id="recommendation-engine">
-      <span class="section-num">Section 04</span>
-      <h2>The 3-Tier Multi-Attribute Recommendation Engine</h2>
-      <p>
-        The Model Finder does not use simplistic keyword matching. It implements <strong>Multi-Attribute Utility Theory (MAUT)</strong> combined with <strong>Elimination-by-Aspects (EBA)</strong>:
-      </p>
-
-      <div class="callout callout-cyan">
-        <div class="callout-title">Tier 1: Hard Constraint Pruning (Elimination-by-Aspects)</div>
-        Before mathematical utility scoring begins, candidate models that violate hard physical or regulatory boundaries are immediately pruned:
-        <ul style="margin: 0.5rem 0 0 1.25rem;">
-          <li><strong>Air-Gapped Sovereign:</strong> If the user selects on-premise air-gapped compliance, proprietary cloud models (Claude, GPT-4o, Gemini) receive a strict score of <code>0</code>.</li>
-          <li><strong>Consumer Local Hardware:</strong> If a user has an 8GB or 16GB machine, models with parameter counts >14B receive a score of <code>0</code> to prevent out-of-memory kernel panics.</li>
-          <li><strong>Zero Cost Budget:</strong> Paid proprietary APIs receive a strict filter if user specifies $0 budget without hosted free tier.</li>
-        </ul>
-      </div>
-
-      <div class="callout callout-amber">
-        <div class="callout-title">Tier 2: Dynamic Persona Utility Weighting (MAUT)</div>
-        The remaining candidates are scored against the user's workflow persona vector:
-        <table class="tech-table" style="margin-top:0.75rem;">
-          <thead>
-            <tr>
-              <th>Workflow Persona</th>
-              <th>Quality</th>
-              <th>Cost Efficiency</th>
-              <th>Inference Speed</th>
-              <th>Context</th>
-              <th>Privacy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Software Engineer (Coder)</strong></td>
-              <td><strong>35%</strong></td>
-              <td>10%</td>
-              <td>20%</td>
-              <td>15%</td>
-              <td>10%</td>
-            </tr>
-            <tr>
-              <td><strong>API SaaS Builder</strong></td>
-              <td>25%</td>
-              <td><strong>30%</strong></td>
-              <td>25%</td>
-              <td>10%</td>
-              <td>5%</td>
-            </tr>
-            <tr>
-              <td><strong>Enterprise CISO / Compliance</strong></td>
-              <td>30%</td>
-              <td>10%</td>
-              <td>10%</td>
-              <td>20%</td>
-              <td><strong>20%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Student & Academic Researcher</strong></td>
-              <td>30%</td>
-              <td><strong>35%</strong></td>
-              <td>10%</td>
-              <td>15%</td>
-              <td>5%</td>
-            </tr>
-            <tr>
-              <td><strong>Content Creator / Writer</strong></td>
-              <td><strong>40%</strong></td>
-              <td>15%</td>
-              <td>15%</td>
-              <td>15%</td>
-              <td>5%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="callout callout-green">
-        <div class="callout-title">Tier 3: Verified Benchmark Multipliers</div>
-        Models with proven, peer-reviewed benchmark wins receive targeted multipliers for matching workloads:
-        <ul style="margin: 0.5rem 0 0 1.25rem;">
-          <li>Repository refactoring with SWE-bench Verified $\ge 45\%$: <strong>+30% boost</strong></li>
-          <li>STEM & calculus proofing with MATH-500 $\ge 90\%$: <strong>+35% boost</strong></li>
-          <li>Autonomous agentic loops with BFCL $\ge 88\%$: <strong>+35% boost</strong></li>
-          <li>Whole-repo/document ingestion with Context $\ge 1\text{M tokens}$: <strong>+40% boost</strong></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 5. HARDWARE SIZING -->
-    <section class="method-section" id="hardware-kvcache">
-      <span class="section-num">Section 05</span>
-      <h2>Local Hardware Sizing & KV Cache Memory Physics</h2>
-      <p>
-        A frequent failure mode for AI practitioners is downloading an open-weights model that exceeds their physical GPU VRAM. ModelAtlas calculates memory requirements using physical parameter quantization formulas:
-      </p>
-
-      <div class="formula-card">
-        VRAM (Model Weights Q4_K_M) ≈ Parameters (B) × 0.55 GB + 1.2 GB (Runtime Overhead)<br><br>
-        Examples:<br>
-        • 7B–8B Model  (Qwen 2.5 7B, Llama 3.1 8B)   := ~5.5 GB VRAM  → Fits 8GB Laptops / M-series Macs<br>
-        • 14B Model    (Qwen 2.5 14B, Phi-4)          := ~9.8 GB VRAM  → Fits 16GB GPUs (RTX 4060Ti / Mac 16GB)<br>
-        • 32B Model    (Qwen 2.5 32B, QwQ 32B)        := ~20.5 GB VRAM → Fits 24GB GPUs (RTX 3090/4090)<br>
-        • 70B Model    (Llama 3.3 70B, Qwen 2.5 72B)  := ~40.2 GB VRAM → Requires 2x 24GB GPUs or 64GB Mac Studio<br>
-        • 671B MoE     (DeepSeek R1, DeepSeek V3)     := ~400 GB+ VRAM → Requires 8x 80GB Datacenter Cluster
-      </div>
-
-      <h3>The KV Cache Footprint at Long Context</h3>
-      <p>
-        Running 128k or 256k context locally requires significant additional memory for the <strong>Key-Value (KV) Cache</strong>:
-      </p>
-
-      <div class="formula-card">
-        Memory_KV (Bytes) = 2 × n_layers × n_heads × d_head × n_tokens × bytes_per_element<br><br>
-        For a 70B model at 128k tokens in 16-bit precision:<br>
-        KV Cache alone consumes ~16GB to 32GB of VRAM in addition to model weights.
-        <div class="formula-expl">
-          ModelAtlas explicitly flags the KV cache requirements in AI Advisor responses and hardware guides, recommending FP8 KV cache or vLLM PagedAttention for long-context local deployments.
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. IN-BROWSER RAG ADVISOR -->
-    <section class="method-section" id="rag-advisor">
-      <span class="section-num">Section 06</span>
-      <h2>In-Browser RAG AI Advisor Engine</h2>
-      <p>
-        The ModelAtlas AI Advisor (<code>chat_widget.js</code>) is powered by a client-side Retrieval-Augmented Generation (RAG) knowledge engine. It indexes nine verified technical reference documents:
-      </p>
-
-      <div class="grid-2">
-        <div class="grid-card">
-          <div class="grid-card-title">📚 Domain Knowledge Corpus</div>
-          <p>
-            1. VRAM Hardware Sizing & Quantization<br>
-            2. Multi-GPU MoE Cluster Architecture<br>
-            3. Head-to-Head Frontier Showdowns<br>
-            4. Long-Context Needle-in-a-Haystack<br>
-            5. Free Access & Student Tier Economics<br>
-            6. Enterprise ZDR, HIPAA & SOC-2<br>
-            7. Prompt Caching & Cost Halving<br>
-            8. Anti-Cliché Writing Prompts<br>
-            9. Open-Weights Commercial Licensing
-          </p>
-        </div>
-        <div class="grid-card">
-          <div class="grid-card-title">🧠 Multi-Turn Conversational Memory</div>
-          <p>
-            The advisor maintains session memory across conversational turns, persisting user hardware constraints, budget preferences, and pronouns (e.g. resolving "Can it run on my machine?" to the last recommended model).
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. PROVENANCE -->
-    <section class="method-section" id="provenance">
-      <span class="section-num">Section 07</span>
-      <h2>Provenance & Automated Synchronization</h2>
-      <p>
-        ModelAtlas maintains strict benchmark auditability. Metrics are parsed directly from authoritative sources via automated ingestion scripts (<code>scripts/ingest_lmsys_csv.js</code>, <code>scripts/sync_benchmarks.js</code>).
-      </p>
-      <div class="callout callout-cyan">
-        <div class="callout-title">Source Data Transparency</div>
-        Every metric traces back to its original public evaluation harness:
-        <ul style="margin: 0.5rem 0 0 1.25rem;">
-          <li>LMSYS Chatbot Arena Leaderboard CSV dumps (Chatbot Arena Bradley-Terry Elo)</li>
-          <li>Berkeley Function Calling Leaderboard (BFCL AST & Executable evaluation)</li>
-          <li>SWE-bench Verified GitHub evaluation logs (Princeton University)</li>
-          <li>Official OpenAI, Anthropic, Google DeepMind, and DeepSeek Research Technical Reports</li>
-        </ul>
-      </div>
-    </section>
-
   </main>
-
 </div>
 
 <!-- FOOTER -->
@@ -574,24 +793,285 @@
       <a href="compare.html">Compare</a>
       <a href="methodology.html">Methodology</a>
     </div>
-    <p class="footer-copy">© 2026 ModelAtlas · Empirical, vendor-neutral AI model intelligence · Open & Free</p>
+    <p class="footer-copy">© 2026 ModelAtlas · Transparent, peer-verifiable AI model intelligence · Open & Free</p>
   </div>
 </footer>
 
 <script>
-  // Mobile nav hamburger toggle
-  document.getElementById('hamburger').addEventListener('click', () => {
-    document.getElementById('navLinks').classList.toggle('open');
+  // Mobile Nav Drawer Toggle
+  document.getElementById('hamburger')?.addEventListener('click', () => {
+    document.getElementById('navLinks')?.classList.toggle('open');
   });
 
-  // Smooth scroll & active link highlight in TOC
+  // 1. Pipeline Detail Interaction
+  const pipeDetails = [
+    "Stage 1: Raw Ingestion & Metric Harmonization\nAutomated GitHub Actions pull public evaluation tables directly from LMSYS Chatbot Arena dumps (1M+ human blind battles), Berkeley Function Calling Leaderboards (BFCL tool execution), and Princeton SWE-bench Verified logs.",
+    "Stage 2: Client-Side Zero-Retention Vault\nAll 384+ models are packaged in a lightweight UMD module (models.js). The entire database loads into client RAM in under 20ms, meaning zero user prompts or questions ever touch a server.",
+    "Stage 3: Bradley-Terry Elo Normalization\nA temporal scale-adjustment filter (-250 Elo) neutralizes the inflation of 2023-era models (like GPT-4-0314), ensuring only modern frontier LLMs occupy top rankings.",
+    "Stage 4: 6-Dimension Radar Morphing\nEvery model is mapped along 6 orthogonal axes: Quality, Speed, Context, Reasoning, Coding, and Value. Context uses logarithmic scaling to gracefully handle 128k to 2,000,000 token spans.",
+    "Stage 5: Multi-Attribute Decision Match\nHard Constraint Pruning eliminates models violating your hardware VRAM or privacy rules; the surviving models are scored against your persona utility vector to crown your #1 Champion and Runner-Up."
+  ];
+
+  document.querySelectorAll('.pipe-step').forEach(step => {
+    step.addEventListener('click', () => {
+      document.querySelectorAll('.pipe-step').forEach(s => s.classList.remove('active'));
+      step.classList.add('active');
+      const idx = parseInt(step.getAttribute('data-step'), 10);
+      document.getElementById('pipeDetail').innerText = pipeDetails[idx];
+    });
+  });
+
+  // 2. Elo Time Machine Data & Interaction
+  const tmModels = [
+    { name: "Claude 3.7 Sonnet", provider: "Anthropic", year: "2026", rawElo: 1362, calElo: 1362, isLegacy: false },
+    { name: "OpenAI o3-mini", provider: "OpenAI", year: "2026", rawElo: 1360, calElo: 1360, isLegacy: false },
+    { name: "DeepSeek R1", provider: "DeepSeek", year: "2026", rawElo: 1358, calElo: 1358, isLegacy: false },
+    { name: "GPT-4-0314", provider: "OpenAI (Deprecated)", year: "2023", rawElo: 1443, calElo: 1193, isLegacy: true },
+    { name: "Qwen1.5-110B-Chat", provider: "Alibaba (Legacy)", year: "2024", rawElo: 1431, calElo: 1181, isLegacy: true },
+    { name: "Claude-2.0", provider: "Anthropic (Legacy)", year: "2023", rawElo: 1400, calElo: 1150, isLegacy: true }
+  ];
+
+  function setEloView(isCalibrated) {
+    document.getElementById('btnCalibrated').classList.toggle('active', isCalibrated);
+    document.getElementById('btnRaw').classList.toggle('active', !isCalibrated);
+
+    const sorted = [...tmModels].sort((a, b) => {
+      const eloA = isCalibrated ? a.calElo : a.rawElo;
+      const eloB = isCalibrated ? b.calElo : b.rawElo;
+      return eloB - eloA;
+    });
+
+    const list = document.getElementById('tmCardsList');
+    list.innerHTML = '';
+    sorted.forEach((m, idx) => {
+      const displayElo = isCalibrated ? m.calElo : m.rawElo;
+      const card = document.createElement('div');
+      card.className = `tm-card ${isCalibrated && m.isLegacy ? 'legacy-demoted' : ''} ${isCalibrated && !m.isLegacy ? 'frontier-elevated' : ''}`;
+      card.innerHTML = `
+        <div class="tm-left">
+          <div class="tm-rank">#${idx + 1}</div>
+          <div>
+            <div class="tm-name">${m.name}</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">${m.provider}</div>
+          </div>
+          <span class="tm-year ${m.year === '2026' ? 'year-2026' : 'year-2023'}">${m.year}</span>
+        </div>
+        <div class="tm-right">
+          <div class="tm-elo" style="color:${isCalibrated && !m.isLegacy ? '#4ade80' : m.isLegacy && !isCalibrated ? '#f87171' : 'var(--text)'};">
+            ${displayElo} Elo
+          </div>
+          <span class="tm-status-pill ${isCalibrated ? (m.isLegacy ? 'pill-inflated' : 'pill-calibrated') : (m.isLegacy ? 'pill-inflated' : 'pill-calibrated')}">
+            ${isCalibrated ? (m.isLegacy ? '-250 Adjusted' : 'Active Frontier') : (m.isLegacy ? '⚠️ Inflated 2023 Score' : 'Competes vs Frontier')}
+          </span>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  // Initial time machine render
+  setEloView(true);
+
+  // 3. Mini Radar Persona Sandbox
+  const radarPresets = {
+    coder: {
+      scores: [95, 85, 80, 90, 98, 75],
+      caption: "Software Engineer Profile: High SWE-bench Verified (70.3%) & sub-100ms inline autocomplete priority."
+    },
+    api: {
+      scores: [88, 98, 75, 80, 85, 96],
+      caption: "High-Volume API SaaS: Extreme sub-$0.25/M cost efficiency, fast TTFT latency, and strict JSON schemas."
+    },
+    enterprise: {
+      scores: [94, 65, 70, 96, 85, 70],
+      caption: "Sovereign Enterprise: Massive 2M document context, Zero Data Retention (ZDR), and on-prem air-gapping."
+    },
+    student: {
+      scores: [92, 95, 85, 96, 80, 95],
+      caption: "Academic STEM Student: Socratic step-by-step calculus reasoning (MATH-500: 97%+) on a $0 budget."
+    },
+    creator: {
+      scores: [98, 80, 80, 85, 75, 82],
+      caption: "Longform Author: Natural human voice cadence, nuanced prose, and elimination of robotic AI tropes."
+    }
+  };
+
+  let currentRadarScores = [95, 85, 80, 90, 98, 75];
+  let targetRadarScores = [95, 85, 80, 90, 98, 75];
+  let animFrameId = null;
+
+  function morphRadar(type, btn) {
+    document.querySelectorAll('.rs-persona-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const p = radarPresets[type];
+    targetRadarScores = [...p.scores];
+    document.getElementById('radarCaption').innerText = p.caption;
+    animateRadar();
+  }
+
+  function animateRadar() {
+    let diff = 0;
+    for (let i = 0; i < 6; i++) {
+      const d = targetRadarScores[i] - currentRadarScores[i];
+      currentRadarScores[i] += d * 0.18;
+      diff += Math.abs(d);
+    }
+    drawMiniRadar(currentRadarScores);
+    if (diff > 0.5) {
+      animFrameId = requestAnimationFrame(animateRadar);
+    }
+  }
+
+  function drawMiniRadar(vals) {
+    const canvas = document.getElementById('miniRadarCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = 380 * dpr;
+    canvas.height = 320 * dpr;
+    canvas.style.width = '380px';
+    canvas.style.height = '320px';
+    ctx.scale(dpr, dpr);
+
+    const width = 380;
+    const height = 320;
+    const cx = width / 2;
+    const cy = height / 2 + 10;
+    const r = 105;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const labels = ['Quality', 'Speed', 'Context', 'Reasoning', 'Coding', 'Value'];
+    const count = 6;
+    const angleStep = (Math.PI * 2) / count;
+
+    // Draw concentric web rings
+    [0.25, 0.5, 0.75, 1.0].forEach(lvl => {
+      ctx.beginPath();
+      for (let i = 0; i < count; i++) {
+        const ang = i * angleStep - Math.PI / 2;
+        const x = cx + Math.cos(ang) * (r * lvl);
+        const y = cy + Math.sin(ang) * (r * lvl);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // Draw axis lines and labels
+    ctx.font = '600 11px Inter, sans-serif';
+    ctx.fillStyle = '#8b9bb0';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < count; i++) {
+      const ang = i * angleStep - Math.PI / 2;
+      const ax = cx + Math.cos(ang) * r;
+      const ay = cy + Math.sin(ang) * r;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(ax, ay);
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.stroke();
+
+      const lx = cx + Math.cos(ang) * (r + 18);
+      const ly = cy + Math.sin(ang) * (r + 18);
+      ctx.fillText(labels[i], lx, ly);
+    }
+
+    // Draw animated polygon
+    ctx.beginPath();
+    for (let i = 0; i < count; i++) {
+      const ang = i * angleStep - Math.PI / 2;
+      const val = Math.max(10, Math.min(100, vals[i]));
+      const dist = (val / 100) * r;
+      const px = cx + Math.cos(ang) * dist;
+      const py = cy + Math.sin(ang) * dist;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(245,158,11,0.22)';
+    ctx.fill();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Draw vertices dots
+    for (let i = 0; i < count; i++) {
+      const ang = i * angleStep - Math.PI / 2;
+      const val = Math.max(10, Math.min(100, vals[i]));
+      const dist = (val / 100) * r;
+      const px = cx + Math.cos(ang) * dist;
+      const py = cy + Math.sin(ang) * dist;
+
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fill();
+      ctx.strokeStyle = '#040b13';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+
+  // Initial radar draw
+  drawMiniRadar(currentRadarScores);
+
+  // 4. Hardware Sizing & KV Cache Live Interactive Slider
+  function updateHwBars(ctxTokens) {
+    ctxTokens = parseInt(ctxTokens, 10);
+    const kTokens = Math.round(ctxTokens / 1000);
+    document.getElementById('sliderContextVal').innerText = `${ctxTokens.toLocaleString()} tokens (~${Math.round(ctxTokens * 0.75).toLocaleString()} words)`;
+
+    // KV Cache Formula: Memory = 2 * layers * heads * dim * tokens * bytes
+    // Scaled proportions for visual simulation:
+    // 8GB: 5.5GB weights + (tokens/128000)*2.0GB KV
+    const kv8 = Math.min(2.5, (ctxTokens / 128000) * 2.2);
+    const total8 = 5.5 + kv8;
+    document.getElementById('barKv8').style.width = `${(kv8 / 8) * 100}%`;
+    document.getElementById('textTotal8').innerText = `${total8.toFixed(1)} GB / 8 GB`;
+
+    // 16GB: 9.8GB weights + (tokens/128000)*3.5GB KV
+    const kv16 = Math.min(5.0, (ctxTokens / 128000) * 4.2);
+    const total16 = 9.8 + kv16;
+    document.getElementById('barKv16').style.width = `${(kv16 / 16) * 100}%`;
+    document.getElementById('textTotal16').innerText = `${total16.toFixed(1)} GB / 16 GB`;
+
+    // 24GB: 20.5GB weights + (tokens/128000)*6.0GB KV
+    const kv24 = Math.min(7.0, (ctxTokens / 128000) * 6.5);
+    const total24 = 20.5 + kv24;
+    document.getElementById('barKv24').style.width = `${(kv24 / 24) * 100}%`;
+    document.getElementById('textTotal24').innerText = `${total24.toFixed(1)} GB / 24 GB`;
+    const label24 = document.getElementById('textTotal24').nextElementSibling;
+    if (total24 > 24) {
+      label24.innerText = 'Out of Memory 🚨';
+      label24.style.color = '#f87171';
+    } else {
+      label24.innerText = 'Tight Fit ⚠️';
+      label24.style.color = '#fbbf24';
+    }
+
+    // 64GB: 40.0GB weights + (tokens/128000)*18.0GB KV
+    const kv64 = Math.min(20.0, (ctxTokens / 128000) * 18.0);
+    const total64 = 40.0 + kv64;
+    document.getElementById('barKv64').style.width = `${(kv64 / 64) * 100}%`;
+    document.getElementById('textTotal64').innerText = `${total64.toFixed(1)} GB / 64 GB`;
+  }
+
+  // Smooth scroll TOC highlight
   const tocLinks = document.querySelectorAll('.toc-links a');
-  const sections = document.querySelectorAll('.method-section');
+  const sections = document.querySelectorAll('.visual-section');
 
   window.addEventListener('scroll', () => {
     let current = '';
     sections.forEach(sec => {
-      const top = sec.offsetTop - 120;
+      const top = sec.offsetTop - 140;
       if (window.scrollY >= top) current = sec.getAttribute('id');
     });
     tocLinks.forEach(link => {
